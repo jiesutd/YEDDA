@@ -7,7 +7,8 @@ This GUI annotation tool is developed with tkinter package in Python.
 System required: Python 2.7
 
 Interface demo:
-![alt text](https://github.com/jiesutd/AnnTool/blob/master/interface.png "Interface demo")
+![alt text](https://github.com/jiesutd/AnnTool/blob/master/EnglishInterface.png "English Interface demo")
+![alt text](https://github.com/jiesutd/AnnTool/blob/master/ChineseInterface.png "Chinese Interface demo")
 
 How to use?
 ====
