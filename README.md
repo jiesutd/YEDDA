@@ -1,11 +1,11 @@
-AnnTool: An efficient corpus annotation tool with GUI.
+AnnTool: An efficient corpus annotation tool .
 ======
 
 About:
 ====
 This GUI annotation tool is developed with tkinter package in Python. 
 System required: Python 2.7
-[interface](interface.png)
+[interface](https://github.com/jiesutd/AnnTool/blob/master/<interface class="png"></interface>)
 
 How to use?
 ====
