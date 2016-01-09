@@ -242,7 +242,7 @@ class Example(Frame):
                 command = command[1]
                 content = self.getText()
                 cursor_index = self.text.index(INSERT)
-                # newcursor_index = cursor_index.split('.')[0]+"."+str(int(cursor_index.split('.')[1])+select_num)
+                newcursor_index = cursor_index.split('.')[0]+"."+str(int(cursor_index.split('.')[1])+select_num)
                 # print "new cursor position: ", select_num, " with ", newcursor_index, "with ", newcursor_index
                 selected_string = self.text.get(cursor_index, newcursor_index).encode('utf-8')
                     
@@ -252,7 +252,7 @@ class Example(Frame):
                 if command in self.pressCommand:
                     if len(selected_string) > 0:
                         # print "insert index: ", self.text.index(INSERT) 
-                        followHalf_content, newcursor_index = self.replaceString(followHalf_content, selected_string, command, cursor_index)
+                        followHalf_content, newcursor_index = self.replaceString(followHalf_content, selected_string, command, newcursor_index)
                         content = aboveHalf_content + followHalf_content
                 self.writeFile(self.fileName, content, newcursor_index)
             
