@@ -5,7 +5,8 @@ About:
 ====
 This GUI annotation tool is developed with tkinter package in Python. 
 System required: Python 2.7
-[interface](https://github.com/jiesutd/AnnTool/blob/master/<interface class="png"></interface>)
+
+[interface demo](https://github.com/jiesutd/AnnTool/blob/master/interface.png)
 
 How to use?
 ====
