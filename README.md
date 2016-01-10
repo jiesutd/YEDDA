@@ -1,4 +1,4 @@
-AnnTool: An efficient corpus annotation tool .
+SUTDAnnotator: An efficient corpus annotation tool .
 ======
 
 About:
