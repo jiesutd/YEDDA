@@ -158,11 +158,12 @@ class Example(Frame):
 
     def returnButton(self):
         self.pushToHistory()
-        self.returnEnter(event)
+        # self.returnEnter(event)
         content = self.entry.get()
         self.clearCommand()
         self.executeEntryCommand(content)
         return content
+
 
     def returnEnter(self,event):
         self.pushToHistory()
@@ -316,6 +317,7 @@ class Example(Frame):
                 ann_file.close()   
             # print "Writed to new file: ", new_name 
             self.autoLoadNewFile(new_name, newcursor_index)
+            # self.generateSequenceFile()
         else:
             print "Don't write to empty file!"        
 
@@ -427,6 +429,28 @@ class Example(Frame):
         return self.text.index(INSERT)
 
 
+    def generateSequenceFile(self):
+        if ".ann" not in self.fileName: 
+            return -1
+        fileLines = open(self.fileName, 'rU').readlines()
+        seqFile = open(self.fileName.split('.ann')[0]+ '.anns', 'w')
+        for line in fileLines:
+            if len(line) <= 0:
+                seqFile.write('\n')
+                continue
+            else:
+                wordTagPairs = getWordTagPairs(line)
+                for wordTag in wordTagPairs:
+                    seqFile.write(wordTag)
+        seqFile.close()
+
+
+def getWordTagPairs(tagedSentence):
+    psirList = {}
+
+    return psirList
+
+
 def decompositCommand(command_string):
     command_list = []
     each_command = []
@@ -455,6 +479,6 @@ def main():
 
 if __name__ == '__main__':
     main()
-
+    
 
 
