@@ -27,7 +27,7 @@ class Example(Frame):
         self.history = deque(maxlen=10)
         self.currentContent = deque(maxlen=1)
         self.pressCommand = {'t':"TITLE", 'o':"ORG", 'u':"UNIV", 'd':"DATE",'a':"ACTION", 'e':"EDU",
-        'p':"PRO", 'g':"GEND",'c':"CONT", 'r':"RACE",'l':"LOC", 's':"SEP", 'n':"NAME"}
+        'p':"PRO", 'g':"GEND",'c':"CONT", 'r':"RACE",'l':"LOC", 'n':"NAME", 'm':"MISC"}
         self.allKey = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
         self.controlCommand = {'q':"unTag", 'ctrl+z':'undo'}
         self.labelEntryList = []
@@ -77,7 +77,10 @@ class Example(Frame):
         cbtn = Button(self, text="Quit", command=self.quit)
         cbtn.grid(row=3, column=self.textColumn +1, pady=4)
 
-        
+        self.cursorName = Label(self, text="Cursor: ", foreground="red", font=("Helvetica", 14, "bold"))
+        self.cursorName.grid(row=4, column=self.textColumn +1, pady=4)
+        self.cursorIndex = Label(self, text="", foreground="red", font=("Helvetica", 14, "bold"))
+        self.cursorIndex.grid(row=5, column=self.textColumn +1, pady=4)
         
         # obtn = Button(self, text="OK")
         # obtn.grid(row=5, column=3) 
@@ -131,6 +134,7 @@ class Example(Frame):
             self.setNameLabel("File: " + fl)
             self.setDisplay()
             self.text.mark_set(INSERT, "1.0")
+            self.setCursorLabel(self.text.index(INSERT))
 
     def readFile(self, filename):
         f = open(filename, "r")
@@ -148,6 +152,9 @@ class Example(Frame):
     
     def setNameLabel(self, new_file):
         self.lbl.config(text=new_file)
+
+    def setCursorLabel(self, new_file):
+        self.cursorIndex.config(text=new_file)
 
     def returnButton(self):
         self.pushToHistory()
@@ -234,27 +241,33 @@ class Example(Frame):
 
 
     def executeEntryCommand(self,command):
-        command_list = decompositCommand(command)
-        for idx in range(0, len(command_list)):
-            command = command_list[idx]
-            if len(command) == 2:
-                select_num = int(command[0])
-                command = command[1]
-                content = self.getText()
-                cursor_index = self.text.index(INSERT)
-                newcursor_index = cursor_index.split('.')[0]+"."+str(int(cursor_index.split('.')[1])+select_num)
-                # print "new cursor position: ", select_num, " with ", newcursor_index, "with ", newcursor_index
-                selected_string = self.text.get(cursor_index, newcursor_index).encode('utf-8')
-                    
-                aboveHalf_content = self.text.get('1.0',cursor_index).encode('utf-8')
-                followHalf_content = self.text.get(cursor_index, "end-1c").encode('utf-8')
-                    
-                if command in self.pressCommand:
-                    if len(selected_string) > 0:
-                        # print "insert index: ", self.text.index(INSERT) 
-                        followHalf_content, newcursor_index = self.replaceString(followHalf_content, selected_string, command, newcursor_index)
-                        content = aboveHalf_content + followHalf_content
-                self.writeFile(self.fileName, content, newcursor_index)
+        if len(command) == 0:
+            currentCursor = self.text.index(INSERT)
+            newCurrentCursor = str(int(currentCursor.split('.')[0])+1) + ".0"
+            self.text.mark_set(INSERT, newCurrentCursor)
+            self.setCursorLabel(newCurrentCursor)
+        else:
+            command_list = decompositCommand(command)
+            for idx in range(0, len(command_list)):
+                command = command_list[idx]
+                if len(command) == 2:
+                    select_num = int(command[0])
+                    command = command[1]
+                    content = self.getText()
+                    cursor_index = self.text.index(INSERT)
+                    newcursor_index = cursor_index.split('.')[0]+"."+str(int(cursor_index.split('.')[1])+select_num)
+                    # print "new cursor position: ", select_num, " with ", newcursor_index, "with ", newcursor_index
+                    selected_string = self.text.get(cursor_index, newcursor_index).encode('utf-8')
+                        
+                    aboveHalf_content = self.text.get('1.0',cursor_index).encode('utf-8')
+                    followHalf_content = self.text.get(cursor_index, "end-1c").encode('utf-8')
+                        
+                    if command in self.pressCommand:
+                        if len(selected_string) > 0:
+                            # print "insert index: ", self.text.index(INSERT) 
+                            followHalf_content, newcursor_index = self.replaceString(followHalf_content, selected_string, command, newcursor_index)
+                            content = aboveHalf_content + followHalf_content
+                    self.writeFile(self.fileName, content, newcursor_index)
             
 
     def deleteTextInput(self,event):
@@ -315,6 +328,7 @@ class Example(Frame):
             self.setNameLabel("File: " + fileName)
             self.setDisplay()
             self.text.mark_set(INSERT, newcursor_index)
+            self.setCursorLabel(newcursor_index)
             
             
     def setDisplay(self):
@@ -409,6 +423,8 @@ class Example(Frame):
             self.labelEntryList.append(labelEntry)
             # print "row: ", row
 
+    def getCursorIndex(self):
+        return self.text.index(INSERT)
 
 
 def decompositCommand(command_string):
@@ -434,7 +450,6 @@ def main():
     root.geometry("1000x700+200+200")
     app = Example(root)
     app.setFont(17)
-    
     root.mainloop()  
 
 
