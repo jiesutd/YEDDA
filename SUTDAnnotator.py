@@ -74,13 +74,16 @@ class Example(Frame):
         ubtn = Button(self, text="Update map", command=self.renewPressCommand)
         ubtn.grid(row=2, column=self.textColumn +1, pady=4)
 
+        exportbtn = Button(self, text="Export", command=self.generateSequenceFile)
+        exportbtn.grid(row=3, column=self.textColumn +1, pady=4)
+
         cbtn = Button(self, text="Quit", command=self.quit)
-        cbtn.grid(row=3, column=self.textColumn +1, pady=4)
+        cbtn.grid(row=4, column=self.textColumn +1, pady=4)
 
         self.cursorName = Label(self, text="Cursor: ", foreground="red", font=("Helvetica", 14, "bold"))
-        self.cursorName.grid(row=4, column=self.textColumn +1, pady=4)
+        self.cursorName.grid(row=5, column=self.textColumn +1, pady=4)
         self.cursorIndex = Label(self, text="", foreground="red", font=("Helvetica", 14, "bold"))
-        self.cursorIndex.grid(row=5, column=self.textColumn +1, pady=4)
+        self.cursorIndex.grid(row=6, column=self.textColumn +1, pady=4)
         
         # obtn = Button(self, text="OK")
         # obtn.grid(row=5, column=3) 
@@ -429,13 +432,18 @@ class Example(Frame):
         return self.text.index(INSERT)
 
 
+    # def export2seqformat(self,event):
+    #     self.generateSequenceFile()
+
+
     def generateSequenceFile(self):
         if ".ann" not in self.fileName: 
             return -1
         fileLines = open(self.fileName, 'rU').readlines()
-        seqFile = open(self.fileName.split('.ann')[0]+ '.anns', 'w')
+        new_filename = self.fileName.split('.ann')[0]+ '.anns'
+        seqFile = open(new_filename, 'w')
         for line in fileLines:
-            if len(line) <= 0:
+            if len(line) <= 1:
                 seqFile.write('\n')
                 continue
             else:
@@ -443,12 +451,77 @@ class Example(Frame):
                 for wordTag in wordTagPairs:
                     seqFile.write(wordTag)
         seqFile.close()
+        print "Exported file into sequence style in file: ",new_filename
 
 
 def getWordTagPairs(tagedSentence):
-    psirList = {}
+    newSent = tagedSentence.strip('\n').decode('utf-8')
+    filterList = re.findall('\[.*?\#.*?\*\]', newSent)
+    newSentLength = len(newSent)
+    pairList = []
+    chunk_list = []
+    start_pos = 0
+    end_pos = 0
+    for pattern in filterList:
+        singleChunkList = []
+        start_pos = end_pos + newSent[end_pos:].find(pattern)
+        end_pos = start_pos + len(pattern)
+        singleChunkList.append(pattern)
+        singleChunkList.append(start_pos)
+        singleChunkList.append(end_pos)
+        singleChunkList.append(True)
+        chunk_list.append(singleChunkList)
+        singleChunkList = []
+    full_list = []
+    for idx in range(0, len(chunk_list)):
+        if idx == 0:
+            if chunk_list[idx][1] > 0:
+                full_list.append([newSent[0:chunk_list[idx][1]], 0, chunk_list[idx][1], False])
+                full_list.append(chunk_list[idx])
+            else:
+                full_list.append(chunk_list[idx])
+        else:
+            if chunk_list[idx][1] == chunk_list[idx-1][2]:
+                full_list.append(chunk_list[idx])
+            elif chunk_list[idx][1] < chunk_list[idx-1][2]:
+                print "ERROR: found pattern has overlap!", chunk_list[idx][1], ' with ', chunk_list[idx-1][2]
+            else:
+                full_list.append([newSent[chunk_list[idx-1][2]:chunk_list[idx][1]], chunk_list[idx-1][2], chunk_list[idx][1], False])
+                full_list.append(chunk_list[idx])
 
-    return psirList
+        if idx == len(chunk_list) - 1 :
+            if chunk_list[idx][2] > newSentLength:
+                print "ERROR: found pattern position larger than sentence length!"
+            elif chunk_list[idx][2] < newSentLength:
+                full_list.append([newSent[chunk_list[idx][2]:newSentLength], chunk_list[idx][2], newSentLength, False])
+            else:
+                continue
+                
+    for each_list in full_list:
+        if each_list[3]:
+            contLabelList = each_list[0].strip('[]').rsplit('#', 1)
+            if len(contLabelList) != 2:
+                print "Error: sentence format error!"
+            label = contLabelList[1].strip('*')
+            contentLength = len(contLabelList[0])
+            for idx in range(0, contentLength):
+                if label != 'MISC':
+                    if idx == 0:
+                        pair = contLabelList[0][idx]+ ' ' + 'B-' + label + '\n'
+                        pairList.append(pair.encode('utf-8'))
+                    else:
+                        pair = contLabelList[0][idx]+ ' ' + 'I-' + label + '\n'
+                        pairList.append(pair.encode('utf-8'))
+                else:
+                    pair = contLabelList[0][idx] + ' ' + 'O' + '\n'
+                    pairList.append(pair.encode('utf-8'))
+        else:
+            for idx in range(0, len(each_list[0])):
+                pair = each_list[0][idx]+ ' ' + 'O\n'
+                pairList.append(pair.encode('utf-8'))
+    # for i in pairList:
+    #     print i
+    return pairList
 
 
 def decompositCommand(command_string):
@@ -479,6 +552,75 @@ def main():
 
 if __name__ == '__main__':
     main()
-    
+    # sent = "[洪理芳#NAME*][先生#GEND*][历任#ACTION*][皖南电机厂#ORG*][厂长#TITLE*][、#MISC*][党委书记#TITLE*][；#MISC*][宣城行署机电局#ORG*][副局长#TITLE*][、#MISC*][党组书记#TITLE*][；#MISC*][皖南机动车辆厂#ORG*][厂长#TITLE*][、#MISC*][党委书记#TITLE*][；#MISC*][安徽飞彩（集团）有限公司#ORG*][董事长#TITLE*][、#MISC*][总经理#TITLE*][；#MISC*][安徽飞彩车辆股份有限公司#ORG*][董事长#TITLE*][、#MISC*][总经理#TITLE*][。#MISC*][现任#ACTION*][安徽飞彩车辆股份有限公司#ORG*][董事长#TITLE*][。#MISC*]"
+    # newSent = sent.decode('utf-8')
+    # filterList = re.findall('\[.*?\#.*?\*\]', newSent)
+    # newSentLength = len(newSent)
+    # pairList = []
+    # print "length: ", len(sent), len(newSent)
+    # chunk_list = []
+    # start_pos = 0
+    # end_pos = 0
+    # for pattern in filterList:
+
+    #     singleChunkList = []
+    #     # pattern = pattern.decode('utf-8')
+    #     print "pattern: ",  " length: ", len(pattern)
+    #     start_pos = end_pos + newSent[end_pos:].find(pattern)
+    #     end_pos = start_pos + len(pattern)
+    #     print "pos: ", start_pos, ' ', end_pos, pattern.encode('utf-8')
+    #     singleChunkList.append(pattern)
+    #     singleChunkList.append(start_pos)
+    #     singleChunkList.append(end_pos)
+    #     singleChunkList.append(True)
+    #     chunk_list.append(singleChunkList)
+    #     singleChunkList = []
+    # full_list = []
+    # for idx in range(0, len(chunk_list)):
+    #     if idx == 0:
+    #         if chunk_list[idx][1] > 0:
+    #             full_list.append([newSent[0:chunk_list[idx][1]], 0, chunk_list[idx][1], False])
+    #             full_list.append(chunk_list[idx])
+    #         else:
+    #             full_list.append(chunk_list[idx])
+    #     else:
+    #         if chunk_list[idx][1] == chunk_list[idx-1][2]:
+    #             full_list.append(chunk_list[idx])
+    #         elif chunk_list[idx][1] < chunk_list[idx-1][2]:
+    #             print "ERROR: found pattern has overlap!", chunk_list[idx][1], ' with ',chunk_list[idx-1][2]
+    #         else:
+    #             full_list.append([newSent[chunk_list[idx-1][2]:chunk_list[idx][1]], chunk_list[idx-1][2], chunk_list[idx][1], False])
+    #             full_list.append(chunk_list[idx])
+
+    #     if idx == len(chunk_list) - 1 :
+    #         if chunk_list[idx][2] > newSentLength:
+    #             print "ERROR: found pattern position larger than sentence length!"
+    #         elif chunk_list[idx][2] < newSentLength:
+    #             full_list.append([newSent[chunk_list[idx][2]:newSentLength], chunk_list[idx][2], newSentLength, False])
+    #         else:
+    #             continue
+                
+    # for each_list in full_list:
+    #     if each_list[3]:
+    #         contLabelList = each_list[0].strip('[]').rsplit('#', 1)
+    #         if len(contLabelList) != 2:
+    #             print "Error: sentence format error!"
+    #         label = contLabelList[1].strip('*')
+    #         contentLength = len(contLabelList[0])
+    #         for idx in range(0, contentLength):
+    #             if label != 'MISC':
+    #                 if idx == 0:
+    #                     pairList.append(contLabelList[0][idx] + ' ' + 'B-' + label + '\n')
+    #                 else:
+    #                     pairList.append(contLabelList[0][idx] + ' ' + 'I-' + label + '\n')
+    #             else:
+    #                 pairList.append(contLabelList[0][idx] + ' ' + 'O' + '\n')
+    #     else:
+    #         for idx in range(0, len(each_list[0])):
+    #             pairList.append(each_list[0][idx] + ' ' + 'O\n')
+    # for i in pairList:
+    #     print i.encode('utf-8')
+
+
 
 
