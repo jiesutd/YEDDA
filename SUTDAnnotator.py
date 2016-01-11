@@ -61,7 +61,7 @@ class Example(Frame):
         self.text = Text(self, font=fnt,selectbackground='red')
         self.text.grid(row=1, column=0, columnspan=self.textColumn, rowspan=self.textRow, padx=12, sticky=E+W+S+N)
 
-        self.text.see(1000.0)
+        # self.text.see(1000.0)
         self.sb = Scrollbar(self)
         self.sb.grid(row = 1, column = self.textColumn, rowspan = self.textRow, padx=0, sticky = E+W+S+N)
         self.text['yscrollcommand'] = self.sb.set 
@@ -103,6 +103,8 @@ class Example(Frame):
             self.text.bind(simplePressKey, self.deleteTextInput)
             controlPlusKey = "<Control-Key-" + press_key + ">"
             self.text.bind(controlPlusKey, self.keepCurrent)
+            altPlusKey = "<Command-Key-" + press_key + ">"
+            self.text.bind(altPlusKey, self.keepCurrent)
             
         # self.text.bind('<Return>', self.pushToHistoryEvent)
         # self.text.bind('<KeyRelease-Return>', self.backToHistory)
@@ -333,6 +335,7 @@ class Example(Frame):
             self.setNameLabel("File: " + fileName)
             self.setDisplay()
             self.text.mark_set(INSERT, newcursor_index)
+            self.text.see(newcursor_index)
             self.setCursorLabel(newcursor_index)
             
             
