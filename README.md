@@ -35,4 +35,5 @@ Other features:
 
 Updating...
 ====
-* 2016-01-09: init version
+* 2016-Jan-09: init version
+* 2016-Jan-11: add sequence format export function
