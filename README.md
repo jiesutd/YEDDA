@@ -30,6 +30,7 @@ Other features:
 * Selected the annotated text, such as "[美国＃CONT*]", then press `q`, the annotated text will be recoverd to unannotate format (i.e. "美国").
 * In the command entry, just type `Enter` without any command, the cursor in text will move to the head of next line. (You can monitor this through "Cursor").
 * The "Cursor" shows the current cursor position in text widget. `1.12+9c` means the `1st` line `12th` characters add with `9` character, which equals the `1st` line `21th` characters.
+* `Export` button will export the ***".ann"*** file as a identity name with ***".anns"*** in the same directory. The exported file list the content in sequence format (We set label ***"MISC"*** as ***"O"*** in default, user can change it in the source code).
 
 
 Updating...
