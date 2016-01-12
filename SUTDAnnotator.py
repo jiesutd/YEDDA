@@ -333,12 +333,43 @@ class Example(Frame):
             text = self.readFile(fileName)
             self.text.insert("end-1c", text)
             self.setNameLabel("File: " + fileName)
-            self.setDisplay()
             self.text.mark_set(INSERT, newcursor_index)
             self.text.see(newcursor_index)
             self.setCursorLabel(newcursor_index)
+            self.setLineDisplay()
             
+
+
+    def setLineDisplay(self):
+        self.text.config(insertbackground='red', insertwidth=4)
+
+        countVar = StringVar()
+        currentCursor = self.text.index(INSERT)
+        lineStart = currentCursor.split('.')[0] + '.0'
+        lineEnd = currentCursor.split('.')[0] + '.end'
+        self.text.mark_set("matchStart", lineStart)
+        self.text.mark_set("matchEnd", lineStart) 
+        self.text.mark_set("searchLimit", lineEnd)
+        while True:
+            self.text.tag_configure("catagory", background="green")
+            self.text.tag_configure("edge", background="blue")
+            pos = self.text.search(r'\[.*?\#.*?\*\]', "matchEnd" , "searchLimit",  count=countVar, regexp=True)
+            if pos =="":
+                break
+            self.text.mark_set("matchStart", pos)
+            self.text.mark_set("matchEnd", "%s+%sc" % (pos, countVar.get()))
             
+            first_pos = pos
+            second_pos = "%s+%sc" % (pos, str(1))
+            lastsecond_pos = "%s+%sc" % (pos, str(int(countVar.get())-1))
+            last_pos = "%s + %sc" %(pos, countVar.get())
+
+            self.text.tag_add("catagory", second_pos, lastsecond_pos)
+            self.text.tag_add("edge", first_pos, second_pos)
+            self.text.tag_add("edge", lastsecond_pos, last_pos)    
+
+
+
     def setDisplay(self):
         self.text.config(insertbackground='red', insertwidth=4)
 
@@ -352,9 +383,6 @@ class Example(Frame):
         while True:
             self.text.tag_configure("catagory", background="green")
             self.text.tag_configure("edge", background="blue")
-                # type_pattern = re.compile(r'\[*\]')
-                # type_pattern = '[\*' + "\?" + '#' + annotate_type + '*]'
-                # print "annotate type: ", annotate_type
             pos = self.text.search(r'\[.*?\#.*?\*\]', "matchEnd" , "searchLimit",  count=countVar, regexp=True)
             if pos =="":
                 break
