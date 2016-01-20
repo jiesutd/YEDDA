@@ -4,6 +4,7 @@ SUTDAnnotator: An efficient corpus annotation tool
 About:
 ====
 This GUI annotation tool is developed with tkinter package in Python. 
+
 System required: Python 2.7
 
 Interface demo:

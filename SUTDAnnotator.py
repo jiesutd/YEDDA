@@ -26,8 +26,8 @@ class Example(Frame):
         self.fileName = ""
         self.history = deque(maxlen=10)
         self.currentContent = deque(maxlen=1)
-        self.pressCommand = {'t':"TITLE", 'o':"ORG", 'u':"UNIV", 'd':"DATE",'a':"ACTION", 'e':"EDU",
-        'p':"PRO", 'g':"GEND",'c':"CONT", 'r':"RACE",'l':"LOC", 'n':"NAME", 'm':"MISC"}
+        self.pressCommand = {'t':"TITLE", 'o':"ORG", 'd':"DATE",'a':"ACTION", 'e':"EDU",
+         'g':"GEND",'c':"CONT", 'p':"PRO", 'r':"RACE",'l':"LOC", 'n':"NAME", 'm':"MISC"}
         self.allKey = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
         self.controlCommand = {'q':"unTag", 'ctrl+z':'undo'}
         self.labelEntryList = []
