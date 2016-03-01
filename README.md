@@ -38,3 +38,4 @@ Updating...
 ====
 * 2016-Jan-09: init version
 * 2016-Jan-11: add sequence format export function
+* 2016-Mar-01: fix export bug (bug: set space when sentence didn't include any effective label)

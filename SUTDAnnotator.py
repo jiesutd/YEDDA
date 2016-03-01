@@ -61,7 +61,7 @@ class Example(Frame):
         self.text = Text(self, font=fnt,selectbackground='red')
         self.text.grid(row=1, column=0, columnspan=self.textColumn, rowspan=self.textRow, padx=12, sticky=E+W+S+N)
 
-        # self.text.see(1000.0)
+        
         self.sb = Scrollbar(self)
         self.sb.grid(row = 1, column = self.textColumn, rowspan = self.textRow, padx=0, sticky = E+W+S+N)
         self.text['yscrollcommand'] = self.sb.set 
@@ -138,6 +138,7 @@ class Example(Frame):
             self.text.insert(END, text)
             self.setNameLabel("File: " + fl)
             self.setDisplay()
+            # self.initAnnotate()
             self.text.mark_set(INSERT, "1.0")
             self.setCursorLabel(self.text.index(INSERT))
 
@@ -160,6 +161,10 @@ class Example(Frame):
 
     def setCursorLabel(self, new_file):
         self.cursorIndex.config(text=new_file)
+
+    # def initAnnotate():
+    #     text = self.text.get('1.0','end-1c')
+        
 
     def returnButton(self):
         self.pushToHistory()
@@ -474,7 +479,7 @@ class Example(Frame):
         new_filename = self.fileName.split('.ann')[0]+ '.anns'
         seqFile = open(new_filename, 'w')
         for line in fileLines:
-            if len(line) <= 1:
+            if len(line) <= 2:
                 seqFile.write('\n')
                 continue
             else:
@@ -493,16 +498,26 @@ def getWordTagPairs(tagedSentence):
     chunk_list = []
     start_pos = 0
     end_pos = 0
-    for pattern in filterList:
+    if len(filterList) == 0:
         singleChunkList = []
-        start_pos = end_pos + newSent[end_pos:].find(pattern)
-        end_pos = start_pos + len(pattern)
-        singleChunkList.append(pattern)
-        singleChunkList.append(start_pos)
-        singleChunkList.append(end_pos)
-        singleChunkList.append(True)
+        singleChunkList.append(newSent)
+        singleChunkList.append(0)
+        singleChunkList.append(len(newSent))
+        singleChunkList.append(False)
         chunk_list.append(singleChunkList)
+        print singleChunkList
         singleChunkList = []
+    else:
+        for pattern in filterList:
+            singleChunkList = []
+            start_pos = end_pos + newSent[end_pos:].find(pattern)
+            end_pos = start_pos + len(pattern)
+            singleChunkList.append(pattern)
+            singleChunkList.append(start_pos)
+            singleChunkList.append(end_pos)
+            singleChunkList.append(True)
+            chunk_list.append(singleChunkList)
+            singleChunkList = []
     full_list = []
     for idx in range(0, len(chunk_list)):
         if idx == 0:
