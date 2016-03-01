@@ -505,7 +505,7 @@ def getWordTagPairs(tagedSentence):
         singleChunkList.append(len(newSent))
         singleChunkList.append(False)
         chunk_list.append(singleChunkList)
-        print singleChunkList
+        # print singleChunkList
         singleChunkList = []
     else:
         for pattern in filterList:
