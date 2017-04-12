@@ -1,3 +1,8 @@
+# -*- coding: utf-8 -*-
+# @Author: Jie
+# @Date:   2016-Jan-06 17:11:59
+# @Last Modified by:   Jie     @Contact: jieynlp@gmail.com
+# @Last Modified time: 2017-04-12 23:29:40
 #!/usr/bin/env python
 # coding=utf-8
 
@@ -14,6 +19,8 @@ import tkFileDialog
 import tkFont
 import re
 from collections import deque
+import pickle
+import os.path
 
 
 
@@ -24,7 +31,7 @@ class Example(Frame):
          
         self.parent = parent
         self.fileName = ""
-        self.history = deque(maxlen=10)
+        self.history = deque(maxlen=20)
         self.currentContent = deque(maxlen=1)
         self.pressCommand = {'t':"TITLE", 'o':"ORG", 'd':"DATE",'a':"ACTION", 'e':"EDU",
          'g':"GEND",'c':"CONT", 'p':"PRO", 'r':"RACE",'l':"LOC", 'n':"NAME", 'm':"MISC"}
@@ -35,13 +42,17 @@ class Example(Frame):
         # default GUI display parameter
         self.textRow = 18
         self.textColumn = 5
+        self.tagScheme = "BMES"
+        self.onlyNP = False
+        self.seged = True
+        self.configFile = "config"
 
         self.initUI()
         
         
     def initUI(self):
       
-        self.parent.title("SUTDNLP Annotation Tool")
+        self.parent.title("SUTDNLP Annotation Tool-V0.4")
         self.pack(fill=BOTH, expand=True)
         
         for idx in range(0,self.textColumn):
@@ -389,7 +400,7 @@ class Example(Frame):
             self.text.tag_configure("catagory", background="green")
             self.text.tag_configure("edge", background="blue")
             pos = self.text.search(r'\[.*?\#.*?\*\]', "matchEnd" , "searchLimit",  count=countVar, regexp=True)
-            if pos =="":
+            if pos == "":
                 break
             self.text.mark_set("matchStart", pos)
             self.text.mark_set("matchEnd", "%s+%sc" % (pos, countVar.get()))
@@ -438,12 +449,16 @@ class Example(Frame):
         self.pressCommand = new_dict
         for idx in range(1, delete_num+1):
             self.labelEntryList[listLength-idx].delete(0,END)
-            self.shortcutLabelList[listLength-idx].config(text="NON== ") 
-
+            self.shortcutLabelList[listLength-idx].config(text="NON= ") 
+        with open(self.configFile, 'wb') as fp:
+            pickle.dump(self.pressCommand, fp)
         self.setMapShow()
 
 
     def setMapShow(self):
+        if os.path.isfile(self.configFile):
+            with open (self.configFile, 'rb') as fp:
+                self.pressCommand = pickle.load(fp)
         hight = len(self.pressCommand)
         width = 2
         row = 0
@@ -454,7 +469,7 @@ class Example(Frame):
         for key in sorted(self.pressCommand):
             row += 1
             # print "key: ", key, "  command: ", self.pressCommand[key]
-            symbolLabel = Label(self, text =key + " == ", foreground="blue", font=("Helvetica", 14, "bold"))
+            symbolLabel = Label(self, text =key + " = ", foreground="blue", font=("Helvetica", 14, "bold"))
             symbolLabel.grid(row=row, column = self.textColumn +2,columnspan=1, rowspan = 1, padx = 3)
             self.shortcutLabelList.append(symbolLabel)
 
@@ -476,6 +491,7 @@ class Example(Frame):
         if ".ann" not in self.fileName: 
             return -1
         fileLines = open(self.fileName, 'rU').readlines()
+        lineNum = len(fileLines)
         new_filename = self.fileName.split('.ann')[0]+ '.anns'
         seqFile = open(new_filename, 'w')
         for line in fileLines:
@@ -483,18 +499,19 @@ class Example(Frame):
                 seqFile.write('\n')
                 continue
             else:
-                wordTagPairs = getWordTagPairs(line)
+                wordTagPairs = getWordTagPairs(line, self.seged, self.tagScheme, self.onlyNP)
                 for wordTag in wordTagPairs:
                     seqFile.write(wordTag)
         seqFile.close()
         print "Exported file into sequence style in file: ",new_filename
+        print "Line number:",lineNum
 
 
-def getWordTagPairs(tagedSentence):
+def getWordTagPairs(tagedSentence, seged=True, tagScheme="BMES", onlyNP=False):
     newSent = tagedSentence.strip('\n').decode('utf-8')
     filterList = re.findall('\[.*?\#.*?\*\]', newSent)
     newSentLength = len(newSent)
-    pairList = []
+    
     chunk_list = []
     start_pos = 0
     end_pos = 0
@@ -518,6 +535,7 @@ def getWordTagPairs(tagedSentence):
             singleChunkList.append(True)
             chunk_list.append(singleChunkList)
             singleChunkList = []
+    ## chunk_list format:
     full_list = []
     for idx in range(0, len(chunk_list)):
         if idx == 0:
@@ -542,32 +560,62 @@ def getWordTagPairs(tagedSentence):
                 full_list.append([newSent[chunk_list[idx][2]:newSentLength], chunk_list[idx][2], newSentLength, False])
             else:
                 continue
-                
-    for each_list in full_list:
-        if each_list[3]:
-            contLabelList = each_list[0].strip('[]').rsplit('#', 1)
+    return turnFullListToOutputPair(full_list, seged, tagScheme, onlyNP)
+
+
+def turnFullListToOutputPair(fullList, seged=True, tagScheme="BMES", onlyNP=False):
+    pairList = []
+    for eachList in fullList:
+        if eachList[3]:
+            contLabelList = eachList[0].strip('[]').rsplit('#', 1)
             if len(contLabelList) != 2:
                 print "Error: sentence format error!"
             label = contLabelList[1].strip('*')
-            contentLength = len(contLabelList[0])
-            for idx in range(0, contentLength):
-                if label != 'MISC':
-                    if idx == 0:
-                        pair = contLabelList[0][idx]+ ' ' + 'B-' + label + '\n'
-                        pairList.append(pair.encode('utf-8'))
-                    else:
-                        pair = contLabelList[0][idx]+ ' ' + 'I-' + label + '\n'
-                        pairList.append(pair.encode('utf-8'))
-                else:
-                    pair = contLabelList[0][idx] + ' ' + 'O' + '\n'
-                    pairList.append(pair.encode('utf-8'))
+            if seged:
+                contLabelList[0] = contLabelList[0].split()
+            if onlyNP:
+                label = "NP"
+            outList = outputWithTagScheme(contLabelList[0], label, tagScheme)
+            for eachItem in outList:
+                pairList.append(eachItem)
         else:
-            for idx in range(0, len(each_list[0])):
-                pair = each_list[0][idx]+ ' ' + 'O\n'
+            if seged:
+                eachList[0] = eachList[0].split()
+            for idx in range(0, len(eachList[0])):
+                basicContent = eachList[0][idx]
+                if basicContent == ' ': 
+                    continue
+                pair = basicContent + ' ' + 'O\n'
                 pairList.append(pair.encode('utf-8'))
-    # for i in pairList:
-    #     print i
     return pairList
+
+
+def outputWithTagScheme(input_list, label, tagScheme="BMES"):
+    output_list = []
+    list_length = len(input_list)
+    if tagScheme=="BMES":
+        if list_length ==1:
+            pair = input_list[0]+ ' ' + 'S-' + label + '\n'
+            output_list.append(pair.encode('utf-8'))
+        else:
+            for idx in range(list_length):
+                if idx == 0:
+                    pair = input_list[idx]+ ' ' + 'B-' + label + '\n'
+                elif idx == list_length -1:
+                    pair = input_list[idx]+ ' ' + 'E-' + label + '\n'
+                else:
+                    pair = input_list[idx]+ ' ' + 'M-' + label + '\n'
+                output_list.append(pair.encode('utf-8'))
+    else:
+        for idx in range(list_length):
+            if idx == 0:
+                pair = input_list[idx]+ ' ' + 'B-' + label + '\n'
+            else:
+                pair = input_list[idx]+ ' ' + 'I-' + label + '\n'
+            output_list.append(pair.encode('utf-8'))
+    return output_list
+
+
 
 
 def decompositCommand(command_string):

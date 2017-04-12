@@ -16,7 +16,7 @@ How to use?
 Just run the .py file.
 * Set your shortcut map in the right side of annotation interface, you can set other labels empty if the shortcut number is enough. For example: ***"a == ACTION, c == CONT"***
 * Click the ***"Update map"*** button to store the map setting
-* Click ***"Open"*** button and select your annotate file. (You may set your file name ended with .txt if possible)
+* Click ***"Open"*** button and select your annotate file. (You may set your file name ended with .txt or .ann if possible)
 
 This tool supports two ways of annotation:
 * Select the text and press the corresponding shortcut (i.e. `a` for label ***"Action"***).
@@ -36,6 +36,8 @@ Other features:
 
 Updating...
 ====
-* 2016-Jan-09: init version
-* 2016-Jan-11: add sequence format export function
-* 2016-Mar-01: fix export bug (bug: set space when sentence didn't include any effective label)
+* 2017-Apr-12(V 0.4): support BMES/BIO export (self.tagScheme), support segmented sentence export(self.seged), can keep previous shortcut setting.
+* 2016-Mar-01(V 0.3): fix export bug (bug: set space when sentence didn't include any effective label)
+* 2016-Jan-11(V 0.2): add sequence format export function
+* 2016-Jan-09(V 0.1): init version
+
