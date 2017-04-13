@@ -31,13 +31,14 @@ Other features:
 * Selected the annotated text, such as "[美国＃CONT*]", then press `q`, the annotated text will be recoverd to unannotate format (i.e. "美国").
 * In the command entry, just type `Enter` without any command, the cursor in text will move to the head of next line. (You can monitor this through "Cursor").
 * The "Cursor" shows the current cursor position in text widget. `1.12+9c` means the `1st` line `12th` characters add with `9` character, which equals the `1st` line `21th` characters.
-* `Export` button will export the ***".ann"*** file as a identity name with ***".anns"*** in the same directory. The exported file list the content in sequence format (We set label ***"MISC"*** as ***"O"*** in default, user can change it in the source code).
+* `Export` button will export the ***".ann"*** file as a identity name with ***".anns"*** in the same directory. The exported file list the content in sequence format.
 
 
 Updating...
 ====
-* 2017-Apr-12(V 0.4): support BMES/BIO export (self.tagScheme), support segmented sentence export(self.seged), can keep previous shortcut setting.
-* 2016-Mar-01(V 0.3): fix export bug (bug: set space when sentence didn't include any effective label)
-* 2016-Jan-11(V 0.2): add sequence format export function
-* 2016-Jan-09(V 0.1): init version
+* 2017-Apr-13, (V 0.4): modify color; support setting color single line or whole file (may be slow in large file) (`self.colorAllChunk`)
+* 2017-Apr-12, (V 0.4): support BMES/BIO export (`self.tagScheme`); support segmented sentence export(`self.seged`); can save previous shortcut setting.
+* 2016-Mar-01, (V 0.3): fix export bug (bug: set space when sentence didn't include any effective label)
+* 2016-Jan-11, (V 0.2): add sequence format export function
+* 2016-Jan-09, (V 0.1): init version
 

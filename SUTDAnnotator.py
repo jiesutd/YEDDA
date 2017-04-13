@@ -2,7 +2,7 @@
 # @Author: Jie Yang from SUTD
 # @Date:   2016-Jan-06 17:11:59
 # @Last Modified by:   Jie     @Contact: jieynlp@gmail.com
-# @Last Modified time: 2017-04-13 16:41:01
+# @Last Modified time: 2017-04-13 16:48:18
 #!/usr/bin/env python
 # coding=utf-8
 
@@ -39,6 +39,7 @@ class Example(Frame):
         self.onlyNP = False
         self.seged = True
         self.configFile = "config"
+        self.colorAllChunk = True
 
         self.initUI()
         
@@ -355,9 +356,15 @@ class Example(Frame):
         currentCursor = self.text.index(INSERT)
         lineStart = currentCursor.split('.')[0] + '.0'
         lineEnd = currentCursor.split('.')[0] + '.end'
-        self.text.mark_set("matchStart", lineStart)
-        self.text.mark_set("matchEnd", lineStart) 
-        self.text.mark_set("searchLimit", lineEnd)
+         
+        if self.colorAllChunk:
+            self.text.mark_set("matchStart", "1.0")
+            self.text.mark_set("matchEnd", "1.0")
+            self.text.mark_set("searchLimit", 'end-1c')
+        else:
+            self.text.mark_set("matchStart", lineStart)
+            self.text.mark_set("matchEnd", lineStart)
+            self.text.mark_set("searchLimit", lineEnd)
         while True:
             self.text.tag_configure("catagory", background="LightSkyBlue1")
             self.text.tag_configure("edge", background="SteelBlue1")
