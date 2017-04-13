@@ -2,7 +2,7 @@
 # @Author: Jie Yang from SUTD
 # @Date:   2016-Jan-06 17:11:59
 # @Last Modified by:   Jie     @Contact: jieynlp@gmail.com
-# @Last Modified time: 2017-04-13 16:23:17
+# @Last Modified time: 2017-04-13 16:41:01
 #!/usr/bin/env python
 # coding=utf-8
 
@@ -62,7 +62,7 @@ class Example(Frame):
         self.lbl.grid(sticky=W, pady=4, padx=5)
 
         fnt = tkFont.Font(family="Helvetica",size=self.textRow,weight="bold",underline=0)
-        self.text = Text(self, font=fnt,selectbackground='red')
+        self.text = Text(self, font=fnt,selectbackground='light salmon')
         self.text.grid(row=1, column=0, columnspan=self.textColumn, rowspan=self.textRow, padx=12, sticky=E+W+S+N)
 
         
@@ -348,7 +348,6 @@ class Example(Frame):
             self.setLineDisplay()
             
 
-
     def setLineDisplay(self):
         self.text.config(insertbackground='red', insertwidth=4)
 
@@ -360,8 +359,8 @@ class Example(Frame):
         self.text.mark_set("matchEnd", lineStart) 
         self.text.mark_set("searchLimit", lineEnd)
         while True:
-            self.text.tag_configure("catagory", background="green")
-            self.text.tag_configure("edge", background="blue")
+            self.text.tag_configure("catagory", background="LightSkyBlue1")
+            self.text.tag_configure("edge", background="SteelBlue1")
             pos = self.text.search(r'\[.*?\#.*?\*\]', "matchEnd" , "searchLimit",  count=countVar, regexp=True)
             if pos =="":
                 break
@@ -390,8 +389,8 @@ class Example(Frame):
         countVar = StringVar()
         # for annotate_type in self.pressCommand.values():
         while True:
-            self.text.tag_configure("catagory", background="green")
-            self.text.tag_configure("edge", background="blue")
+            self.text.tag_configure("catagory", background="LightSkyBlue1")
+            self.text.tag_configure("edge", background="SteelBlue1")
             pos = self.text.search(r'\[.*?\#.*?\*\]', "matchEnd" , "searchLimit",  count=countVar, regexp=True)
             if pos == "":
                 break
