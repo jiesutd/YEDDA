@@ -1,17 +1,10 @@
 # -*- coding: utf-8 -*-
-# @Author: Jie
+# @Author: Jie Yang from SUTD
 # @Date:   2016-Jan-06 17:11:59
 # @Last Modified by:   Jie     @Contact: jieynlp@gmail.com
-# @Last Modified time: 2017-04-13 14:40:37
+# @Last Modified time: 2017-04-13 15:11:56
 #!/usr/bin/env python
 # coding=utf-8
-
-##===================================================================##
-#   Annotation tools
-#   Written by Jie Yang at SUTD
-#   Jan. 6, 2016
-# 
-##===================================================================##
 
 from Tkinter import *
 from ttk import *#Frame, Button, Label, Style, Scrollbar
