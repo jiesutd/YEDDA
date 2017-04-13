@@ -2,7 +2,7 @@
 # @Author: Jie
 # @Date:   2016-Jan-06 17:11:59
 # @Last Modified by:   Jie     @Contact: jieynlp@gmail.com
-# @Last Modified time: 2017-04-12 23:29:40
+# @Last Modified time: 2017-04-13 14:40:37
 #!/usr/bin/env python
 # coding=utf-8
 
@@ -33,8 +33,8 @@ class Example(Frame):
         self.fileName = ""
         self.history = deque(maxlen=20)
         self.currentContent = deque(maxlen=1)
-        self.pressCommand = {'t':"TITLE", 'o':"ORG", 'd':"DATE",'a':"ACTION", 'e':"EDU",
-         'g':"GEND",'c':"CONT", 'p':"PRO", 'r':"RACE",'l':"LOC", 'n':"NAME", 'm':"MISC"}
+        self.pressCommand = {'a':"Government", 'b':"Company", 'c':"Org-Other",'d':"Person", 'e':"Policy",
+         'f':"Project",'g':"Product", 'h':"Service", 'i':"Technology",'j':"Arti-Other", 'k':"Event", 'l':"Other"}
         self.allKey = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
         self.controlCommand = {'q':"unTag", 'ctrl+z':'undo'}
         self.labelEntryList = []
@@ -433,7 +433,7 @@ class Example(Frame):
         currentList.append(cursorPosition)
         self.history.append(currentList)
 
-
+    ## update shortcut map
     def renewPressCommand(self):
         seq = 0
         new_dict = {}
@@ -454,7 +454,7 @@ class Example(Frame):
             pickle.dump(self.pressCommand, fp)
         self.setMapShow()
 
-
+    ## show shortcut map
     def setMapShow(self):
         if os.path.isfile(self.configFile):
             with open (self.configFile, 'rb') as fp:
@@ -469,7 +469,7 @@ class Example(Frame):
         for key in sorted(self.pressCommand):
             row += 1
             # print "key: ", key, "  command: ", self.pressCommand[key]
-            symbolLabel = Label(self, text =key + " = ", foreground="blue", font=("Helvetica", 14, "bold"))
+            symbolLabel = Label(self, text =key + ": ", foreground="blue", font=("Helvetica", 14, "bold"))
             symbolLabel.grid(row=row, column = self.textColumn +2,columnspan=1, rowspan = 1, padx = 3)
             self.shortcutLabelList.append(symbolLabel)
 
