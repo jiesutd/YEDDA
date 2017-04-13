@@ -2,7 +2,7 @@
 # @Author: Jie Yang from SUTD
 # @Date:   2016-Jan-06 17:11:59
 # @Last Modified by:   Jie     @Contact: jieynlp@gmail.com
-# @Last Modified time: 2017-04-13 15:11:56
+# @Last Modified time: 2017-04-13 16:23:17
 #!/usr/bin/env python
 # coding=utf-8
 
@@ -26,8 +26,8 @@ class Example(Frame):
         self.fileName = ""
         self.history = deque(maxlen=20)
         self.currentContent = deque(maxlen=1)
-        self.pressCommand = {'a':"Government", 'b':"Company", 'c':"Org-Other",'d':"Person", 'e':"Policy",
-         'f':"Project",'g':"Product", 'h':"Service", 'i':"Technology",'j':"Arti-Other", 'k':"Event", 'l':"Other"}
+        self.pressCommand = {'a':"Org-Government", 'b':"Org-Company", 'c':"Org-Other",'d':"Person", 'e':"Arti-Policy",
+         'f':"Arti-Project",'g':"Arti-Product", 'h':"Arti-Service", 'i':"Arti-Technology",'j':"Arti-Other", 'k':"Event", 'l':"Other"}
         self.allKey = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
         self.controlCommand = {'q':"unTag", 'ctrl+z':'undo'}
         self.labelEntryList = []
