@@ -14,13 +14,13 @@ Interface demo:
 How to use?
 ====
 Just run the .py file.
-* Set your shortcut map in the right side of annotation interface, you can set other labels empty if the shortcut number is enough. For example: ***"a == ACTION, c == CONT"***
+* Set your shortcut map in the right side of annotation interface, you can leave other labels empty if the shortcut number is enough. For example: ***"a: ACTION, c: CONT"***
 * Click the ***"Update map"*** button to store the map setting
-* Click ***"Open"*** button and select your annotate file. (You may set your file name ended with .txt or .ann if possible)
+* Click ***"Open"*** button and select your input file. (You may set your file name ended with .txt or .ann if possible)
 
 This tool supports two ways of annotation:
-* Select the text and press the corresponding shortcut (i.e. `a` for label ***"Action"***).
-* Type the code at command line (at the bottom of the interface). For example, type `2a3c1a` end with `<Enter>`, it will annotate the following `2` character as type ***'a'(ACTION)***, the following `3` character as type ***'c'(CONT)***, then the following `1` character as  ***'a'(ACTION)***.
+* Select the text and press the corresponding shortcut (i.e. `c` for label ***"Person"***).
+* Type the code at command line (at the bottom of the interface). For example, type `2c3b1a` end with `<Enter>`, it will annotate the following `2` character as type ***'c'(Person)***, the following `3` character as type ***'b'(Location)***, then the following `1` character as  ***'a'(Organization)***.
 
 The annotated results will be stored synchronously. Annotated file is located at the same directory with origin file with the name of ***"origin name + .ann"***
 
@@ -28,7 +28,7 @@ The annotated results will be stored synchronously. Annotated file is located at
 Other features:
 =====
 * Type `ctrl + z` will undo  the most recent modification
-* Selected the annotated text, such as "[美国＃CONT*]", then press `q`, the annotated text will be recoverd to unannotate format (i.e. "美国").
+* Selected the annotated text, such as "[美国＃Location*]", then press `q`, the annotated text will be recoverd to unannotate format (i.e. "美国").
 * In the command entry, just type `Enter` without any command, the cursor in text will move to the head of next line. (You can monitor this through "Cursor").
 * The "Cursor" shows the current cursor position in text widget. `1.12+9c` means the `1st` line `12th` characters add with `9` character, which equals the `1st` line `21th` characters.
 * `Export` button will export the ***".ann"*** file as a identity name with ***".anns"*** in the same directory. The exported file list the content in sequence format.
@@ -36,6 +36,7 @@ Other features:
 
 Updating...
 ====
+* 2017-Apr-15, (V 0.4): update example and readme
 * 2017-Apr-13, (V 0.4): modify color; support setting color single line or whole file (may be slow in large file) (`self.colorAllChunk`)
 * 2017-Apr-12, (V 0.4): support BMES/BIO export (`self.tagScheme`); support segmented sentence export(`self.seged`); can save previous shortcut setting.
 * 2016-Mar-01, (V 0.3): fix export bug (bug: set space when sentence didn't include any effective label)
