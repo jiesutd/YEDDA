@@ -2,7 +2,7 @@
 # @Author: Jie Yang from SUTD
 # @Date:   2016-Jan-06 17:11:59
 # @Last Modified by:   Jie     @Contact: jieynlp@gmail.com
-# @Last Modified time: 2017-04-19 13:20:54
+# @Last Modified time: 2017-04-19 17:01:25
 #!/usr/bin/env python
 # coding=utf-8
 
@@ -40,13 +40,14 @@ class Example(Frame):
         self.seged = True
         self.configFile = "config"
         self.colorAllChunk = True
+        self.entityRe = r'\[\@.*?\#.*?\*\]'
 
         self.initUI()
         
         
     def initUI(self):
       
-        self.parent.title("SUTDNLP Annotation Tool-V0.4")
+        self.parent.title("SUTDNLP Annotation Tool-V0.5")
         self.pack(fill=BOTH, expand=True)
         
         for idx in range(0,self.textColumn):
@@ -230,10 +231,10 @@ class Example(Frame):
         followHalf_content = self.text.get(firstSelection_index, "end-1c").encode('utf-8')
         try:
             selected_string = self.text.selection_get().encode('utf-8')
-            if ((command == "q")&(selected_string[0] == '[')&(selected_string[-1] == ']')&(selected_string.find('#')>0)&(selected_string.find('*')>0)):
+            if ((command == "q")&(selected_string[:2] == "[@")&(selected_string[-1] == "]")&(selected_string.find("#")>0)&(selected_string.find('*')>0)):
                 print "q yes"
                 if True:    
-                    new_string_list = selected_string.strip('[]').rsplit('#',1)
+                    new_string_list = selected_string.strip('[@]').rsplit('#',1)
                     new_string = ''
                     # for idx in range(0, len(new_string_list)-1):
                     #     new_string += new_string_list[idx]
@@ -303,7 +304,7 @@ class Example(Frame):
 
     def replaceString(self, content, string, replaceType, cursor_index):
         if replaceType in self.pressCommand:
-            new_string = "[" + string + '#' + self.pressCommand[replaceType] + "*]" 
+            new_string = "[@" + string + "#" + self.pressCommand[replaceType] + "*]" 
             cursor_indexList = cursor_index.split('.') 
             newcursor_index = "%s + %sc" % (cursor_index, str(len(self.pressCommand[replaceType])+4))
             # newcursor_index = cursor_indexList[0] + "." + str(int(cursor_indexList[1])+ len(new_string))
@@ -368,7 +369,7 @@ class Example(Frame):
         while True:
             self.text.tag_configure("catagory", background="LightSkyBlue1")
             self.text.tag_configure("edge", background="SteelBlue1")
-            pos = self.text.search(r'\[.*?\#.*?\*\]', "matchEnd" , "searchLimit",  count=countVar, regexp=True)
+            pos = self.text.search(self.entityRe, "matchEnd" , "searchLimit",  count=countVar, regexp=True)
             if pos =="":
                 break
             self.text.mark_set("matchStart", pos)
@@ -398,7 +399,7 @@ class Example(Frame):
         while True:
             self.text.tag_configure("catagory", background="LightSkyBlue1")
             self.text.tag_configure("edge", background="SteelBlue1")
-            pos = self.text.search(r'\[.*?\#.*?\*\]', "matchEnd" , "searchLimit",  count=countVar, regexp=True)
+            pos = self.text.search(self.entityRe, "matchEnd" , "searchLimit",  count=countVar, regexp=True)
             if pos == "":
                 break
             self.text.mark_set("matchStart", pos)
@@ -498,7 +499,7 @@ class Example(Frame):
                 seqFile.write('\n')
                 continue
             else:
-                wordTagPairs = getWordTagPairs(line, self.seged, self.tagScheme, self.onlyNP)
+                wordTagPairs = getWordTagPairs(line, self.seged, self.tagScheme, self.onlyNP, self.entityRe)
                 for wordTag in wordTagPairs:
                     seqFile.write(wordTag)
                 ## use null line to seperate sentences
@@ -508,9 +509,9 @@ class Example(Frame):
         print "Line number:",lineNum
 
 
-def getWordTagPairs(tagedSentence, seged=True, tagScheme="BMES", onlyNP=False):
+def getWordTagPairs(tagedSentence, seged=True, tagScheme="BMES", onlyNP=False, entityRe=r'\[\@.*?\#.*?\*\]'):
     newSent = tagedSentence.strip('\n').decode('utf-8')
-    filterList = re.findall('\[.*?\#.*?\*\]', newSent)
+    filterList = re.findall(entityRe, newSent)
     newSentLength = len(newSent)
     
     chunk_list = []
@@ -568,7 +569,7 @@ def turnFullListToOutputPair(fullList, seged=True, tagScheme="BMES", onlyNP=Fals
     pairList = []
     for eachList in fullList:
         if eachList[3]:
-            contLabelList = eachList[0].strip('[]').rsplit('#', 1)
+            contLabelList = eachList[0].strip('[@]').rsplit('#', 1)
             if len(contLabelList) != 2:
                 print "Error: sentence format error!"
             label = contLabelList[1].strip('*')
