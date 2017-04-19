@@ -2,7 +2,7 @@
 # @Author: Jie Yang from SUTD
 # @Date:   2016-Jan-06 17:11:59
 # @Last Modified by:   Jie     @Contact: jieynlp@gmail.com
-# @Last Modified time: 2017-04-13 16:48:18
+# @Last Modified time: 2017-04-19 13:20:54
 #!/usr/bin/env python
 # coding=utf-8
 
@@ -501,6 +501,8 @@ class Example(Frame):
                 wordTagPairs = getWordTagPairs(line, self.seged, self.tagScheme, self.onlyNP)
                 for wordTag in wordTagPairs:
                     seqFile.write(wordTag)
+                ## use null line to seperate sentences
+                seqFile.write('\n')
         seqFile.close()
         print "Exported file into sequence style in file: ",new_filename
         print "Line number:",lineNum
