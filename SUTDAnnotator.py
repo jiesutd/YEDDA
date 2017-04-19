@@ -2,7 +2,7 @@
 # @Author: Jie Yang from SUTD
 # @Date:   2016-Jan-06 17:11:59
 # @Last Modified by:   Jie     @Contact: jieynlp@gmail.com
-# @Last Modified time: 2017-04-19 17:01:25
+# @Last Modified time: 2017-04-19 17:32:39
 #!/usr/bin/env python
 # coding=utf-8
 
@@ -231,25 +231,20 @@ class Example(Frame):
         followHalf_content = self.text.get(firstSelection_index, "end-1c").encode('utf-8')
         try:
             selected_string = self.text.selection_get().encode('utf-8')
-            if ((command == "q")&(selected_string[:2] == "[@")&(selected_string[-1] == "]")&(selected_string.find("#")>0)&(selected_string.find('*')>0)):
-                print "q yes"
-                if True:    
-                    new_string_list = selected_string.strip('[@]').rsplit('#',1)
-                    new_string = ''
-                    # for idx in range(0, len(new_string_list)-1):
-                    #     new_string += new_string_list[idx]
-                    new_string = new_string_list[0]
-                    followHalf_content = followHalf_content.replace(selected_string, new_string,1)
-                    content = aboveHalf_content + followHalf_content
-                    # newcursor_index = "%s - %sc" % (cursor_index, str(len(selected_string)-len(new_string)))
-                    print "q length: ", len(new_string_list[1]), new_string_list[1], cursor_index
-
-                    newcursor_index = "%s - %sc" % (cursor_index, str(len(new_string_list[1])+3))
-                    print "new index: ", newcursor_index
-                    self.writeFile(self.fileName, content, newcursor_index)
+            if re.match(self.entityRe,selected_string) != None : 
+                ## selected entity
+                new_string_list = selected_string.strip('[@]').rsplit('#',1)
+                new_string = new_string_list[0]
+                followHalf_content = followHalf_content.replace(selected_string, new_string, 1)
+                selected_string = new_string
+                cursor_index = "%s - %sc" % (cursor_index, str(len(new_string_list[1])+4))
+            if command == "q":
+                print 'q yes'
+                print "new index: ", cursor_index
+                content = aboveHalf_content + followHalf_content
+                self.writeFile(self.fileName, content, cursor_index)
             else:
                 if len(selected_string) > 0:
-                    # print "insert index: ", self.text.index(INSERT) 
                     followHalf_content, newcursor_index = self.replaceString(followHalf_content, selected_string, command, cursor_index)
                     content = aboveHalf_content + followHalf_content
                 self.writeFile(self.fileName, content, newcursor_index)

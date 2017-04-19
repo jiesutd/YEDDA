@@ -28,7 +28,8 @@ The annotated results will be stored synchronously. Annotated file is located at
 Other features:
 =====
 * Type `ctrl + z` will undo  the most recent modification
-* Selected the annotated text, such as "[@美国＃Location*]", then press `q`, the annotated text will be recoverd to unannotate format (i.e. "美国").
+* Selected the annotated text, such as "[@美国＃Location\*]", then press `q`, the annotated text will be recoverd to unannotate format (i.e. "美国").
+* Change label directly, such as select "[@美国＃Location\*]", then press `a`, the annotated text will change to new label bounded with shortcut `a` (i.e. "[@美国#Organization\*]").
 * In the command entry, just type `Enter` without any command, the cursor in text will move to the head of next line. (You can monitor this through "Cursor").
 * The "Cursor" shows the current cursor position in text widget. `1.12+9c` means the `1st` line `12th` characters add with `9` character, which equals the `1st` line `21th` characters.
 * `Export` button will export the ***".ann"*** file as a identity name with ***".anns"*** in the same directory. The exported file list the content in sequence format.
@@ -36,7 +37,7 @@ Other features:
 
 Updating...
 ====
-* 2017-Apr-19, (V 0.5): update entity represent as [@Entity#Type*], fix some bugs
+* 2017-Apr-19, (V 0.5): update entity represent as [@Entity#Type*]; support change label directly; fix some bugs
 * 2017-Apr-15, (V 0.4): update example and readme
 * 2017-Apr-13, (V 0.4): modify color; support setting color single line or whole file (may be slow in large file) (`self.colorAllChunk`)
 * 2017-Apr-12, (V 0.4): support BMES/BIO export (`self.tagScheme`); support segmented sentence export(`self.seged`); can save previous shortcut setting.
