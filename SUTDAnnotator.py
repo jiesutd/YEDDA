@@ -2,7 +2,7 @@
 # @Author: Jie Yang from SUTD
 # @Date:   2016-Jan-06 17:11:59
 # @Last Modified by:   Jie     @Contact: jieynlp@gmail.com
-# @Last Modified time: 2017-04-19 17:32:39
+# @Last Modified time: 2017-04-20 00:51:48
 #!/usr/bin/env python
 # coding=utf-8
 
@@ -14,6 +14,7 @@ import re
 from collections import deque
 import pickle
 import os.path
+import platform
 
 
 
@@ -91,6 +92,7 @@ class Example(Frame):
         self.cursorIndex = Label(self, text="", foreground="red", font=("Helvetica", 14, "bold"))
         self.cursorIndex.grid(row=6, column=self.textColumn +1, pady=4)
         
+        
         # obtn = Button(self, text="OK")
         # obtn.grid(row=5, column=3) 
 
@@ -103,7 +105,7 @@ class Example(Frame):
         
         # for press_key in self.pressCommand.keys():
         for idx in range(0, len(self.allKey)):
-            press_key = self.allKey[idx:idx+1]
+            press_key = self.allKey[idx]
             self.text.bind(press_key, lambda event, arg=press_key:self.textReturnEnter(event,arg))
             simplePressKey = "<KeyRelease-" + press_key + ">"
             self.text.bind(simplePressKey, self.deleteTextInput)
@@ -111,25 +113,47 @@ class Example(Frame):
             self.text.bind(controlPlusKey, self.keepCurrent)
             altPlusKey = "<Command-Key-" + press_key + ">"
             self.text.bind(altPlusKey, self.keepCurrent)
-            
-        # self.text.bind('<Return>', self.pushToHistoryEvent)
-        # self.text.bind('<KeyRelease-Return>', self.backToHistory)
 
         self.text.bind('<Control-Key-z>', self.backToHistory)
-
+        ## disable the default  copy behaivour when right click
+        if platform.system() == "Darwin":
+            ## for MacOS, right click is button 2
+            self.text.bind('<Button-2>', self.rightClick)
+        else:
+            ## for other operation system, right click is button 3
+            self.text.bind('<Button-3>', self.rightClick)
+        self.text.bind('<Double-Button-1>', self.doubleLeftClick)
+        self.text.bind('<ButtonRelease-1>', self.singleLeftClick)
 
         self.setMapShow()
 
-
-        # control_text = "Control key: \n"
-        # for press_key in self.controlCommand.keys():
-        #     control_text += press_key + "-> " + self.controlCommand[press_key] + '\n'
-        # control_table = Label(self, text=control_text, foreground="red", font=("Helvetica", 13))
-        # control_table.grid(row=4, column=self.textColumn +1)
-
         self.enter = Button(self, text="Enter", command=self.returnButton)
         self.enter.grid(row=self.textRow +1, column=self.textColumn +1) 
- 
+    
+    ## TODO: cursor index show with the left click
+    def singleLeftClick(self, event):
+        cursor_index = self.text.index(INSERT)   
+        self.cursorIndex.config(text=cursor_index)
+    
+    ## TODO: select entity by double left click
+    def doubleLeftClick(self, event):
+        cursor_index = self.text.index(INSERT)
+        start_index = ("%s - %sc" % (cursor_index, 5))
+        end_index = ("%s + %sc" % (cursor_index, 5))
+        self.text.tag_add(cursor_index, end_index)
+        self.text.config(selectbackground='red')
+
+    ## Disable right click default copy selection behaviour
+    def rightClick(self, event):
+        try:
+            firstSelection_index = self.text.index(SEL_FIRST)
+            cursor_index = self.text.index(SEL_LAST)
+            content = self.text.get('1.0',"end-1c").encode('utf-8')
+            self.writeFile(self.fileName, content, cursor_index)
+        except TclError:
+            pass
+
+
 
     def onOpen(self):
         ftypes = [('all files', '.*'), ('text files', '.txt'), ('ann files', '.ann')]
@@ -165,8 +189,8 @@ class Example(Frame):
     def setNameLabel(self, new_file):
         self.lbl.config(text=new_file)
 
-    def setCursorLabel(self, new_file):
-        self.cursorIndex.config(text=new_file)
+    def setCursorLabel(self, cursor_index):
+        self.cursorIndex.config(text=cursor_index)
 
     # def initAnnotate():
     #     text = self.text.get('1.0','end-1c')
@@ -211,6 +235,7 @@ class Example(Frame):
         self.text.insert(INSERT, 'p')   # add a word as pad for key release delete
 
     def keepCurrent(self, event):
+        # print "a"
         self.text.insert(INSERT, 'p')
 
 
@@ -225,19 +250,19 @@ class Example(Frame):
 
     def executeCursorCommand(self,command):
         content = self.getText()
-        firstSelection_index = self.text.index(SEL_FIRST)
-        cursor_index = self.text.index(SEL_LAST)
-        aboveHalf_content = self.text.get('1.0',firstSelection_index).encode('utf-8')
-        followHalf_content = self.text.get(firstSelection_index, "end-1c").encode('utf-8')
         try:
+            firstSelection_index = self.text.index(SEL_FIRST)
+            cursor_index = self.text.index(SEL_LAST)
+            aboveHalf_content = self.text.get('1.0',firstSelection_index).encode('utf-8')
+            followHalf_content = self.text.get(firstSelection_index, "end-1c").encode('utf-8')
             selected_string = self.text.selection_get().encode('utf-8')
             if re.match(self.entityRe,selected_string) != None : 
-                ## selected entity
+                ## if have selected entity
                 new_string_list = selected_string.strip('[@]').rsplit('#',1)
                 new_string = new_string_list[0]
                 followHalf_content = followHalf_content.replace(selected_string, new_string, 1)
                 selected_string = new_string
-                cursor_index = "%s - %sc" % (cursor_index, str(len(new_string_list[1])+4))
+                cursor_index = "%s - %sc" % (cursor_index, str(len(new_string_list[1])+3))
             if command == "q":
                 print 'q yes'
                 print "new index: ", cursor_index
@@ -248,8 +273,8 @@ class Example(Frame):
                     followHalf_content, newcursor_index = self.replaceString(followHalf_content, selected_string, command, cursor_index)
                     content = aboveHalf_content + followHalf_content
                 self.writeFile(self.fileName, content, newcursor_index)
-        except ValueError:
-            print "Have not selected content!"
+        except TclError:
+            pass
 
 
     def executeEntryCommand(self,command):
@@ -309,7 +334,7 @@ class Example(Frame):
             return content, cursor_index
         # print "new string: ", new_string
         # print "find: ", content.find(string)
-        content = content.replace(string, new_string,1)
+        content = content.replace(string, new_string, 1)
         # print "content: ", content
         return content, newcursor_index
 
@@ -474,12 +499,9 @@ class Example(Frame):
             self.labelEntryList.append(labelEntry)
             # print "row: ", row
 
+
     def getCursorIndex(self):
         return self.text.index(INSERT)
-
-
-    # def export2seqformat(self,event):
-    #     self.generateSequenceFile()
 
 
     def generateSequenceFile(self):
@@ -643,74 +665,7 @@ def main():
 
 if __name__ == '__main__':
     main()
-    # sent = "[洪理芳#NAME*][先生#GEND*][历任#ACTION*][皖南电机厂#ORG*][厂长#TITLE*][、#MISC*][党委书记#TITLE*][；#MISC*][宣城行署机电局#ORG*][副局长#TITLE*][、#MISC*][党组书记#TITLE*][；#MISC*][皖南机动车辆厂#ORG*][厂长#TITLE*][、#MISC*][党委书记#TITLE*][；#MISC*][安徽飞彩（集团）有限公司#ORG*][董事长#TITLE*][、#MISC*][总经理#TITLE*][；#MISC*][安徽飞彩车辆股份有限公司#ORG*][董事长#TITLE*][、#MISC*][总经理#TITLE*][。#MISC*][现任#ACTION*][安徽飞彩车辆股份有限公司#ORG*][董事长#TITLE*][。#MISC*]"
-    # newSent = sent.decode('utf-8')
-    # filterList = re.findall('\[.*?\#.*?\*\]', newSent)
-    # newSentLength = len(newSent)
-    # pairList = []
-    # print "length: ", len(sent), len(newSent)
-    # chunk_list = []
-    # start_pos = 0
-    # end_pos = 0
-    # for pattern in filterList:
 
-    #     singleChunkList = []
-    #     # pattern = pattern.decode('utf-8')
-    #     print "pattern: ",  " length: ", len(pattern)
-    #     start_pos = end_pos + newSent[end_pos:].find(pattern)
-    #     end_pos = start_pos + len(pattern)
-    #     print "pos: ", start_pos, ' ', end_pos, pattern.encode('utf-8')
-    #     singleChunkList.append(pattern)
-    #     singleChunkList.append(start_pos)
-    #     singleChunkList.append(end_pos)
-    #     singleChunkList.append(True)
-    #     chunk_list.append(singleChunkList)
-    #     singleChunkList = []
-    # full_list = []
-    # for idx in range(0, len(chunk_list)):
-    #     if idx == 0:
-    #         if chunk_list[idx][1] > 0:
-    #             full_list.append([newSent[0:chunk_list[idx][1]], 0, chunk_list[idx][1], False])
-    #             full_list.append(chunk_list[idx])
-    #         else:
-    #             full_list.append(chunk_list[idx])
-    #     else:
-    #         if chunk_list[idx][1] == chunk_list[idx-1][2]:
-    #             full_list.append(chunk_list[idx])
-    #         elif chunk_list[idx][1] < chunk_list[idx-1][2]:
-    #             print "ERROR: found pattern has overlap!", chunk_list[idx][1], ' with ',chunk_list[idx-1][2]
-    #         else:
-    #             full_list.append([newSent[chunk_list[idx-1][2]:chunk_list[idx][1]], chunk_list[idx-1][2], chunk_list[idx][1], False])
-    #             full_list.append(chunk_list[idx])
-
-    #     if idx == len(chunk_list) - 1 :
-    #         if chunk_list[idx][2] > newSentLength:
-    #             print "ERROR: found pattern position larger than sentence length!"
-    #         elif chunk_list[idx][2] < newSentLength:
-    #             full_list.append([newSent[chunk_list[idx][2]:newSentLength], chunk_list[idx][2], newSentLength, False])
-    #         else:
-    #             continue
-                
-    # for each_list in full_list:
-    #     if each_list[3]:
-    #         contLabelList = each_list[0].strip('[]').rsplit('#', 1)
-    #         if len(contLabelList) != 2:
-    #             print "Error: sentence format error!"
-    #         label = contLabelList[1].strip('*')
-    #         contentLength = len(contLabelList[0])
-    #         for idx in range(0, contentLength):
-    #             if label != 'MISC':
-    #                 if idx == 0:
-    #                     pairList.append(contLabelList[0][idx] + ' ' + 'B-' + label + '\n')
-    #                 else:
-    #                     pairList.append(contLabelList[0][idx] + ' ' + 'I-' + label + '\n')
-    #             else:
-    #                 pairList.append(contLabelList[0][idx] + ' ' + 'O' + '\n')
-    #     else:
-    #         for idx in range(0, len(each_list[0])):
-    #             pairList.append(each_list[0][idx] + ' ' + 'O\n')
-    # for i in pairList:
-    #     print i.encode('utf-8')
 
 
 
