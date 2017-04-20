@@ -2,7 +2,7 @@
 # @Author: Jie Yang from SUTD
 # @Date:   2016-Jan-06 17:11:59
 # @Last Modified by:   Jie     @Contact: jieynlp@gmail.com
-# @Last Modified time: 2017-04-20 00:51:48
+# @Last Modified time: 2017-04-20 14:48:31
 #!/usr/bin/env python
 # coding=utf-8
 
@@ -27,8 +27,21 @@ class Example(Frame):
         self.fileName = ""
         self.history = deque(maxlen=20)
         self.currentContent = deque(maxlen=1)
-        self.pressCommand = {'a':"Org-Government", 'b':"Org-Company", 'c':"Org-Other",'d':"Person", 'e':"Arti-Policy",
-         'f':"Arti-Project",'g':"Arti-Product", 'h':"Arti-Service", 'i':"Arti-Technology",'j':"Arti-Other", 'k':"Event", 'l':"Other"}
+        self.pressCommand = {'a':"Location",
+                             'b':"Org-Government",
+                             'c':"Org-Company",
+                             'd':"Org-Media",
+                             'e':"Org-Other",
+                             'f':"Person-Name", 
+                             'g':"Person-Title",
+                             'h':"Arti-Policy",
+                             'i':"Arti-Project",
+                             'j':"Arti-Product", 
+                             'k':"Arti-Service", 
+                             'l':"Arti-Technology",
+                             'm':"Arti-Other", 
+                             'n':"Event", 
+                             's':"Other"}
         self.allKey = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
         self.controlCommand = {'q':"unTag", 'ctrl+z':'undo'}
         self.labelEntryList = []
@@ -132,8 +145,10 @@ class Example(Frame):
     
     ## TODO: cursor index show with the left click
     def singleLeftClick(self, event):
-        cursor_index = self.text.index(INSERT)   
-        self.cursorIndex.config(text=cursor_index)
+        cursor_index = self.text.index(INSERT) 
+        row_column = cursor_index.split('.')
+        cursor_text = ("Row: %s\nCol: %s" % (row_column[0], row_column[-1]))
+        self.cursorIndex.config(text=cursor_text)
     
     ## TODO: select entity by double left click
     def doubleLeftClick(self, event):
@@ -190,7 +205,9 @@ class Example(Frame):
         self.lbl.config(text=new_file)
 
     def setCursorLabel(self, cursor_index):
-        self.cursorIndex.config(text=cursor_index)
+        row_column = cursor_index.split('.')
+        cursor_text = ("Row: %s\nCol: %s" % (row_column[0], row_column[-1]))
+        self.cursorIndex.config(text=cursor_text)
 
     # def initAnnotate():
     #     text = self.text.get('1.0','end-1c')
@@ -262,7 +279,7 @@ class Example(Frame):
                 new_string = new_string_list[0]
                 followHalf_content = followHalf_content.replace(selected_string, new_string, 1)
                 selected_string = new_string
-                cursor_index = "%s - %sc" % (cursor_index, str(len(new_string_list[1])+3))
+                cursor_index = "%s - %sc" % (cursor_index, str(len(new_string_list[1])+4))
             if command == "q":
                 print 'q yes'
                 print "new index: ", cursor_index
@@ -326,7 +343,7 @@ class Example(Frame):
         if replaceType in self.pressCommand:
             new_string = "[@" + string + "#" + self.pressCommand[replaceType] + "*]" 
             cursor_indexList = cursor_index.split('.') 
-            newcursor_index = "%s + %sc" % (cursor_index, str(len(self.pressCommand[replaceType])+4))
+            newcursor_index = "%s + %sc" % (cursor_index, str(len(self.pressCommand[replaceType])+5))
             # newcursor_index = cursor_indexList[0] + "." + str(int(cursor_indexList[1])+ len(new_string))
         else:
             print "Invaild command!"  
