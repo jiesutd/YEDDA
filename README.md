@@ -28,7 +28,7 @@ The annotated results will be stored synchronously. Annotated file is located at
 Important features:
 =====
 1. Type `ctrl + z` will undo  the most recent modification
-2. Put cursor within an entity span, press shortcut key (e.g. `x`) to update entity label (label binded with the shortcut key `x`). (`q` for remove label)
+2. Put cursor within an entity span, press shortcut key (e.g. `x`) to update label (binded with `x`) of the entity where cursor is belonging. (`q` for remove the label)
 3. Selected the annotated text, such as "[@美国＃Location\*]", then press `q`, the annotated text will be recoverd to unannotate format (i.e. "美国").
 4. Change label directly, such as select "[@美国＃Location\*]", then press `x`, the annotated text will change to new label mapped with shortcut `x` (e.g. "[@美国#Organization\*]").
 5. In the command entry, just type `Enter` without any command, the cursor in text will move to the head of next line. (You can monitor this through "Cursor").
