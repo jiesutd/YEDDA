@@ -25,15 +25,15 @@ This tool supports two ways of annotation:
 The annotated results will be stored synchronously. Annotated file is located at the same directory with origin file with the name of ***"origin name + .ann"***
 
 
-Other features:
+Important features:
 =====
-* Type `ctrl + z` will undo  the most recent modification
-* Put cursor within an entity span, press shortcut key (e.g. `x`) to update entity label (label binded with the shortcut key `x`). (`q` for remove label)
-* Selected the annotated text, such as "[@美国＃Location\*]", then press `q`, the annotated text will be recoverd to unannotate format (i.e. "美国").
-* Change label directly, such as select "[@美国＃Location\*]", then press `x`, the annotated text will change to new label mapped with shortcut `x` (e.g. "[@美国#Organization\*]").
-* In the command entry, just type `Enter` without any command, the cursor in text will move to the head of next line. (You can monitor this through "Cursor").
-* The "Cursor" shows the current cursor position in text widget. `1.12+9c` means the `1st` line `12th` characters add with `9` character, which equals the `1st` line `21th` characters.
-* `Export` button will export the ***".ann"*** file as a identity name with ***".anns"*** in the same directory. The exported file list the content in sequence format.
+1. Type `ctrl + z` will undo  the most recent modification
+2. Put cursor within an entity span, press shortcut key (e.g. `x`) to update entity label (label binded with the shortcut key `x`). (`q` for remove label)
+3. Selected the annotated text, such as "[@美国＃Location\*]", then press `q`, the annotated text will be recoverd to unannotate format (i.e. "美国").
+4. Change label directly, such as select "[@美国＃Location\*]", then press `x`, the annotated text will change to new label mapped with shortcut `x` (e.g. "[@美国#Organization\*]").
+5. In the command entry, just type `Enter` without any command, the cursor in text will move to the head of next line. (You can monitor this through "Cursor").
+6. The "Cursor" shows the current cursor position in text widget. `1.12+9c` means the `1st` line `12th` characters add with `9` character, which equals the `1st` line `21th` characters.
+7. `Export` button will export the ***".ann"*** file as a identity name with ***".anns"*** in the same directory. The exported file list the content in sequence format.
 
 
 Updating...
