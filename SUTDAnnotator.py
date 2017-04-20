@@ -2,7 +2,7 @@
 # @Author: Jie Yang from SUTD
 # @Date:   2016-Jan-06 17:11:59
 # @Last Modified by:   Jie     @Contact: jieynlp@gmail.com
-# @Last Modified time: 2017-04-20 14:48:31
+# @Last Modified time: 2017-04-20 15:44:26
 #!/usr/bin/env python
 # coding=utf-8
 
@@ -147,7 +147,7 @@ class Example(Frame):
     def singleLeftClick(self, event):
         cursor_index = self.text.index(INSERT) 
         row_column = cursor_index.split('.')
-        cursor_text = ("Row: %s\nCol: %s" % (row_column[0], row_column[-1]))
+        cursor_text = ("row: %s\ncol: %s" % (row_column[0], row_column[-1]))
         self.cursorIndex.config(text=cursor_text)
     
     ## TODO: select entity by double left click
@@ -206,7 +206,7 @@ class Example(Frame):
 
     def setCursorLabel(self, cursor_index):
         row_column = cursor_index.split('.')
-        cursor_text = ("Row: %s\nCol: %s" % (row_column[0], row_column[-1]))
+        cursor_text = ("row: %s\ncol: %s" % (row_column[0], row_column[-1]))
         self.cursorIndex.config(text=cursor_text)
 
     # def initAnnotate():
