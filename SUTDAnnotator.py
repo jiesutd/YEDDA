@@ -2,7 +2,7 @@
 # @Author: Jie Yang from SUTD
 # @Date:   2016-Jan-06 17:11:59
 # @Last Modified by:   Jie     @Contact: jieynlp@gmail.com
-# @Last Modified time: 2017-04-20 15:44:26
+# @Last Modified time: 2017-04-20 19:02:15
 #!/usr/bin/env python
 # coding=utf-8
 
@@ -143,20 +143,23 @@ class Example(Frame):
         self.enter = Button(self, text="Enter", command=self.returnButton)
         self.enter.grid(row=self.textRow +1, column=self.textColumn +1) 
     
-    ## TODO: cursor index show with the left click
+    ## cursor index show with the left click
     def singleLeftClick(self, event):
         cursor_index = self.text.index(INSERT) 
         row_column = cursor_index.split('.')
         cursor_text = ("row: %s\ncol: %s" % (row_column[0], row_column[-1]))
         self.cursorIndex.config(text=cursor_text)
+
     
     ## TODO: select entity by double left click
     def doubleLeftClick(self, event):
-        cursor_index = self.text.index(INSERT)
-        start_index = ("%s - %sc" % (cursor_index, 5))
-        end_index = ("%s + %sc" % (cursor_index, 5))
-        self.text.tag_add(cursor_index, end_index)
-        self.text.config(selectbackground='red')
+        pass
+        # cursor_index = self.text.index(INSERT)
+        # start_index = ("%s - %sc" % (cursor_index, 5))
+        # end_index = ("%s + %sc" % (cursor_index, 5))
+        # self.text.tag_add('SEL', '1.0',"end-1c")
+        
+        
 
     ## Disable right click default copy selection behaviour
     def rightClick(self, event):
@@ -229,6 +232,7 @@ class Example(Frame):
         self.executeEntryCommand(content)
         return content
 
+
     def textReturnEnter(self,event, press_key):
         self.pushToHistory()
         # print "event: ", press_key
@@ -237,6 +241,7 @@ class Example(Frame):
         self.executeCursorCommand(press_key.lower())
         # self.deleteTextInput()
         return press_key
+
 
     def backToHistory(self,event):
         if len(self.history) > 0:
@@ -252,7 +257,6 @@ class Example(Frame):
         self.text.insert(INSERT, 'p')   # add a word as pad for key release delete
 
     def keepCurrent(self, event):
-        # print "a"
         self.text.insert(INSERT, 'p')
 
 
@@ -270,9 +274,9 @@ class Example(Frame):
         try:
             firstSelection_index = self.text.index(SEL_FIRST)
             cursor_index = self.text.index(SEL_LAST)
-            aboveHalf_content = self.text.get('1.0',firstSelection_index).encode('utf-8')
-            followHalf_content = self.text.get(firstSelection_index, "end-1c").encode('utf-8')
-            selected_string = self.text.selection_get().encode('utf-8')
+            aboveHalf_content = self.text.get('1.0',firstSelection_index)
+            followHalf_content = self.text.get(firstSelection_index, "end-1c")
+            selected_string = self.text.selection_get()
             if re.match(self.entityRe,selected_string) != None : 
                 ## if have selected entity
                 new_string_list = selected_string.strip('[@]').rsplit('#',1)
@@ -281,17 +285,40 @@ class Example(Frame):
                 selected_string = new_string
                 cursor_index = "%s - %sc" % (cursor_index, str(len(new_string_list[1])+4))
             if command == "q":
-                print 'q yes'
-                print "new index: ", cursor_index
-                content = aboveHalf_content + followHalf_content
-                self.writeFile(self.fileName, content, cursor_index)
+                print 'q: remove entity label'
             else:
                 if len(selected_string) > 0:
-                    followHalf_content, newcursor_index = self.replaceString(followHalf_content, selected_string, command, cursor_index)
-                    content = aboveHalf_content + followHalf_content
-                self.writeFile(self.fileName, content, newcursor_index)
+                    followHalf_content, cursor_index = self.replaceString(followHalf_content, selected_string, command, cursor_index)
+            content = aboveHalf_content + followHalf_content
+            content = content.encode('utf-8')
+            self.writeFile(self.fileName, content, cursor_index)
         except TclError:
-            pass
+            ## not select text
+            cursor_index = self.text.index(INSERT)
+            [line_id, column_id] = cursor_index.split('.')
+            aboveLine_content =  self.text.get('1.0', str(int(line_id)-1) + '.end')
+            belowLine_content = self.text.get(str(int(line_id)+1)+'.0', "end-1c")
+            line = self.text.get(line_id + '.0', line_id + '.end')
+            matched_span =  (-1,-1)
+            for match in re.finditer(self.entityRe, line):
+                if  match.span()[0]<= int(column_id) & int(column_id) <= match.span()[1]:
+                    matched_span = match.span()
+                    break
+            if matched_span[1] >0 :
+                selected_string = line[matched_span[0]:matched_span[1]]
+                new_string_list = selected_string.strip('[@]').rsplit('#',1)
+                new_string = new_string_list[0]
+                line = line.replace(selected_string, new_string, 1)
+                selected_string = new_string
+                cursor_index = line_id + '.'+ str(int(matched_span[1])-(len(new_string_list[1])+4))
+                if command == "q":
+                    print 'q: remove entity label'
+                else:
+                    if len(selected_string) > 0:
+                        line, cursor_index = self.replaceString(line, selected_string, command, cursor_index)
+            content = aboveLine_content + line + belowLine_content
+            content = content.encode('utf-8')
+            self.writeFile(self.fileName, content, cursor_index)
 
 
     def executeEntryCommand(self,command):

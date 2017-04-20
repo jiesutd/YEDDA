@@ -13,7 +13,7 @@ Interface demo:
 
 How to use?
 ====
-Just run the .py file.
+Just run the .py file. `python SUTDAnnotator.py`
 * Set your shortcut map in the right side of annotation interface, you can leave other labels empty if the shortcut number is enough. For example: ***"a: ACTION, c: CONT"***
 * Click the ***"Update map"*** button to store the map setting
 * Click ***"Open"*** button and select your input file. (You may set your file name ended with .txt or .ann if possible)
@@ -28,8 +28,9 @@ The annotated results will be stored synchronously. Annotated file is located at
 Other features:
 =====
 * Type `ctrl + z` will undo  the most recent modification
+* Put cursor within an entity span, press shortcut key (e.g. `x`) to update entity label (label binded with the shortcut key `x`). (`q` for remove label)
 * Selected the annotated text, such as "[@美国＃Location\*]", then press `q`, the annotated text will be recoverd to unannotate format (i.e. "美国").
-* Change label directly, such as select "[@美国＃Location\*]", then press `a`, the annotated text will change to new label bounded with shortcut `a` (i.e. "[@美国#Organization\*]").
+* Change label directly, such as select "[@美国＃Location\*]", then press `x`, the annotated text will change to new label mapped with shortcut `x` (e.g. "[@美国#Organization\*]").
 * In the command entry, just type `Enter` without any command, the cursor in text will move to the head of next line. (You can monitor this through "Cursor").
 * The "Cursor" shows the current cursor position in text widget. `1.12+9c` means the `1st` line `12th` characters add with `9` character, which equals the `1st` line `21th` characters.
 * `Export` button will export the ***".ann"*** file as a identity name with ***".anns"*** in the same directory. The exported file list the content in sequence format.
@@ -37,11 +38,12 @@ Other features:
 
 Updating...
 ====
-* 2017-Apr-19, (V 0.5): update entity represent as [@Entity#Type*]; support change label directly; fix some bugs
-* 2017-Apr-15, (V 0.4): update example and readme
-* 2017-Apr-13, (V 0.4): modify color; support setting color single line or whole file (may be slow in large file) (`self.colorAllChunk`)
+* 2017-Apr-20, (V 0.5): change entity label more directly; optimize cursor figure.
+* 2017-Apr-19, (V 0.5): update entity represent as [@Entity#Type*]; support change label directly; fix some bugs.
+* 2017-Apr-15, (V 0.4): update example and readme.
+* 2017-Apr-13, (V 0.4): modify color; support setting color single line or whole file (may be slow in large file) (`self.colorAllChunk`).
 * 2017-Apr-12, (V 0.4): support BMES/BIO export (`self.tagScheme`); support segmented sentence export(`self.seged`); can save previous shortcut setting.
-* 2016-Mar-01, (V 0.3): fix export bug (bug: set space when sentence didn't include any effective label)
-* 2016-Jan-11, (V 0.2): add sequence format export function
-* 2016-Jan-09, (V 0.1): init version
+* 2016-Mar-01, (V 0.3): fix export bug (bug: set space when sentence didn't include any effective label).
+* 2016-Jan-11, (V 0.2): add sequence format export function.
+* 2016-Jan-09, (V 0.1): init version.
 
