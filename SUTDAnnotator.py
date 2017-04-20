@@ -2,7 +2,7 @@
 # @Author: Jie Yang from SUTD
 # @Date:   2016-Jan-06 17:11:59
 # @Last Modified by:   Jie     @Contact: jieynlp@gmail.com
-# @Last Modified time: 2017-04-20 19:18:09
+# @Last Modified time: 2017-04-20 22:03:37
 #!/usr/bin/env python
 # coding=utf-8
 
@@ -14,7 +14,6 @@ import re
 from collections import deque
 import pickle
 import os.path
-import platform
 
 
 
@@ -128,13 +127,10 @@ class Example(Frame):
             self.text.bind(altPlusKey, self.keepCurrent)
 
         self.text.bind('<Control-Key-z>', self.backToHistory)
-        ## disable the default  copy behaivour when right click
-        if platform.system() == "Darwin":
-            ## for MacOS, right click is button 2
-            self.text.bind('<Button-2>', self.rightClick)
-        else:
-            ## for other operation system, right click is button 3
-            self.text.bind('<Button-3>', self.rightClick)
+        ## disable the default  copy behaivour when right click. For MacOS, right click is button 2, other systems are button3
+        self.text.bind('<Button-2>', self.rightClick)
+        self.text.bind('<Button-3>', self.rightClick)
+
         self.text.bind('<Double-Button-1>', self.doubleLeftClick)
         self.text.bind('<ButtonRelease-1>', self.singleLeftClick)
 
