@@ -2,7 +2,7 @@
 # @Author: Jie Yang from SUTD
 # @Date:   2016-Jan-06 17:11:59
 # @Last Modified by:   Jie     @Contact: jieynlp@gmail.com
-# @Last Modified time: 2017-04-20 22:03:37
+# @Last Modified time: 2017-04-24 15:23:16
 #!/usr/bin/env python
 # coding=utf-8
 
@@ -60,7 +60,7 @@ class Example(Frame):
         
     def initUI(self):
       
-        self.parent.title("SUTDNLP Annotation Tool-V0.5.1")
+        self.parent.title("SUTDNLP Annotation Tool-V0.5.2")
         self.pack(fill=BOTH, expand=True)
         
         for idx in range(0,self.textColumn):
@@ -187,7 +187,7 @@ class Example(Frame):
             self.setCursorLabel(self.text.index(INSERT))
 
     def readFile(self, filename):
-        f = open(filename, "r")
+        f = open(filename, "rU")
         text = f.read()
         self.fileName = filename
         return text

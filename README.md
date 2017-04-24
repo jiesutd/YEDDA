@@ -38,6 +38,7 @@ Important features:
 
 Updating...
 ====
+* 2017-Apr-20, (V 0.5.2): fix bugs with `newline` problem on MacOS/Linux/Windows. (`\r``\n``\r\n`)
 * 2017-Apr-20, (V 0.5.1): change entity label more directly; optimize cursor figure.
 * 2017-Apr-19, (V 0.5): update entity represent as [@Entity#Type*]; support change label directly; fix some bugs.
 * 2017-Apr-15, (V 0.4): update example and readme.
