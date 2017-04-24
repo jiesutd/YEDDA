@@ -2,7 +2,7 @@
 # @Author: Jie Yang from SUTD
 # @Date:   2016-Jan-06 17:11:59
 # @Last Modified by:   Jie     @Contact: jieynlp@gmail.com
-# @Last Modified time: 2017-04-24 15:23:16
+# @Last Modified time: 2017-04-24 16:05:15
 #!/usr/bin/env python
 # coding=utf-8
 
@@ -103,10 +103,7 @@ class Example(Frame):
         self.cursorName.grid(row=5, column=self.textColumn +1, pady=4)
         self.cursorIndex = Label(self, text="", foreground="red", font=("Helvetica", 14, "bold"))
         self.cursorIndex.grid(row=6, column=self.textColumn +1, pady=4)
-        
-        
-        # obtn = Button(self, text="OK")
-        # obtn.grid(row=5, column=3) 
+
 
         lbl_entry = Label(self, text="Command:")
         lbl_entry.grid(row = self.textRow +1,  sticky = E+W+S+N, pady=4,padx=4)
@@ -458,7 +455,7 @@ class Example(Frame):
         # for annotate_type in self.pressCommand.values():
         while True:
             self.text.tag_configure("catagory", background="LightSkyBlue1")
-            self.text.tag_configure("edge", background="SteelBlue1")
+            self.text.tag_configure("edge", background="LightSkyBlue1")
             pos = self.text.search(self.entityRe, "matchEnd" , "searchLimit",  count=countVar, regexp=True)
             if pos == "":
                 break
