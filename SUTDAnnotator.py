@@ -2,7 +2,7 @@
 # @Author: Jie Yang from SUTD
 # @Date:   2016-Jan-06 17:11:59
 # @Last Modified by:   Jie     @Contact: jieynlp@gmail.com
-# @Last Modified time: 2017-04-24 16:05:15
+# @Last Modified time: 2017-04-25 23:16:23
 #!/usr/bin/env python
 # coding=utf-8
 
@@ -445,12 +445,10 @@ class Example(Frame):
 
     def setDisplay(self):
         self.text.config(insertbackground='red', insertwidth=4)
-
         self.text.mark_set("matchStart", "1.0")
         self.text.mark_set("matchEnd", "1.0") 
         self.text.mark_set("searchLimit", 'end-1c')
 
-        
         countVar = StringVar()
         # for annotate_type in self.pressCommand.values():
         while True:
@@ -542,7 +540,8 @@ class Example(Frame):
 
 
     def generateSequenceFile(self):
-        if ".ann" not in self.fileName: 
+        if (".ann" not in self.fileName) and (".txt" not in self.fileName): 
+            print "Export only works on filename ended in .ann or .txt! Please rename file."
             return -1
         fileLines = open(self.fileName, 'rU').readlines()
         lineNum = len(fileLines)
