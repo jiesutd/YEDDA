@@ -2,7 +2,7 @@
 # @Author: Jie Yang from SUTD
 # @Date:   2016-Jan-06 17:11:59
 # @Last Modified by:   Jie     @Contact: jieynlp@gmail.com
-# @Last Modified time: 2017-04-25 23:16:23
+# @Last Modified time: 2017-04-26 22:57:39
 #!/usr/bin/env python
 # coding=utf-8
 
@@ -14,7 +14,6 @@ import re
 from collections import deque
 import pickle
 import os.path
-
 
 
 class Example(Frame):
@@ -60,7 +59,7 @@ class Example(Frame):
         
     def initUI(self):
       
-        self.parent.title("SUTDNLP Annotation Tool-V0.5.2")
+        self.parent.title("SUTDNLP Annotation Tool-V0.5.3")
         self.pack(fill=BOTH, expand=True)
         
         for idx in range(0,self.textColumn):
@@ -297,19 +296,27 @@ class Example(Frame):
                 if  match.span()[0]<= int(column_id) & int(column_id) <= match.span()[1]:
                     matched_span = match.span()
                     break
-            if matched_span[1] >0 :
+            if matched_span[1] > 0 :
                 selected_string = line[matched_span[0]:matched_span[1]]
                 new_string_list = selected_string.strip('[@]').rsplit('#',1)
                 new_string = new_string_list[0]
-                line = line.replace(selected_string, new_string, 1)
+                line = line[:matched_span[0]] + new_string + line[matched_span[1]:]
+                # line = line.replace(selected_string, new_string, 1)
                 selected_string = new_string
                 cursor_index = line_id + '.'+ str(int(matched_span[1])-(len(new_string_list[1])+4))
                 if command == "q":
                     print 'q: remove entity label'
                 else:
                     if len(selected_string) > 0:
-                        line, cursor_index = self.replaceString(line, selected_string, command, cursor_index)
-            content = aboveLine_content + line + belowLine_content
+                        if command in self.pressCommand:
+                            line, cursor_index = self.replaceString(line, selected_string, command, cursor_index)
+                        else:
+                            return
+            if aboveLine_content != '':
+                aboveLine_content = aboveLine_content+ '\n'
+            if belowLine_content != '':
+                belowLine_content = '\n' + belowLine_content
+            content = aboveLine_content + line+ belowLine_content
             content = content.encode('utf-8')
             self.writeFile(self.fileName, content, cursor_index)
 
@@ -332,10 +339,8 @@ class Example(Frame):
                     newcursor_index = cursor_index.split('.')[0]+"."+str(int(cursor_index.split('.')[1])+select_num)
                     # print "new cursor position: ", select_num, " with ", newcursor_index, "with ", newcursor_index
                     selected_string = self.text.get(cursor_index, newcursor_index).encode('utf-8')
-                        
                     aboveHalf_content = self.text.get('1.0',cursor_index).encode('utf-8')
                     followHalf_content = self.text.get(cursor_index, "end-1c").encode('utf-8')
-                        
                     if command in self.pressCommand:
                         if len(selected_string) > 0:
                             # print "insert index: ", self.text.index(INSERT) 
