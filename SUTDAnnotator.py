@@ -2,7 +2,7 @@
 # @Author: Jie Yang from SUTD
 # @Date:   2016-Jan-06 17:11:59
 # @Last Modified by:   Jie     @Contact: jieynlp@gmail.com
-# @Last Modified time: 2017-04-26 22:57:39
+# @Last Modified time: 2017-04-27 11:47:22
 #!/usr/bin/env python
 # coding=utf-8
 
@@ -39,13 +39,14 @@ class Example(Frame):
                              'l':"Arti-Technology",
                              'm':"Arti-Other", 
                              'n':"Event", 
+                             'o': "Sector",
                              's':"Other"}
         self.allKey = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
         self.controlCommand = {'q':"unTag", 'ctrl+z':'undo'}
         self.labelEntryList = []
         self.shortcutLabelList = []
         # default GUI display parameter
-        self.textRow = 18
+        self.textRow = 25
         self.textColumn = 5
         self.tagScheme = "BMES"
         self.onlyNP = False
@@ -74,12 +75,10 @@ class Example(Frame):
         
         self.lbl = Label(self, text="File: no file is opened")
         self.lbl.grid(sticky=W, pady=4, padx=5)
-
-        fnt = tkFont.Font(family="Helvetica",size=self.textRow,weight="bold",underline=0)
-        self.text = Text(self, font=fnt,selectbackground='light salmon')
+        self.fnt = tkFont.Font(family="Helvetica",size=self.textRow,weight="bold",underline=0)
+        self.text = Text(self, font=self.fnt,selectbackground='light salmon')
         self.text.grid(row=1, column=0, columnspan=self.textColumn, rowspan=self.textRow, padx=12, sticky=E+W+S+N)
 
-        
         self.sb = Scrollbar(self)
         self.sb.grid(row = 1, column = self.textColumn, rowspan = self.textRow, padx=0, sticky = E+W+S+N)
         self.text['yscrollcommand'] = self.sb.set 
@@ -93,16 +92,15 @@ class Example(Frame):
         ubtn.grid(row=2, column=self.textColumn +1, pady=4)
 
         exportbtn = Button(self, text="Export", command=self.generateSequenceFile)
-        exportbtn.grid(row=3, column=self.textColumn +1, pady=4)
+        exportbtn.grid(row=3, column=self.textColumn + 1, pady=4)
 
         cbtn = Button(self, text="Quit", command=self.quit)
-        cbtn.grid(row=4, column=self.textColumn +1, pady=4)
+        cbtn.grid(row=4, column=self.textColumn + 1, pady=4)
 
         self.cursorName = Label(self, text="Cursor: ", foreground="red", font=("Helvetica", 14, "bold"))
         self.cursorName.grid(row=5, column=self.textColumn +1, pady=4)
         self.cursorIndex = Label(self, text="", foreground="red", font=("Helvetica", 14, "bold"))
-        self.cursorIndex.grid(row=6, column=self.textColumn +1, pady=4)
-
+        self.cursorIndex.grid(row=6, column=self.textColumn + 1, pady=4)
 
         lbl_entry = Label(self, text="Command:")
         lbl_entry.grid(row = self.textRow +1,  sticky = E+W+S+N, pady=4,padx=4)
@@ -413,7 +411,7 @@ class Example(Frame):
             
 
     def setLineDisplay(self):
-        self.text.config(insertbackground='red', insertwidth=4)
+        self.text.config(insertbackground='red', insertwidth=4, font=self.fnt)
 
         countVar = StringVar()
         currentCursor = self.text.index(INSERT)
