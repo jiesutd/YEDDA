@@ -2,7 +2,7 @@
 # @Author: Jie Yang from SUTD
 # @Date:   2016-Jan-06 17:11:59
 # @Last Modified by:   Jie     @Contact: jieynlp@gmail.com
-# @Last Modified time: 2017-04-27 11:47:22
+# @Last Modified time: 2017-04-27 11:51:24
 #!/usr/bin/env python
 # coding=utf-8
 
@@ -88,7 +88,7 @@ class Example(Frame):
         abtn = Button(self, text="Open", command=self.onOpen)
         abtn.grid(row=1, column=self.textColumn +1)
 
-        ubtn = Button(self, text="Update map", command=self.renewPressCommand)
+        ubtn = Button(self, text="Remap", command=self.renewPressCommand)
         ubtn.grid(row=2, column=self.textColumn +1, pady=4)
 
         exportbtn = Button(self, text="Export", command=self.generateSequenceFile)
@@ -696,7 +696,7 @@ def decompositCommand(command_string):
 
 def main():
     root = Tk()
-    root.geometry("1000x700+200+200")
+    root.geometry("1300x700+200+200")
     app = Example(root)
     app.setFont(17)
     root.mainloop()  
