@@ -2,7 +2,7 @@
 # @Author: Jie Yang from SUTD
 # @Date:   2016-Jan-06 17:11:59
 # @Last Modified by:   Jie     @Contact: jieynlp@gmail.com
-# @Last Modified time: 2017-04-27 11:51:24
+# @Last Modified time: 2017-05-01 22:54:34
 #!/usr/bin/env python
 # coding=utf-8
 
@@ -17,10 +17,8 @@ import os.path
 
 
 class Example(Frame):
-  
     def __init__(self, parent):
-        Frame.__init__(self, parent)   
-         
+        Frame.__init__(self, parent)
         self.parent = parent
         self.fileName = ""
         self.history = deque(maxlen=20)
@@ -30,16 +28,18 @@ class Example(Frame):
                              'c':"Org-Company",
                              'd':"Org-Media",
                              'e':"Org-Other",
-                             'f':"Person-Name", 
+                             'f':"Person-Name",
                              'g':"Person-Title",
-                             'h':"Arti-Policy",
-                             'i':"Arti-Project",
-                             'j':"Arti-Product", 
-                             'k':"Arti-Service", 
-                             'l':"Arti-Technology",
-                             'm':"Arti-Other", 
-                             'n':"Event", 
-                             'o': "Sector",
+                             'h':"Person-Combine", 
+                             'i':"Arti-Policy",
+                             'j':"Arti-Project",
+                             'k':"Arti-Product", 
+                             'l':"Arti-Service", 
+                             'm':"Arti-Technology",
+                             'n':"Arti-Document",
+                             'o':"Arti-Other", 
+                             'p':"Event", 
+                             'r': "Sector",
                              's':"Other"}
         self.allKey = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
         self.controlCommand = {'q':"unTag", 'ctrl+z':'undo'}
@@ -49,12 +49,14 @@ class Example(Frame):
         self.textRow = 25
         self.textColumn = 5
         self.tagScheme = "BMES"
-        self.onlyNP = False
+        self.onlyNP = False  ## for exporting sequence 
         self.seged = True
         self.configFile = "config"
         self.colorAllChunk = True
         self.entityRe = r'\[\@.*?\#.*?\*\]'
-
+        ## configure color
+        self.entityColor = "LightSkyBlue1"
+        self.selectColor = 'light salmon'
         self.initUI()
         
         
@@ -76,7 +78,7 @@ class Example(Frame):
         self.lbl = Label(self, text="File: no file is opened")
         self.lbl.grid(sticky=W, pady=4, padx=5)
         self.fnt = tkFont.Font(family="Helvetica",size=self.textRow,weight="bold",underline=0)
-        self.text = Text(self, font=self.fnt,selectbackground='light salmon')
+        self.text = Text(self, font=self.fnt, selectbackground=self.selectColor)
         self.text.grid(row=1, column=0, columnspan=self.textColumn, rowspan=self.textRow, padx=12, sticky=E+W+S+N)
 
         self.sb = Scrollbar(self)
@@ -427,8 +429,8 @@ class Example(Frame):
             self.text.mark_set("matchEnd", lineStart)
             self.text.mark_set("searchLimit", lineEnd)
         while True:
-            self.text.tag_configure("catagory", background="LightSkyBlue1")
-            self.text.tag_configure("edge", background="SteelBlue1")
+            self.text.tag_configure("catagory", background=self.entityColor)
+            self.text.tag_configure("edge", background=self.entityColor)
             pos = self.text.search(self.entityRe, "matchEnd" , "searchLimit",  count=countVar, regexp=True)
             if pos =="":
                 break
@@ -455,8 +457,10 @@ class Example(Frame):
         countVar = StringVar()
         # for annotate_type in self.pressCommand.values():
         while True:
-            self.text.tag_configure("catagory", background="LightSkyBlue1")
-            self.text.tag_configure("edge", background="LightSkyBlue1")
+            # self.text.tag_configure("catagory", background="LightSkyBlue1")
+            # self.text.tag_configure("edge", background="LightSkyBlue1")
+            self.text.tag_configure("catagory", background=self.entityColor)
+            self.text.tag_configure("edge", background=self.entityColor)
             pos = self.text.search(self.entityRe, "matchEnd" , "searchLimit",  count=countVar, regexp=True)
             if pos == "":
                 break
