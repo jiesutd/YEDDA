@@ -2,7 +2,7 @@
 # @Author: Jie Yang from SUTD
 # @Date:   2016-Jan-06 17:11:59
 # @Last Modified by:   Jie     @Contact: jieynlp@gmail.com
-# @Last Modified time: 2017-05-02 16:35:15
+# @Last Modified time: 2017-05-03 14:57:56
 #!/usr/bin/env python
 # coding=utf-8
 
@@ -30,18 +30,19 @@ class Example(Frame):
                              'e':"Org-Other",
                              'f':"Person-Name",
                              'g':"Person-Title",
-                             'h':"Person-Combine", 
-                             'i':"Arti-Policy",
-                             'j':"Arti-Project",
-                             'k':"Arti-Product", 
-                             'l':"Arti-Service", 
-                             'm':"Arti-Technology",
-                             'n':"Arti-Document",
-                             'o':"Arti-Other", 
-                             'p':"Event", 
-                             'r': "Sector",
-                             's': "Fin-Concept",
-                             't':"Other"}
+                             'h':"Person-Title",
+                             'i':"Person-Combine", 
+                             'j':"Arti-Policy",
+                             'k':"Arti-Project",
+                             'l':"Arti-Product", 
+                             'm':"Arti-Service", 
+                             'n':"Arti-Technology",
+                             'o':"Arti-Document",
+                             'p':"Arti-Other", 
+                             'r':"Event", 
+                             's': "Sector",
+                             't': "Fin-Concept",
+                             'u':"Other"}
         self.allKey = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
         self.controlCommand = {'q':"unTag", 'ctrl+z':'undo'}
         self.labelEntryList = []
