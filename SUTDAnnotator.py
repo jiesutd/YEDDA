@@ -2,7 +2,7 @@
 # @Author: Jie Yang from SUTD
 # @Date:   2016-Jan-06 17:11:59
 # @Last Modified by:   Jie     @Contact: jieynlp@gmail.com
-# @Last Modified time: 2017-05-03 14:57:56
+# @Last Modified time: 2017-05-03 14:59:00
 #!/usr/bin/env python
 # coding=utf-8
 
@@ -30,7 +30,7 @@ class Example(Frame):
                              'e':"Org-Other",
                              'f':"Person-Name",
                              'g':"Person-Title",
-                             'h':"Person-Title",
+                             'h':"Person-Other",
                              'i':"Person-Combine", 
                              'j':"Arti-Policy",
                              'k':"Arti-Project",
