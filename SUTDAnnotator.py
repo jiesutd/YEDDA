@@ -2,7 +2,7 @@
 # @Author: Jie Yang from SUTD
 # @Date:   2016-Jan-06 17:11:59
 # @Last Modified by:   Jie     @Contact: jieynlp@gmail.com
-# @Last Modified time: 2017-05-04 19:28:30
+# @Last Modified time: 2017-05-04 19:39:27
 #!/usr/bin/env python
 # coding=utf-8
 
@@ -40,7 +40,7 @@ class Example(Frame):
                              'o':"Arti-Document",
                              'p':"Arti-Other", 
                              'r':"Event-Past",
-                             's':"Event-Future"
+                             's':"Event-Future",
                              't': "Sector",
                              'u': "Fin-Concept",
                              'v':"Other"}
