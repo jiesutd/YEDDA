@@ -2,7 +2,7 @@
 # @Author: Jie Yang from SUTD
 # @Date:   2016-Jan-06 17:11:59
 # @Last Modified by:   Jie     @Contact: jieynlp@gmail.com
-# @Last Modified time: 2017-05-03 14:59:00
+# @Last Modified time: 2017-05-04 19:28:30
 #!/usr/bin/env python
 # coding=utf-8
 
@@ -39,10 +39,11 @@ class Example(Frame):
                              'n':"Arti-Technology",
                              'o':"Arti-Document",
                              'p':"Arti-Other", 
-                             'r':"Event", 
-                             's': "Sector",
-                             't': "Fin-Concept",
-                             'u':"Other"}
+                             'r':"Event-Past",
+                             's':"Event-Future"
+                             't': "Sector",
+                             'u': "Fin-Concept",
+                             'v':"Other"}
         self.allKey = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
         self.controlCommand = {'q':"unTag", 'ctrl+z':'undo'}
         self.labelEntryList = []
