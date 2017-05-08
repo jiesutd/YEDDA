@@ -2,7 +2,7 @@
 # @Author: Jie Yang from SUTD
 # @Date:   2016-Jan-06 17:11:59
 # @Last Modified by:   Jie     @Contact: jieynlp@gmail.com
-# @Last Modified time: 2017-05-04 19:39:27
+# @Last Modified time: 2017-05-08 18:46:54
 #!/usr/bin/env python
 # coding=utf-8
 
@@ -303,8 +303,8 @@ class Example(Frame):
                 selected_string = line[matched_span[0]:matched_span[1]]
                 new_string_list = selected_string.strip('[@]').rsplit('#',1)
                 new_string = new_string_list[0]
-                line = line[:matched_span[0]] + new_string + line[matched_span[1]:]
-                # line = line.replace(selected_string, new_string, 1)
+                line_before_entity = line[:matched_span[0]]
+                line_after_entity =  new_string + line[matched_span[1]:]
                 selected_string = new_string
                 cursor_index = line_id + '.'+ str(int(matched_span[1])-(len(new_string_list[1])+4))
                 if command == "q":
@@ -312,14 +312,15 @@ class Example(Frame):
                 else:
                     if len(selected_string) > 0:
                         if command in self.pressCommand:
-                            line, cursor_index = self.replaceString(line, selected_string, command, cursor_index)
+                            line_after_entity, cursor_index = self.replaceString(line_after_entity, selected_string, command, cursor_index)
                         else:
                             return
+                line = line_before_entity + line_after_entity
             if aboveLine_content != '':
                 aboveLine_content = aboveLine_content+ '\n'
             if belowLine_content != '':
                 belowLine_content = '\n' + belowLine_content
-            content = aboveLine_content + line+ belowLine_content
+            content = aboveLine_content + line + belowLine_content
             content = content.encode('utf-8')
             self.writeFile(self.fileName, content, cursor_index)
 
