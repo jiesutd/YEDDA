@@ -2,7 +2,7 @@
 # @Author: Jie Yang from SUTD
 # @Date:   2016-Jan-06 17:11:59
 # @Last Modified by:   Jie     @Contact: jieynlp@gmail.com
-# @Last Modified time: 2017-05-08 18:46:54
+# @Last Modified time: 2017-05-08 22:15:02
 #!/usr/bin/env python
 # coding=utf-8
 
@@ -535,7 +535,7 @@ class Example(Frame):
         for key in sorted(self.pressCommand):
             row += 1
             # print "key: ", key, "  command: ", self.pressCommand[key]
-            symbolLabel = Label(self, text =key + ": ", foreground="blue", font=("Helvetica", 14, "bold"))
+            symbolLabel = Label(self, text =key.upper() + ": ", foreground="blue", font=("Helvetica", 14, "bold"))
             symbolLabel.grid(row=row, column = self.textColumn +2,columnspan=1, rowspan = 1, padx = 3)
             self.shortcutLabelList.append(symbolLabel)
 
