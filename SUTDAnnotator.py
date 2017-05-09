@@ -2,7 +2,7 @@
 # @Author: Jie Yang from SUTD
 # @Date:   2016-Jan-06 17:11:59
 # @Last Modified by:   Jie     @Contact: jieynlp@gmail.com
-# @Last Modified time: 2017-05-08 22:15:02
+# @Last Modified time: 2017-05-09 13:47:49
 #!/usr/bin/env python
 # coding=utf-8
 
@@ -49,7 +49,7 @@ class Example(Frame):
         self.labelEntryList = []
         self.shortcutLabelList = []
         # default GUI display parameter
-        self.textRow = 25
+        self.textRow = 23
         self.textColumn = 5
         self.tagScheme = "BMES"
         self.onlyNP = False  ## for exporting sequence 
