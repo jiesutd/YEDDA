@@ -2,7 +2,7 @@
 # @Author: Jie Yang from SUTD
 # @Date:   2016-Jan-06 17:11:59
 # @Last Modified by:   Jie     @Contact: jieynlp@gmail.com
-# @Last Modified time: 2017-05-09 13:47:49
+# @Last Modified time: 2017-05-31 14:39:42
 #!/usr/bin/env python
 # coding=utf-8
 
@@ -14,11 +14,13 @@ import re
 from collections import deque
 import pickle
 import os.path
+import platform
 
 
 class Example(Frame):
     def __init__(self, parent):
         Frame.__init__(self, parent)
+        self.OS = platform.system().lower()
         self.parent = parent
         self.fileName = ""
         self.history = deque(maxlen=20)
@@ -49,7 +51,7 @@ class Example(Frame):
         self.labelEntryList = []
         self.shortcutLabelList = []
         # default GUI display parameter
-        self.textRow = 23
+        self.textRow = 20
         self.textColumn = 5
         self.tagScheme = "BMES"
         self.onlyNP = False  ## for exporting sequence 
@@ -60,6 +62,7 @@ class Example(Frame):
         ## configure color
         self.entityColor = "LightSkyBlue1"
         self.selectColor = 'light salmon'
+        self.debug = False
         self.initUI()
         
         
@@ -117,13 +120,16 @@ class Example(Frame):
         # for press_key in self.pressCommand.keys():
         for idx in range(0, len(self.allKey)):
             press_key = self.allKey[idx]
-            self.text.bind(press_key, lambda event, arg=press_key:self.textReturnEnter(event,arg))
+
+            # self.text.bind(press_key, lambda event, arg=press_key:self.textReturnEnter(event,arg))
+            self.text.bind(press_key, self.textReturnEnter)
             simplePressKey = "<KeyRelease-" + press_key + ">"
             self.text.bind(simplePressKey, self.deleteTextInput)
-            controlPlusKey = "<Control-Key-" + press_key + ">"
-            self.text.bind(controlPlusKey, self.keepCurrent)
-            altPlusKey = "<Command-Key-" + press_key + ">"
-            self.text.bind(altPlusKey, self.keepCurrent)
+            if self.OS != "windows":
+                controlPlusKey = "<Control-Key-" + press_key + ">"
+                self.text.bind(controlPlusKey, self.keepCurrent)
+                altPlusKey = "<Command-Key-" + press_key + ">"
+                self.text.bind(altPlusKey, self.keepCurrent)
 
         self.text.bind('<Control-Key-z>', self.backToHistory)
         ## disable the default  copy behaivour when right click. For MacOS, right click is button 2, other systems are button3
@@ -140,6 +146,8 @@ class Example(Frame):
     
     ## cursor index show with the left click
     def singleLeftClick(self, event):
+        if self.debug:
+            print "Action Track: singleLeftClick"
         cursor_index = self.text.index(INSERT) 
         row_column = cursor_index.split('.')
         cursor_text = ("row: %s\ncol: %s" % (row_column[0], row_column[-1]))
@@ -148,6 +156,8 @@ class Example(Frame):
     
     ## TODO: select entity by double left click
     def doubleLeftClick(self, event):
+        if self.debug:
+            print "Action Track: doubleLeftClick"
         pass
         # cursor_index = self.text.index(INSERT)
         # start_index = ("%s - %sc" % (cursor_index, 5))
@@ -158,6 +168,8 @@ class Example(Frame):
 
     ## Disable right click default copy selection behaviour
     def rightClick(self, event):
+        if self.debug:
+            print "Action Track: rightClick"
         try:
             firstSelection_index = self.text.index(SEL_FIRST)
             cursor_index = self.text.index(SEL_LAST)
@@ -203,15 +215,15 @@ class Example(Frame):
         self.lbl.config(text=new_file)
 
     def setCursorLabel(self, cursor_index):
+        if self.debug:
+            print "Action Track: setCursorLabel"
         row_column = cursor_index.split('.')
         cursor_text = ("row: %s\ncol: %s" % (row_column[0], row_column[-1]))
         self.cursorIndex.config(text=cursor_text)
 
-    # def initAnnotate():
-    #     text = self.text.get('1.0','end-1c')
-        
-
     def returnButton(self):
+        if self.debug:
+            print "Action Track: returnButton"
         self.pushToHistory()
         # self.returnEnter(event)
         content = self.entry.get()
@@ -221,6 +233,8 @@ class Example(Frame):
 
 
     def returnEnter(self,event):
+        if self.debug:
+            print "Action Track: returnEnter"
         self.pushToHistory()
         content = self.entry.get()
         self.clearCommand()
@@ -228,9 +242,12 @@ class Example(Frame):
         return content
 
 
-    def textReturnEnter(self,event, press_key):
+    def textReturnEnter(self,event):
+        press_key = event.char
+        if self.debug:
+            print "Action Track: textReturnEnter"
         self.pushToHistory()
-        # print "event: ", press_key
+        print "event: ", press_key
         # content = self.text.get()
         self.clearCommand()
         self.executeCursorCommand(press_key.lower())
@@ -239,6 +256,8 @@ class Example(Frame):
 
 
     def backToHistory(self,event):
+        if self.debug:
+            print "Action Track: backToHistory"
         if len(self.history) > 0:
             historyCondition = self.history.pop()
             # print "history condition: ", historyCondition
@@ -252,10 +271,16 @@ class Example(Frame):
         self.text.insert(INSERT, 'p')   # add a word as pad for key release delete
 
     def keepCurrent(self, event):
+        if self.debug:
+            print "Action Track: keepCurrent"
+        print("keep current, insert:%s"%(INSERT))
+        print "before:", self.text.index(INSERT)
         self.text.insert(INSERT, 'p')
-
+        print "after:", self.text.index(INSERT)
 
     def clearCommand(self):
+        if self.debug:
+            print "Action Track: clearCommand"
         self.entry.delete(0, 'end')
 
 
@@ -265,7 +290,10 @@ class Example(Frame):
         return textContent
 
     def executeCursorCommand(self,command):
+        if self.debug:
+            print "Action Track: executeCursorCommand"
         content = self.getText()
+        print("Command:"+command)
         try:
             firstSelection_index = self.text.index(SEL_FIRST)
             cursor_index = self.text.index(SEL_LAST)
@@ -326,6 +354,8 @@ class Example(Frame):
 
 
     def executeEntryCommand(self,command):
+        if self.debug:
+            print "Action Track: executeEntryCommand"
         if len(command) == 0:
             currentCursor = self.text.index(INSERT)
             newCurrentCursor = str(int(currentCursor.split('.')[0])+1) + ".0"
@@ -354,7 +384,10 @@ class Example(Frame):
             
 
     def deleteTextInput(self,event):
+        if self.debug:
+            print "Action Track: deleteTextInput"
         get_insert = self.text.index(INSERT)
+        print "delete insert:",get_insert
         insert_list = get_insert.split('.')
         last_insert = insert_list[0] + "." + str(int(insert_list[1])-1)
         get_input = self.text.get(last_insert, get_insert).encode('utf-8')
@@ -363,7 +396,7 @@ class Example(Frame):
         followHalf_content = self.text.get(last_insert, "end-1c").encode('utf-8')
         if len(get_input) > 0: 
             followHalf_content = followHalf_content.replace(get_input, '', 1)
-            content = aboveHalf_content + followHalf_content
+        content = aboveHalf_content + followHalf_content
         self.writeFile(self.fileName, content, last_insert)
 
 
@@ -405,6 +438,8 @@ class Example(Frame):
 
 
     def autoLoadNewFile(self, fileName, newcursor_index):
+        if self.debug:
+            print "Action Track: autoLoadNewFile"
         if len(fileName) > 0:
             self.text.delete("1.0",END)
             text = self.readFile(fileName)
@@ -417,6 +452,8 @@ class Example(Frame):
             
 
     def setLineDisplay(self):
+        if self.debug:
+            print "Action Track: setLineDisplay"
         self.text.config(insertbackground='red', insertwidth=4, font=self.fnt)
 
         countVar = StringVar()
@@ -453,6 +490,8 @@ class Example(Frame):
 
 
     def setDisplay(self):
+        if self.debug:
+            print "Action Track: setDisplay"
         self.text.config(insertbackground='red', insertwidth=4)
         self.text.mark_set("matchStart", "1.0")
         self.text.mark_set("matchEnd", "1.0") 
@@ -482,6 +521,8 @@ class Example(Frame):
             
     
     def pushToHistory(self):
+        if self.debug:
+            print "Action Track: pushToHistory"
         currentList = []
         content = self.getText()
         cursorPosition = self.text.index(INSERT)
@@ -491,6 +532,8 @@ class Example(Frame):
         self.history.append(currentList)
 
     def pushToHistoryEvent(self,event):
+        if self.debug:
+            print "Action Track: pushToHistoryEvent"
         currentList = []
         content = self.getText()
         cursorPosition = self.text.index(INSERT)
@@ -501,6 +544,8 @@ class Example(Frame):
 
     ## update shortcut map
     def renewPressCommand(self):
+        if self.debug:
+            print "Action Track: renewPressCommand"
         seq = 0
         new_dict = {}
         listLength = len(self.labelEntryList)
@@ -703,6 +748,8 @@ def decompositCommand(command_string):
 
 
 def main():
+    print("SUTDAnnotator launched!")
+    print(("OS:%s")%(platform.system()))
     root = Tk()
     root.geometry("1300x700+200+200")
     app = Example(root)
