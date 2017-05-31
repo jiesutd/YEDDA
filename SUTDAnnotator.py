@@ -2,7 +2,7 @@
 # @Author: Jie Yang from SUTD
 # @Date:   2016-Jan-06 17:11:59
 # @Last Modified by:   Jie     @Contact: jieynlp@gmail.com
-# @Last Modified time: 2017-05-31 14:39:42
+# @Last Modified time: 2017-05-31 14:44:49
 #!/usr/bin/env python
 # coding=utf-8
 
@@ -68,7 +68,7 @@ class Example(Frame):
         
     def initUI(self):
       
-        self.parent.title("SUTDNLP Annotation Tool-V0.5.3")
+        self.parent.title("SUTDNLP Annotation Tool-V0.6")
         self.pack(fill=BOTH, expand=True)
         
         for idx in range(0,self.textColumn):
