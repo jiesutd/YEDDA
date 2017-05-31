@@ -38,6 +38,7 @@ Important features:
 
 Updating...
 ====
+* 2017-May-31, (V 0.6): optimize for Windows OS.
 * 2017-Apr-26, (V 0.5.3): fix bug with line merge when change entity type.
 * 2017-Apr-20, (V 0.5.2): fix bugs with `newline` problem on MacOS/Linux/Windows. (`\r` `\n` `\r\n`)
 * 2017-Apr-20, (V 0.5.1): change entity label more directly; optimize cursor figure.
