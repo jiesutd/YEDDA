@@ -1,11 +1,15 @@
-SUTDAnnotator: An efficient corpus annotation tool
+SUTDAnnotator: An efficient human annotation tool for text
 ======
 
 About:
 ====
+SUTDAnnotator is developed for annotating chunk/entity/event on text manually. It supports shortcut annotation which is extremely efficient to annotate text by hand. The user only need to select text span and press shortcut key, the span will be annotated automatically. It also support command annotation model and support export annotated text into sequence text.
+
 This GUI annotation tool is developed with tkinter package in Python. 
 
 System required: Python 2.7
+
+Author: Jie Yang, Phd Candidate of SUTD.
 
 Interface demo:
 ![alt text](https://github.com/jiesutd/AnnTool/blob/master/EnglishInterface.png "English Interface demo")
