@@ -2,7 +2,7 @@
 # @Author: Jie Yang from SUTD
 # @Date:   2016-Jan-06 17:11:59
 # @Last Modified by:   Jie     @Contact: jieynlp@gmail.com
-# @Last Modified time: 2017-06-24 17:36:32
+# @Last Modified time: 2017-06-24 21:13:09
 #!/usr/bin/env python
 # coding=utf-8
 
@@ -23,6 +23,8 @@ class Example(Frame):
         self.OS = platform.system().lower()
         self.parent = parent
         self.fileName = ""
+        self.debug = True
+        self.colorAllChunk = True
         self.history = deque(maxlen=20)
         self.currentContent = deque(maxlen=1)
         self.pressCommand = {'a':"Location",
@@ -60,12 +62,12 @@ class Example(Frame):
         self.onlyNP = False  ## for exporting sequence 
         self.seged = True
         self.configFile = "config"
-        self.colorAllChunk = True
-        self.entityRe = r'\[\@.*?\#.*?\*\]'
+        self.entityRe = r'\[\@.*?\#.*?\*\](?!\#)'
+        self.insideNestEntityRe = r'\[\@\[\@(?!\[\@).*?\#.*?\*\]\#'
         ## configure color
-        self.entityColor = "LightSkyBlue1"
+        self.entityColor = "SkyBlue1"
+        self.insideNestEntityColor = "light slate blue"
         self.selectColor = 'light salmon'
-        self.debug = False
         self.textFontStyle = "Times"
         self.initUI()
         
@@ -454,12 +456,12 @@ class Example(Frame):
             self.text.mark_set(INSERT, newcursor_index)
             self.text.see(newcursor_index)
             self.setCursorLabel(newcursor_index)
-            self.setLineDisplay()
+            self.setColorDisplay()
             
 
-    def setLineDisplay(self):
+    def setColorDisplay(self):
         if self.debug:
-            print "Action Track: setLineDisplay"
+            print "Action Track: setColorDisplay"
         self.text.config(insertbackground='red', insertwidth=4, font=self.fnt)
 
         countVar = StringVar()
@@ -491,7 +493,26 @@ class Example(Frame):
 
             self.text.tag_add("catagory", second_pos, lastsecond_pos)
             self.text.tag_add("edge", first_pos, second_pos)
-            self.text.tag_add("edge", lastsecond_pos, last_pos)    
+            self.text.tag_add("edge", lastsecond_pos, last_pos)   
+        ## color the most inside span for nested span, scan from begin to end again  
+        if self.colorAllChunk:
+            self.text.mark_set("matchStart", "1.0")
+            self.text.mark_set("matchEnd", "1.0")
+            self.text.mark_set("searchLimit", 'end-1c')
+        else:
+            self.text.mark_set("matchStart", lineStart)
+            self.text.mark_set("matchEnd", lineStart)
+            self.text.mark_set("searchLimit", lineEnd)
+        while True:
+            self.text.tag_configure("insideEntityColor", background=self.insideNestEntityColor)
+            pos = self.text.search(self.insideNestEntityRe , "matchEnd" , "searchLimit",  count=countVar, regexp=True)
+            if pos == "":
+                break
+            self.text.mark_set("matchStart", pos)
+            self.text.mark_set("matchEnd", "%s+%sc" % (pos, countVar.get()))
+            first_pos = "%s + %sc" %(pos, 2)
+            last_pos = "%s + %sc" %(pos, str(int(countVar.get())-1))
+            self.text.tag_add("insideEntityColor", first_pos, last_pos)   
 
 
 
@@ -504,7 +525,7 @@ class Example(Frame):
         self.text.mark_set("searchLimit", 'end-1c')
 
         countVar = StringVar()
-        # for annotate_type in self.pressCommand.values():
+        ## match biggest span, ignore nest, scan from begin to end again
         while True:
             # self.text.tag_configure("catagory", background="LightSkyBlue1")
             # self.text.tag_configure("edge", background="LightSkyBlue1")
@@ -524,6 +545,20 @@ class Example(Frame):
             self.text.tag_add("catagory", second_pos, lastsecond_pos)
             self.text.tag_add("edge", first_pos, second_pos)
             self.text.tag_add("edge", lastsecond_pos, last_pos)
+
+        ## match nested most inside span, scan from begin to end again
+        self.text.mark_set("matchEnd", "1.0") 
+        self.text.mark_set("searchLimit", 'end-1c')
+        while True:
+            self.text.tag_configure("insideEntityColor", background=self.insideNestEntityColor)
+            pos = self.text.search(self.insideNestEntityRe , "matchEnd" , "searchLimit",  count=countVar, regexp=True)
+            if pos == "":
+                break
+            self.text.mark_set("matchStart", pos)
+            self.text.mark_set("matchEnd", "%s+%sc" % (pos, countVar.get()))
+            first_pos = "%s + %sc" %(pos, 2)
+            last_pos = "%s + %sc" %(pos, str(int(countVar.get())-1))
+            self.text.tag_add("insideEntityColor", first_pos, last_pos)
             
     
     def pushToHistory(self):
