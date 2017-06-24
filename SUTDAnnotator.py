@@ -2,7 +2,7 @@
 # @Author: Jie Yang from SUTD
 # @Date:   2016-Jan-06 17:11:59
 # @Last Modified by:   Jie     @Contact: jieynlp@gmail.com
-# @Last Modified time: 2017-06-24 15:44:16
+# @Last Modified time: 2017-06-24 17:36:32
 #!/usr/bin/env python
 # coding=utf-8
 
@@ -51,7 +51,10 @@ class Example(Frame):
         self.labelEntryList = []
         self.shortcutLabelList = []
         # default GUI display parameter
-        self.textRow = 20
+        if len(self.pressCommand) > 20:
+            self.textRow = len(self.pressCommand)
+        else:
+            self.textRow = 20
         self.textColumn = 5
         self.tagScheme = "BMES"
         self.onlyNP = False  ## for exporting sequence 
@@ -63,6 +66,7 @@ class Example(Frame):
         self.entityColor = "LightSkyBlue1"
         self.selectColor = 'light salmon'
         self.debug = False
+        self.textFontStyle = "Times"
         self.initUI()
         
         
@@ -83,7 +87,7 @@ class Example(Frame):
         
         self.lbl = Label(self, text="File: no file is opened")
         self.lbl.grid(sticky=W, pady=4, padx=5)
-        self.fnt = tkFont.Font(family="Helvetica",size=self.textRow,weight="bold",underline=0)
+        self.fnt = tkFont.Font(family=self.textFontStyle,size=self.textRow,weight="bold",underline=0)
         self.text = Text(self, font=self.fnt, selectbackground=self.selectColor)
         self.text.grid(row=1, column=0, columnspan=self.textColumn, rowspan=self.textRow, padx=12, sticky=E+W+S+N)
 
@@ -105,9 +109,9 @@ class Example(Frame):
         cbtn = Button(self, text="Quit", command=self.quit)
         cbtn.grid(row=4, column=self.textColumn + 1, pady=4)
 
-        self.cursorName = Label(self, text="Cursor: ", foreground="red", font=("Helvetica", 14, "bold"))
+        self.cursorName = Label(self, text="Cursor: ", foreground="red", font=(self.textFontStyle, 14, "bold"))
         self.cursorName.grid(row=5, column=self.textColumn +1, pady=4)
-        self.cursorIndex = Label(self, text="", foreground="red", font=("Helvetica", 14, "bold"))
+        self.cursorIndex = Label(self, text="", foreground="red", font=(self.textFontStyle, 14, "bold"))
         self.cursorIndex.grid(row=6, column=self.textColumn + 1, pady=4)
 
         lbl_entry = Label(self, text="Command:")
@@ -206,7 +210,7 @@ class Example(Frame):
         return text
 
     def setFont(self, value):
-        _family="Helvetica"
+        _family=self.textFontStyle
         _size = value
         _weight="bold"
         _underline=0
@@ -575,18 +579,18 @@ class Example(Frame):
         hight = len(self.pressCommand)
         width = 2
         row = 0
-        mapLabel = Label(self, text ="Shortcuts map Labels", foreground="blue", font=("Helvetica", 14, "bold"))
+        mapLabel = Label(self, text ="Shortcuts map Labels", foreground="blue", font=(self.textFontStyle, 14, "bold"))
         mapLabel.grid(row=0, column = self.textColumn +2,columnspan=2, rowspan = 1, padx = 10)
         self.labelEntryList = []
         self.shortcutLabelList = []
         for key in sorted(self.pressCommand):
             row += 1
             # print "key: ", key, "  command: ", self.pressCommand[key]
-            symbolLabel = Label(self, text =key.upper() + ": ", foreground="blue", font=("Helvetica", 14, "bold"))
+            symbolLabel = Label(self, text =key.upper() + ": ", foreground="blue", font=(self.textFontStyle, 14, "bold"))
             symbolLabel.grid(row=row, column = self.textColumn +2,columnspan=1, rowspan = 1, padx = 3)
             self.shortcutLabelList.append(symbolLabel)
 
-            labelEntry = Entry(self, foreground="blue", font=("Helvetica", 14, "bold"))
+            labelEntry = Entry(self, foreground="blue", font=(self.textFontStyle, 14, "bold"))
             labelEntry.insert(0, self.pressCommand[key])
             labelEntry.grid(row=row, column = self.textColumn +3, columnspan=1, rowspan = 1)
             self.labelEntryList.append(labelEntry)

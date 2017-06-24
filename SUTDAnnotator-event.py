@@ -2,7 +2,7 @@
 # @Author: Jie Yang from SUTD
 # @Date:   2016-Jan-06 17:11:59
 # @Last Modified by:   Jie     @Contact: jieynlp@gmail.com
-# @Last Modified time: 2017-06-24 17:17:40
+# @Last Modified time: 2017-06-24 17:35:38
 #!/usr/bin/env python
 # coding=utf-8
 
@@ -25,34 +25,42 @@ class Example(Frame):
         self.fileName = ""
         self.history = deque(maxlen=20)
         self.currentContent = deque(maxlen=1)
-        self.pressCommand = {'a':"Location",
-                             'b':"Org-Government",
-                             'c':"Org-Company",
-                             'd':"Org-Media",
-                             'e':"Org-Other",
-                             'f':"Person-Name",
-                             'g':"Person-Title",
-                             'h':"Person-Other",
-                             'i':"Person-Combine", 
-                             'j':"Arti-Policy",
-                             'k':"Arti-Project",
-                             'l':"Arti-Product", 
-                             'm':"Arti-Service", 
-                             'n':"Arti-Technology",
-                             'o':"Arti-Document",
-                             'p':"Arti-Other", 
-                             'r':"Event-Past",
-                             's':"Event-Future",
-                             't': "Sector",
-                             'u': "Fin-Concept",
-                             'v':"Other"}
+        self.pressCommand = {'a':u"参与者",
+                             'b':u"动作",
+                             'c':u"对象",
+                             'd':u"状态",
+                             'e':u"时间",
+                             'f':u"地点",
+                             'g':u"金额",
+                             'h':u"内容",
+                             'i':u"Transaction-方式", 
+                             'j':u"Peron-原单位",
+                             'k':u"Per-新单位",
+                             'l':u"Per-原职务",
+                             'm':u"Per-新职务",
+                             'n':u"Quantity-指标",
+                             'o':u"Q-对比值",
+                             'p':u"Q-当前值",
+                             'r':u"Q-变化趋势幅度",
+                             's':u"Q-对比时间",
+                             't':u"Policy-影响行业",
+                             'u':u"Pol-鼓励限制",
+                             'v':u"Project-主导方",
+                             'w':u"Pro-投资方",
+                             'x':u"Pro-承建方",
+                             'y':u"Pro-开工时间",
+                             'z':u"Pro-完成时间"
+                                }
         self.allKey = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
         self.numberKey = "0123456789"
         self.controlCommand = {'q':"unTag", 'ctrl+z':'undo'}
         self.labelEntryList = []
         self.shortcutLabelList = []
         # default GUI display parameter
-        self.textRow = 20
+        if len(self.pressCommand) > 20:
+            self.textRow = len(self.pressCommand)
+        else:
+            self.textRow = 20
         self.textColumn = 5
         self.tagScheme = "BMES"
         self.onlyNP = False  ## for exporting sequence 
@@ -66,11 +74,11 @@ class Example(Frame):
         self.debug = True
         self.maxEventId = 0
         self.currentEventId = ""
+        self.textFontStyle = "Times"
         self.initUI()
         
         
     def initUI(self):
-      
         self.parent.title("SUTDEventAnnotetor-V0.6")
         self.pack(fill=BOTH, expand=True)
         
@@ -81,14 +89,12 @@ class Example(Frame):
         self.columnconfigure(self.textColumn+4, weight=1)
         for idx in range(0,16):
             self.rowconfigure(idx, weight =1)
-        # self.rowconfigure(5, weight=1)
-        # self.rowconfigure(5, pad=7)
         
         self.lbl = Label(self, text="File: no file is opened")
         self.lbl.grid(sticky=W, pady=4, padx=5)
-        self.fnt = tkFont.Font(family="Helvetica",size=self.textRow,weight="bold",underline=0)
+        self.fnt = tkFont.Font(font=(self.textFontStyle,20,"bold"),size=self.textRow, underline=0)
         self.text = Text(self, font=self.fnt, selectbackground=self.selectColor)
-        self.text.grid(row=1, column=0, columnspan=self.textColumn, rowspan=self.textRow, padx=12, sticky=E+W+S+N)
+        self.text.grid(row=1, column=0, columnspan=self.textColumn, rowspan=self.textRow, padx=12,pady=12, sticky=E+W+S+N)
 
         self.sb = Scrollbar(self)
         self.sb.grid(row = 1, column = self.textColumn, rowspan = self.textRow, padx=0, sticky = E+W+S+N)
@@ -108,14 +114,14 @@ class Example(Frame):
         cbtn = Button(self, text="Quit", command=self.quit)
         cbtn.grid(row=4, column=self.textColumn + 1, pady=4)
 
-        self.cursorName = Label(self, text="Cursor: ", foreground="blue", font=("Helvetica", 14, "bold"))
+        self.cursorName = Label(self, text="Cursor: ", foreground="blue", font=(self.textFontStyle, 14, "bold"))
         self.cursorName.grid(row=5, column=self.textColumn +1, pady=4)
-        self.cursorIndex = Label(self, text="", foreground="red", font=("Helvetica", 14, "bold"))
+        self.cursorIndex = Label(self, text="", foreground="red", font=(self.textFontStyle, 14, "bold"))
         self.cursorIndex.grid(row=6, column=self.textColumn + 1, pady=4)
 
-        self.EventName = Label(self, text="Event:   ", foreground="blue", font=("Helvetica", 14, "bold"))
+        self.EventName = Label(self, text="Event:   ", foreground="blue", font=(self.textFontStyle, 14, "bold"))
         self.EventName.grid(row=7, column=self.textColumn +1, pady=4)
-        self.EventId = Label(self, text=("MaxId: %s\nCurId: %s" % (self.maxEventId, self.currentEventId)), foreground="red", font=("Helvetica", 14, "bold"))
+        self.EventId = Label(self, text=("MaxId: %s\nCurId: %s" % (self.maxEventId, self.currentEventId)), foreground="red", font=(self.textFontStyle, 14, "bold"))
         self.EventId.grid(row=8, column=self.textColumn + 1, pady=4)
 
         ## disable command method for event
@@ -124,6 +130,8 @@ class Example(Frame):
         # self.entry = Entry(self)
         # self.entry.grid(row = self.textRow +1, columnspan=self.textColumn + 1, rowspan = 1, sticky = E+W+S+N, pady=4, padx=80)
         # self.entry.bind('<Return>', self.returnEnter)
+        # self.enter = Button(self, text="Enter", command=self.returnButton)
+        # self.enter.grid(row=self.textRow +1, column=self.textColumn +1) 
 
         
         # for press_key in self.pressCommand.keys():
@@ -156,8 +164,7 @@ class Example(Frame):
 
         self.setMapShow()
 
-        self.enter = Button(self, text="Enter", command=self.returnButton)
-        self.enter.grid(row=self.textRow +1, column=self.textColumn +1) 
+        
     
     def numberModel(self, event):
         if self.debug:
@@ -234,7 +241,7 @@ class Example(Frame):
         return text
 
     def setFont(self, value):
-        _family="Helvetica"
+        _family=self.textFontStyle
         _size = value
         _weight="bold"
         _underline=0
@@ -607,18 +614,18 @@ class Example(Frame):
         hight = len(self.pressCommand)
         width = 2
         row = 0
-        mapLabel = Label(self, text ="Shortcuts map Labels", foreground="blue", font=("Helvetica", 14, "bold"))
+        mapLabel = Label(self, text ="Shortcuts map Labels", foreground="blue", font=(self.textFontStyle, 14, "bold"))
         mapLabel.grid(row=0, column = self.textColumn +2,columnspan=2, rowspan = 1, padx = 10)
         self.labelEntryList = []
         self.shortcutLabelList = []
         for key in sorted(self.pressCommand):
             row += 1
             # print "key: ", key, "  command: ", self.pressCommand[key]
-            symbolLabel = Label(self, text =key.upper() + ": ", foreground="blue", font=("Helvetica", 14, "bold"))
+            symbolLabel = Label(self, text =key.upper() + ": ", foreground="blue", font=(self.textFontStyle, 14, "bold"))
             symbolLabel.grid(row=row, column = self.textColumn +2,columnspan=1, rowspan = 1, padx = 3)
             self.shortcutLabelList.append(symbolLabel)
 
-            labelEntry = Entry(self, foreground="blue", font=("Helvetica", 14, "bold"))
+            labelEntry = Entry(self, foreground="blue", font=(self.textFontStyle, 14, "bold"))
             labelEntry.insert(0, self.pressCommand[key])
             labelEntry.grid(row=row, column = self.textColumn +3, columnspan=1, rowspan = 1)
             self.labelEntryList.append(labelEntry)
