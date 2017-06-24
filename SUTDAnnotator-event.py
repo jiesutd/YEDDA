@@ -2,7 +2,7 @@
 # @Author: Jie Yang from SUTD
 # @Date:   2016-Jan-06 17:11:59
 # @Last Modified by:   Jie     @Contact: jieynlp@gmail.com
-# @Last Modified time: 2017-06-24 15:44:16
+# @Last Modified time: 2017-06-24 17:17:40
 #!/usr/bin/env python
 # coding=utf-8
 
@@ -46,7 +46,8 @@ class Example(Frame):
                              't': "Sector",
                              'u': "Fin-Concept",
                              'v':"Other"}
-        self.allKey = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+        self.allKey = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+        self.numberKey = "0123456789"
         self.controlCommand = {'q':"unTag", 'ctrl+z':'undo'}
         self.labelEntryList = []
         self.shortcutLabelList = []
@@ -62,13 +63,15 @@ class Example(Frame):
         ## configure color
         self.entityColor = "LightSkyBlue1"
         self.selectColor = 'light salmon'
-        self.debug = False
+        self.debug = True
+        self.maxEventId = 0
+        self.currentEventId = ""
         self.initUI()
         
         
     def initUI(self):
       
-        self.parent.title("SUTDNLP Annotation Tool-V0.6")
+        self.parent.title("SUTDEventAnnotetor-V0.6")
         self.pack(fill=BOTH, expand=True)
         
         for idx in range(0,self.textColumn):
@@ -105,16 +108,22 @@ class Example(Frame):
         cbtn = Button(self, text="Quit", command=self.quit)
         cbtn.grid(row=4, column=self.textColumn + 1, pady=4)
 
-        self.cursorName = Label(self, text="Cursor: ", foreground="red", font=("Helvetica", 14, "bold"))
+        self.cursorName = Label(self, text="Cursor: ", foreground="blue", font=("Helvetica", 14, "bold"))
         self.cursorName.grid(row=5, column=self.textColumn +1, pady=4)
         self.cursorIndex = Label(self, text="", foreground="red", font=("Helvetica", 14, "bold"))
         self.cursorIndex.grid(row=6, column=self.textColumn + 1, pady=4)
 
-        lbl_entry = Label(self, text="Command:")
-        lbl_entry.grid(row = self.textRow +1,  sticky = E+W+S+N, pady=4,padx=4)
-        self.entry = Entry(self)
-        self.entry.grid(row = self.textRow +1, columnspan=self.textColumn + 1, rowspan = 1, sticky = E+W+S+N, pady=4, padx=80)
-        self.entry.bind('<Return>', self.returnEnter)
+        self.EventName = Label(self, text="Event:   ", foreground="blue", font=("Helvetica", 14, "bold"))
+        self.EventName.grid(row=7, column=self.textColumn +1, pady=4)
+        self.EventId = Label(self, text=("MaxId: %s\nCurId: %s" % (self.maxEventId, self.currentEventId)), foreground="red", font=("Helvetica", 14, "bold"))
+        self.EventId.grid(row=8, column=self.textColumn + 1, pady=4)
+
+        ## disable command method for event
+        # lbl_entry = Label(self, text="Command:")
+        # lbl_entry.grid(row = self.textRow +1,  sticky = E+W+S+N, pady=4,padx=4)
+        # self.entry = Entry(self)
+        # self.entry.grid(row = self.textRow +1, columnspan=self.textColumn + 1, rowspan = 1, sticky = E+W+S+N, pady=4, padx=80)
+        # self.entry.bind('<Return>', self.returnEnter)
 
         
         # for press_key in self.pressCommand.keys():
@@ -131,6 +140,11 @@ class Example(Frame):
                 altPlusKey = "<Command-Key-" + press_key + ">"
                 self.text.bind(altPlusKey, self.keepCurrent)
 
+        for idx in range(0, len(self.numberKey)):
+            press_key = self.numberKey[idx]
+            self.text.bind(press_key, self.numberModel)
+
+
 
         self.text.bind('<Control-Key-z>', self.backToHistory)
         ## disable the default  copy behaivour when right click. For MacOS, right click is button 2, other systems are button3
@@ -145,6 +159,20 @@ class Example(Frame):
         self.enter = Button(self, text="Enter", command=self.returnButton)
         self.enter.grid(row=self.textRow +1, column=self.textColumn +1) 
     
+    def numberModel(self, event):
+        if self.debug:
+            print "Action Track: numberModel"
+        print "Block text."
+        if self.currentEventId != "":
+            self.currentEventId = str(int(self.currentEventId)*10 + int(event.char))
+        else:
+            self.currentEventId = event.char
+        if int(self.currentEventId) > self.maxEventId:
+            self.maxEventId = int(self.currentEventId)
+        print("Current event id: %s, Max event id: %s"%(self.currentEventId, self.maxEventId))
+        eventIds = ("Max_Id: %s\nCur_Id: %s" % (self.maxEventId, self.currentEventId))
+        self.EventId.config(text=eventIds)
+        self.text.config(state=DISABLED)
 
     ## cursor index show with the left click
     def singleLeftClick(self, event):
@@ -152,8 +180,8 @@ class Example(Frame):
             print "Action Track: singleLeftClick"
         cursor_index = self.text.index(INSERT) 
         row_column = cursor_index.split('.')
-        cursor_text = ("row: %s\ncol: %s" % (row_column[0], row_column[-1]))
-        self.cursorIndex.config(text=cursor_text)
+        cursor_text = ("RowId: %s\nColId: %s" % (row_column[0], row_column[-1]))
+        self.cursorIndex.configure(text=cursor_text)
 
     
     ## TODO: select entity by double left click
@@ -220,7 +248,7 @@ class Example(Frame):
         if self.debug:
             print "Action Track: setCursorLabel"
         row_column = cursor_index.split('.')
-        cursor_text = ("row: %s\ncol: %s" % (row_column[0], row_column[-1]))
+        cursor_text = ("RowId:  %s\nColId:  %s" % (row_column[0], row_column[-1]))
         self.cursorIndex.config(text=cursor_text)
 
     def returnButton(self):
@@ -247,11 +275,12 @@ class Example(Frame):
     def textReturnEnter(self,event):
         press_key = event.char
         if self.debug:
-            print "Action Track: textReturnEnter"
+            print "Action Track: textReturnEnter, press:",press_key
         self.pushToHistory()
         print "event: ", press_key
         # content = self.text.get()
-        self.clearCommand()
+        # self.clearCommand()
+        self.text.configure(state='normal')
         self.executeCursorCommand(press_key.lower())
         # self.deleteTextInput()
         return press_key
@@ -405,7 +434,7 @@ class Example(Frame):
 
     def replaceString(self, content, string, replaceType, cursor_index):
         if replaceType in self.pressCommand:
-            new_string = "[@" + string + "#" + self.pressCommand[replaceType] + "*]" 
+            new_string = "[@" + string + "#" +self.currentEventId+ self.pressCommand[replaceType] + "*]" 
             cursor_indexList = cursor_index.split('.') 
             newcursor_index = "%s + %sc" % (cursor_index, str(len(self.pressCommand[replaceType])+5))
             # newcursor_index = cursor_indexList[0] + "." + str(int(cursor_indexList[1])+ len(new_string))
@@ -417,6 +446,9 @@ class Example(Frame):
         # print "find: ", content.find(string)
         content = content.replace(string, new_string, 1)
         # print "content: ", content
+        self.currentEventId = ""
+        eventIds = ("MaxId: %s\nCurId: %s" % (self.maxEventId, self.currentEventId))
+        self.EventId.config(text=eventIds)
         return content, newcursor_index
 
 
