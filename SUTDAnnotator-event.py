@@ -2,7 +2,7 @@
 # @Author: Jie Yang from SUTD
 # @Date:   2016-Jan-06 17:11:59
 # @Last Modified by:   Jie     @Contact: jieynlp@gmail.com
-# @Last Modified time: 2017-06-24 21:13:46
+# @Last Modified time: 2017-07-05 22:59:46
 #!/usr/bin/env python
 # coding=utf-8
 
@@ -77,6 +77,7 @@ class Example(Frame):
         self.maxEventId = 0
         self.currentEventId = ""
         self.textFontStyle = "Times"
+        self.EventIdString = StringVar()
         self.initUI()
         
         
@@ -116,15 +117,32 @@ class Example(Frame):
         cbtn = Button(self, text="Quit", command=self.quit)
         cbtn.grid(row=4, column=self.textColumn + 1, pady=4)
 
-        self.cursorName = Label(self, text="Cursor: ", foreground="blue", font=(self.textFontStyle, 14, "bold"))
-        self.cursorName.grid(row=5, column=self.textColumn +1, pady=4)
-        self.cursorIndex = Label(self, text="", foreground="red", font=(self.textFontStyle, 14, "bold"))
-        self.cursorIndex.grid(row=6, column=self.textColumn + 1, pady=4)
+        eventIdPlus = Button(self, text="ID+", command=self.increaseEventId)
+        eventIdPlus.grid(row=5, column=self.textColumn +1)
+
+        eventIdPlus = Button(self, text="ID -", command=self.decreaseEventId)
+        eventIdPlus.grid(row=6, column=self.textColumn +1)
+
+        
+        ## manual set event Id
+        self.ManualEventIdEntry = Entry(self)
+        self.ManualEventIdEntry.grid(row = 7, column=self.textColumn + 1, sticky = E+W+S+N, pady=4, padx=4)
+        self.ManualEventIdEntry.bind('<Return>', self.EventIdEnter)
 
         self.EventName = Label(self, text="Event:   ", foreground="blue", font=(self.textFontStyle, 14, "bold"))
-        self.EventName.grid(row=7, column=self.textColumn +1, pady=4)
-        self.EventId = Label(self, text=("MaxId: %s\nCurId: %s" % (self.maxEventId, self.currentEventId)), foreground="red", font=(self.textFontStyle, 14, "bold"))
-        self.EventId.grid(row=8, column=self.textColumn + 1, pady=4)
+        self.EventName.grid(row=8, column=self.textColumn +1, pady=4)
+        self.EventId = Label(self, textvariable=self.EventIdString, foreground="red", font=(self.textFontStyle, 14, "bold"))
+        self.EventId.grid(row=9, column=self.textColumn + 1, pady=4)
+        self.EventIdString.set("MaxId: %s\nCurId: %s" % (self.maxEventId, self.currentEventId))
+
+
+        ## show cursor id
+        self.cursorName = Label(self, text="Cursor: ", foreground="blue", font=(self.textFontStyle, 14, "bold"))
+        self.cursorName.grid(row=12, column=self.textColumn +1, pady=4)
+        self.cursorIndex = Label(self, text="", foreground="red", font=(self.textFontStyle, 14, "bold"))
+        self.cursorIndex.grid(row=13, column=self.textColumn + 1, pady=4)
+
+        
 
         ## disable command method for event
         # lbl_entry = Label(self, text="Command:")
@@ -166,7 +184,35 @@ class Example(Frame):
 
         self.setMapShow()
 
-        
+    def increaseEventId(self):
+        if self.debug:
+            print "Action Track: increaseEventId"
+        if self.currentEventId == "":
+            self.currentEventId = "1"
+        else:
+            self.currentEventId = str(int(self.currentEventId)+1)
+        if int(self.currentEventId) > self.maxEventId:
+            self.maxEventId = int(self.currentEventId)
+        self.EventIdString.set("MaxId: %s\nCurId: %s" % (self.maxEventId, self.currentEventId))
+
+    def decreaseEventId(self):
+        if self.debug:
+            print "Action Track: decreaseEventId"
+        if self.currentEventId == "":
+            self.currentEventId = "0"
+        else:
+            self.currentEventId = str(int(self.currentEventId)-1)
+        if int(self.currentEventId) > self.maxEventId:
+            self.maxEventId = int(self.currentEventId)
+        self.EventIdString.set("MaxId: %s\nCurId: %s" % (self.maxEventId, self.currentEventId))
+
+    def EventIdEnter(self,event):
+        if self.debug:
+            print "Action Track: EventIdEnter"
+        content = self.ManualEventIdEntry.get()
+        self.currentEventId = content
+        self.EventIdString.set("MaxId: %s\nCurId: %s" % (self.maxEventId, self.currentEventId))
+
     
     def numberModel(self, event):
         if self.debug:
@@ -455,7 +501,7 @@ class Example(Frame):
         # print "find: ", content.find(string)
         content = content.replace(string, new_string, 1)
         # print "content: ", content
-        self.currentEventId = ""
+        # self.currentEventId = ""
         eventIds = ("MaxId: %s\nCurId: %s" % (self.maxEventId, self.currentEventId))
         self.EventId.config(text=eventIds)
         return content, newcursor_index
