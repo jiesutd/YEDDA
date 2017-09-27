@@ -1,0 +1,93 @@
+%%%%%%%%%%%%%%%%%%%%%%% file typeinst.tex %%%%%%%%%%%%%%%%%%%%%%%%%
+\documentclass[runningheads,a4paper]{llncs}
+\usepackage{amssymb}
+\setcounter{tocdepth}{3}
+\usepackage{graphicx}
+\usepackage{multirow}
+\usepackage{subfigure}
+\usepackage{amsmath}
+\usepackage{CJK}
+\usepackage{color}
+\usepackage{xcolor}
+\usepackage{url}
+\begin{document}
+\begin{CJK*}{UTF8}{gbsn}
+\mainmatter  % start of an individual contribution
+\title{Annotation Comparison Report}
+\author{SUTDNLP Group}
+\institute{Singapore University of Technology and Design}
+\maketitle
+
+\section{Overall Statistics}
+File1 color: \colorbox{blue!30}{Blue}; Dir: \colorbox{blue!30}{../demotext/EnglishUserA.txt.ann}\\
+File2 color: \colorbox{red!30}{Red}; Dir: \colorbox{red!30}{../demotext/EnglishUserB.txt.ann}\\
+\begin{table}[!htbp]
+\centering
+\caption{Statistics for two annotations, assume File1 as gold standard}
+\begin{tabular}{l|l|l}
+\hline
+P/R/F (\%)& Entity &Boundary\\
+\hline
+Artifical& 74.36/50.0/59.79 &--\\
+Event& Nan/0.0/Nan &--\\
+Fin-Concept& 57.36/68.07/62.26 &--\\
+Location& 50.0/100.0/66.67 &--\\
+Organization& 66.67/82.93/73.91 &--\\
+Other& 57.14/44.44/50.0 &--\\
+Person& 91.3/67.74/77.78 &--\\
+Sector& 56.52/76.47/65.0 &--\\
+\hline
+Overall& 61.96/66.36/64.08 &72.05/77.16/74.52\\
+\hline
+\end{tabular}
+\end{table}
+\section{Detail Content Comparison}
+\colorbox{blue!30}{Blue}: only annotated in File1.\\
+\colorbox{red!30}{Red}: only annotated in File2.\\
+\colorbox{green!30}{Green}: annotated in both files.\\
+\rule{5cm}{0.1em}\\
+\vspace{0.3cm}\\
+But the group was actually farther away over the weekend, moving through \colorbox{blue!30}{the }\colorbox{green!30}{Sunda Strait} into the \colorbox{red!30}{Indian Ocean}.\\
+The \colorbox{green!30}{US} military's \colorbox{blue!30}{Pacific }\colorbox{green!30}{Command} said on Tuesday that it had cancelled a port visit to\colorbox{green!30}{Perth}, but had completed previously scheduled training with \colorbox{blue!30}{Australia} off its northwest coast after departing \colorbox{green!30}{Singapore} on 8 April.\\
+The strike group was now "proceeding to \colorbox{blue!30}{the Western Pacific} as ordered".\\
+It is not clear whether the failure to arrive was a deliberate deception, perhaps designed to frighten North Korea's leader \colorbox{red!30}{Kim Jong-un}, a change of plan or simple miscommunication, the \colorbox{red!30}{BBC's Korea correspondent Stephen Evans} says.\\
+Either way, US Vice-President Mike Pence was undeterred as he spoke aboard the USS Ronald Reagan - an aircraft carrier docked in Japan - during his tour of the region, vowing to "defeat any attack and meet any use of conventional or nuclear weapons with an overwhelming and effective American response".\\
+North Korea and the US have ratcheted up tensions in recent weeks and the movement of the strike group had raised the question of a pre-emptive strike by the US.\\
+On Wednesday, Mr Pence described the country as the "most dangerous and urgent threat to peace and security" in the Asia-Pacific.\\
+His words came after the North held a show of military might in a parade over the weekend and tested another missile on Sunday, which blew up almost immediately after launch, the Pentagon said.\\
+The US also accused North Korea of trying to "provoke something", with US Defence Secretary James Mattis calling the test a reckless move on Tuesday.\\
+He said the US was "working closely" with China to engage North Korea.\\
+Pyongyang said it may test missiles on a weekly basis, and warned of "all-out war" if the US takes military action.\\
+"If the US is planning a military attack against us, we will react with a nuclear pre-emptive strike by our own style and method," Vice-Foreign Minister Han Song-ryol told the BBC on Monday.\\
+A \colorbox{green!30}{US} \colorbox{green!30}{aircraft carrier} and other \colorbox{red!30}{warships} did not sail towards \colorbox{green!30}{North Korea} - but went in the opposite direction, it has emerged.\\
+The \colorbox{green!30}{US}\colorbox{blue!30}{ Navy} said on 8 April that the \colorbox{red!30}{Carl Vinson strike group} was travelling to the Korean peninsula amid tensions over Pyongyang's nuclear ambitions.\\
+Last week \colorbox{blue!30}{President Trump} said an "armada" was being sent.\\
+But the group was actually farther away over the weekend, moving through \colorbox{blue!30}{the }\colorbox{green!30}{Sunda Strait} into the \colorbox{red!30}{Indian Ocean}.\\
+The \colorbox{green!30}{US} military's \colorbox{blue!30}{Pacific }\colorbox{green!30}{Command} said on Tuesday that it had cancelled a port visit to\colorbox{red!30}{ }\colorbox{green!30}{Perth}, but had completed previously scheduled training with \colorbox{blue!30}{Australia} off its northwest coast after departing \colorbox{green!30}{Singapore} on 8 April.\\
+The strike group was now "proceeding to \colorbox{blue!30}{the Western Pacific} as ordered".\\
+It is not clear whether the failure to arrive was a deliberate deception, perhaps designed to frighten North Korea's leader \colorbox{red!30}{Kim Jong-un}, a change of plan or simple miscommunication, the \colorbox{red!30}{BBC's Korea correspondent Stephen Evans} says.\\
+Either way, US Vice-President Mike Pence was undeterred as he spoke aboard the USS Ronald Reagan - an aircraft carrier docked in Japan - during his tour of the region, vowing to "defeat any attack and meet any use of conventional or nuclear weapons with an overwhelming and effective American response".\\
+North Korea and the US have ratcheted up tensions in recent weeks and the movement of the strike group had raised the question of a pre-emptive strike by the US.\\
+On Wednesday, Mr Pence described the country as the "most dangerous and urgent threat to peace and security" in the Asia-Pacific.\\
+His words came after the North held a show of military might in a parade over the weekend and tested another missile on Sunday, which blew up almost immediately after launch, the Pentagon said.\\
+The US also accused North Korea of trying to "provoke something", with US Defence Secretary James Mattis calling the test a reckless move on Tuesday.\\
+He said the US was "working closely" with China to engage North Korea.\\
+Pyongyang said it may test missiles on a weekly basis, and warned of "all-out war" if the US takes military action.\\
+"If the US is planning a military attack against us, we will react with a nuclear pre-emptive strike by our own style and method," Vice-Foreign Minister Han Song-ryol told the BBC on Monday.\\
+A \colorbox{green!30}{US} \colorbox{green!30}{aircraft carrier} and other \colorbox{red!30}{warships} did not sail towards \colorbox{green!30}{North Korea} - but went in the opposite direction, it has emerged.\\
+The \colorbox{green!30}{US}\colorbox{blue!30}{ Navy} said on 8 April that the \colorbox{red!30}{Carl Vinson strike group} was travelling to the Korean peninsula amid tensions over Pyongyang's nuclear ambitions.\\
+Last week \colorbox{blue!30}{President Trump} said an "armada" was being sent.\\
+But the group was actually farther away over the weekend, moving through \colorbox{blue!30}{the }\colorbox{green!30}{Sunda Strait} into the \colorbox{red!30}{Indian Ocean}.\\
+The \colorbox{green!30}{US} military's \colorbox{blue!30}{Pacific }\colorbox{green!30}{Command} said on Tuesday that it had cancelled a port visit to\colorbox{red!30}{ }\colorbox{green!30}{Perth}, but had completed previously scheduled training with \colorbox{blue!30}{Australia} off its northwest coast after departing \colorbox{green!30}{Singapore} on 8 April.\\
+The strike group was now "proceeding to \colorbox{blue!30}{the Western Pacific} as ordered".\\
+It is not clear whether the failure to arrive was a deliberate deception, perhaps designed to frighten North Korea's leader \colorbox{red!30}{Kim Jong-un}, a change of plan or simple miscommunication, the \colorbox{red!30}{BBC's Korea correspondent Stephen Evans} says.\\
+Either way, US Vice-President Mike Pence was undeterred as he spoke aboard the USS Ronald Reagan - an aircraft carrier docked in Japan - during his tour of the region, vowing to "defeat any attack and meet any use of conventional or nuclear weapons with an overwhelming and effective American response".\\
+North Korea and the US have ratcheted up tensions in recent weeks and the movement of the strike group had raised the question of a pre-emptive strike by the US.\\
+On Wednesday, Mr Pence described the country as the "most dangerous and urgent threat to peace and security" in the Asia-Pacific.\\
+His words came after the North held a show of military might in a parade over the weekend and tested another missile on Sunday, which blew up almost immediately after launch, the Pentagon said.\\
+The US also accused North Korea of trying to "provoke something", with US Defence Secretary James Mattis calling the test a reckless move on Tuesday.\\
+He said the US was "working closely" with China to engage North Korea.\\
+Pyongyang said it may test missiles on a weekly basis, and warned of "all-out war" if the US takes military action.\\
+"If the US is planning a military attack against us, we will react with a nuclear pre-emptive strike by our own style and method," Vice-Foreign Minister Han Song-ryol told the BBC on Monday.\\
+\end{CJK*}
+\end{document}
