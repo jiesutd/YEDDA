@@ -3,7 +3,7 @@ YEDDA: A Lightweight Collaborative Text Span Annotation Tool
 
 About:
 ====
-YEDDA is developed for annotating chunk/entity/event on text manually. It supports shortcut annotation which is extremely efficient to annotate text by hand. The user only need to select text span and press shortcut key, the span will be annotated automatically. It also support command annotation model which annotates multiple entities in batch and support export annotated text into sequence text. Besides, intelligent recommendation and adminstrator analysis is also included in updated version. For details, please refer to ["our paper"]("lrec2018.pdf")
+YEDDA is developed for annotating chunk/entity/event on text manually. It supports shortcut annotation which is extremely efficient to annotate text by hand. The user only need to select text span and press shortcut key, the span will be annotated automatically. It also support command annotation model which annotates multiple entities in batch and support export annotated text into sequence text. Besides, intelligent recommendation and adminstrator analysis is also included in updated version. For details, please refer to [our paper]("lrec2018.pdf")
 
 This GUI annotation tool is developed with tkinter package in Python. 
 
@@ -20,10 +20,10 @@ It provides both annotator interface for efficient annotatation and admin interf
 * Administrator Interface:
  ![alt text](https://github.com/jiesutd/AnnTool/blob/master/AdminInterface.png "Administrator Interface demo")
 
-How to use as an annotator ?
+Use as an annotator ?
 ====
 * Start the interface: run `python YEDDA_Annotator.py`
-* Configure your shortcut map in the right side of annotation interface, you can leave other labels empty if the shortcut number is enough. For example: `a: Action; c: Cont`
+* Configure your shortcut map in the right side of annotation interface, you can leave other labels empty if the shortcut number is enough. For example: `a: Action; b: Loc; c: Cont`
 * Click the `ReMap` button to store the map setting
 * Click `Open` button and select your input file. (You may set your file name ended with .txt or .ann if possible)
 
@@ -33,11 +33,11 @@ This tool supports two ways of annotation:
 
 Intelligent recommendation:
 * Intelligent recommendation is enabled or disabled by the button `RMOn` and `RMOff`, respectively.
-* If recommendation model is enabled, system will recommend entities based on the annotated text. Recommendation span is formatted as  `[$the text span＃Location\*]`in green color.
+* If recommendation model is enabled, system will recommend entities based on the annotated text. Recommendation span is formatted as  `[$the text span＃Location*]`in green color.
 
 The annotated results will be stored synchronously. Annotated file is located at the same directory with origin file with the name of ***"origin name + .ann"***
 
-How to use as an administrator ?
+Use as an administrator ?
 ====
 YEDDA provides a simple interface for administartor to evaluate and analyze annotation quality among multiple annotators. After collected multiple annotated `*.ann` files from multiple annotators (annotated on same plain text), YEDDA can give two toolkits to monitor the annotation quality: multi-annotator analysis and pairwise annotators comparison.
 * Start the interface: run `python YEDDA_Admin.py`
@@ -49,29 +49,27 @@ Important features:
 =====
 1. Type `ctrl + z` will undo  the most recent modification
 2. Put cursor within an entity span, press shortcut key (e.g. `x`) to update label (binded with `x`) of the entity where cursor is belonging. (`q` for remove the label)
-3. Selected the annotated text, such as "[@美国＃Location\*]", then press `q`, the annotated text will be recoverd to unannotate format (i.e. "美国").
-4. Change label directly, select entity content or put cursor inside the entity span (such as "[@美国＃Location\*]"), then press `x`, the annotated text will change to new label mapped with shortcut `x` (e.g. "[@美国#Organization\*]").
+3. Selected the annotated text, such as `[@美国＃Location*]`, then press `q`, the annotated text will be recoverd to unannotate format (i.e. "美国").
+4. Change label directly, select entity content or put cursor inside the entity span (such as `[@美国＃Location*]`), then press `x`, the annotated text will change to new label mapped with shortcut `x` (e.g. `[@美国#Organization*]`).
 5. Confirm or remove recommended entity: put cursor inside of the entity span and press `y` (yes) or `q` (quit).
 6. In the command entry, just type `Enter` without any command, the cursor in text will move to the head of next line. (You can monitor this through "Cursor").
 7. The "Cursor" shows the current cursor position in text widget, with `row` and `col` represent the row and column number, respectively.
 8. `Export` button will export the ***".ann"*** file as a identity name with ***".anns"*** in the same directory. The exported file list the content in sequence format.
 
 
-Cite:
-======
-@article{yang2017yedda,  
+Cite: 
+========
+    @article{yang2018yedda,  
      title={YEDDA: A Lightweight Collaborative Text Span Annotation Tool},  
-     author={Yang, Jie and Zhang, Yue},  
+     author={Jie Yang and Yue Zhang},  
      year={2018}  
     } 
 
 
-
-
 Updating...
 ====
-* 2017-Sep-27, (YEDDA V 1.0): project was officially named as YEDDA! See our paper ["here"](lrec2018.pdf).
-* 2017-June-24, (V 0.6): support nested coloring; add event annotation beta version ["Event_beta.py"](Event_beta.py)
+* 2017-Sep-27, (YEDDA V 1.0): project was officially named as YEDDA ! See our paper [here](lrec2018.pdf).
+* 2017-June-24, (V 0.6): support nested coloring; add event annotation beta version [Event_beta.py](Event_beta.py)
 * 2017-May-31, (V 0.6): optimize for Windows OS.
 * 2017-Apr-26, (V 0.5.3): fix bug with line merge when change entity type.
 * 2017-Apr-20, (V 0.5.2): fix bugs with `newline` problem on MacOS/Linux/Windows. (`\r` `\n` `\r\n`)
