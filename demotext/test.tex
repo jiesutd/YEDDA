@@ -1,0 +1,133 @@
+%%%%%%%%%%%%%%%%%%%%%%% file typeinst.tex %%%%%%%%%%%%%%%%%%%%%%%%%
+\documentclass[runningheads,a4paper]{llncs}
+\usepackage{amssymb}
+\setcounter{tocdepth}{3}
+\usepackage{graphicx}
+\usepackage{multirow}
+\usepackage{subfigure}
+\usepackage{amsmath}
+\usepackage{CJK}
+\usepackage{color}
+\usepackage{xcolor}
+\usepackage{url}
+\begin{document}
+\begin{CJK*}{UTF8}{gbsn}
+\mainmatter  % start of an individual contribution
+\title{Annotation Comparison Report}
+\author{SUTDNLP Group}
+\institute{Singapore University of Technology and Design}
+\maketitle
+
+\section{Overall Statistics}
+File1 color: \colorbox{blue!30}{Blue}; Dir: \colorbox{blue!30}{/Users/Jie/Dropbox/Research/SUTDAnnotator/demotext/UserB.ann}\\
+File2 color: \colorbox{red!30}{Red}; Dir: \colorbox{red!30}{/Users/Jie/Dropbox/Research/SUTDAnnotator/demotext/UserA.ann}\\
+\begin{table}[!htbp]
+\centering
+\caption{Statistics for two annotations, assume File1 as gold standard}
+\begin{tabular}{l|l|l}
+\hline
+P/R/F (\%)& Entity &Boundary\\
+\hline
+Artifical& 50.0/74.36/59.79 &--\\
+Event-Past& Nan/0.0/Nan &--\\
+Fin-Concept& 68.07/57.36/62.26 &--\\
+Location& 100.0/50.0/66.67 &--\\
+Organization& 82.93/66.67/73.91 &--\\
+Other& 44.44/57.14/50.0 &--\\
+Person& 67.74/91.3/77.78 &--\\
+Sector& 76.47/56.52/65.0 &--\\
+\hline
+Overall& 66.36/61.96/64.08 &77.16/72.05/74.52\\
+\hline
+\end{tabular}
+\end{table}
+\section{Detail Content Comparison}
+\colorbox{blue!30}{Blue}: only annotated in File1.\\
+\colorbox{red!30}{Red}: only annotated in File2.\\
+\colorbox{green!30}{Green}: annotated in both files.\\
+\rule{5cm}{0.1em}\\
+\vspace{0.3cm}\\
+来源:\colorbox{green!30}{阿尔法工厂}（ID:\colorbox{blue!30}{alpworks})\colorbox{red!30}{市场}普遍认为\colorbox{green!30}{美国房地产市场}将再次好转成为不错的\colorbox{green!30}{投资标的}。\\
+然而\colorbox{green!30}{大头}却再也没有在这座\colorbox{blue!30}{城市}买房,\colorbox{red!30}{言谈}也不再有当年那股傲劲,借朋友很多钱,座驾也从\colorbox{green!30}{宝马}变成了\colorbox{green!30}{桑塔纳},每天仍奔波在自己的创业之路中。\\
+具体来看,\colorbox{green!30}{李克强}提出在\colorbox{blue!30}{供给}方面,继续运用好\colorbox{green!30}{结构性减税}等手段,推动“\colorbox{green!30}{双创}”和“\colorbox{green!30}{中国制造2025}”、“\colorbox{green!30}{互联网+}”行动计划,促进\colorbox{green!30}{服务业}、\colorbox{green!30}{先进制造业}发展,扶持\colorbox{green!30}{小微企业}成长,发挥制度创新和技术进步对\colorbox{blue!30}{供给升级}的倍增效用,扩大有效供给。\\
+因此,需要进一步澄清的是,「非公开性」针对的是特定的「\colorbox{green!30}{私募产品}（项目）」不得进行公开的宣传,但并不禁止对\colorbox{green!30}{私募}的\colorbox{green!30}{发起人}（如\colorbox{green!30}{基金公司}）、\colorbox{blue!30}{过往}\colorbox{green!30}{业绩}、\colorbox{green!30}{私募基金管理人}等进行公开宣传。\\
+建议\colorbox{red!30}{拓展}\colorbox{green!30}{前海蛇口自贸区}\colorbox{blue!30}{离岸账户}(\colorbox{blue!30}{OSA})功能\colorbox{green!30}{马蔚华}在《\colorbox{green!30}{关于推进前海蛇口自贸区金融改革的提案}》中表示,\colorbox{green!30}{前海蛇口自贸区金融改革}做了一系列有益探索,取得了很大进展。\\
+根据\colorbox{green!30}{通货膨胀}的定义,\colorbox{green!30}{通货膨胀}是\colorbox{green!30}{货币}\colorbox{blue!30}{过多发行}所造成的\colorbox{green!30}{物价}全面上涨,“现在还很难说\colorbox{green!30}{物价}全面上涨。”\colorbox{green!30}{张世贤}的判断不无道理。\\
+\colorbox{green!30}{中金公司}维持2016年\colorbox{green!30}{CPI}为1.9%的预测不变。\\
+\colorbox{green!30}{交通银行金研中心}:下半年\colorbox{green!30}{财政政策}积极\colorbox{green!30}{货币政策}宽松\colorbox{green!30}{晨报记者刘志飞交通银行金融研究中心}昨日发布的\colorbox{green!30}{下半年展望报告}认为,下半年,我国积极\colorbox{green!30}{财政政策}将继续发力,发挥对\colorbox{red!30}{稳增长}的关键作用。\\
+今年反复出现这个事情,跟\colorbox{green!30}{QE}没有什么关系,\colorbox{green!30}{地方债}是纳入是\colorbox{green!30}{全球央行}的一个普遍的实践,就是扩大到\colorbox{blue!30}{试点},将来可能要扩大到全国去,这是必然的过程。\\
+\colorbox{green!30}{贸易商}低价出货后发现得从\colorbox{green!30}{钢厂}高价补货,午后部分\colorbox{green!30}{钢厂封盘停售}再次拉涨\colorbox{green!30}{现货}。\\
+还有一个更有利的因素,\colorbox{green!30}{铜期货}近月\colorbox{green!30}{合约限仓}为1500吨,而该\colorbox{green!30}{现货电子盘}却\colorbox{green!30}{限仓}为20000吨,相对来说“战场空间”更充裕,更有利于打一场大决战。\\
+这些\colorbox{blue!30}{动能}的逐步释放会使\colorbox{green!30}{经济}保持中高速增长。\\
+他还特别强调,其实\colorbox{blue!30}{中国}一直在进行的\colorbox{green!30}{体制改革}等都属于\colorbox{green!30}{供给侧改革},此次是对此类型\colorbox{green!30}{改革}进行的一次总结和归纳,并形成统一提法。\\
+自\colorbox{green!30}{政府工作报告}首提“淘汰、停建、缓建\colorbox{blue!30}{煤电产能}5000万千瓦以上,以防范化解\colorbox{green!30}{煤电产能过剩}\colorbox{blue!30}{风险},提高\colorbox{green!30}{煤电行业效率},为\colorbox{green!30}{清洁能源发展}腾空间”,\colorbox{red!30}{发改委主任}再提\colorbox{blue!30}{煤电去产能},我们认为\colorbox{green!30}{煤电产能过剩}\colorbox{blue!30}{状况}已引起\colorbox{red!30}{高层}足够重视,且考虑到环保渐趋严格,\colorbox{red!30}{后期}\colorbox{green!30}{煤电产能去化推进力度}或超预期,从而为\colorbox{green!30}{清洁能源}提供良好的发展机遇,相关\colorbox{blue!30}{标的}有\colorbox{green!30}{大唐发电}。\\
+要真正实现\colorbox{blue!30}{新旧产业更替},必须使\colorbox{green!30}{市场机制}真正在\colorbox{green!30}{资源配置}中发挥决定性作用,加快出清\colorbox{green!30}{僵尸企业},为\colorbox{green!30}{新产业}和\colorbox{green!30}{新动能}腾挪空间。\\
+\colorbox{blue!30}{电力}:1月\colorbox{blue!30}{发电耗煤同比跌幅}扩大,预示\colorbox{green!30}{工业经济}或开局不佳。\\
+要继续深化\colorbox{green!30}{金融改革},协调推进\colorbox{green!30}{利率}、\colorbox{green!30}{汇率}\colorbox{red!30}{改革}和\colorbox{green!30}{资本账户}开放。\\
+后者则指\colorbox{green!30}{期权}的买方(权利方)有权在约定时间以约定价格将一定数量的\colorbox{green!30}{标的资产}卖给\colorbox{green!30}{期权}的卖方(义务方),买方享有\colorbox{blue!30}{卖出选择权}。\\
+\colorbox{green!30}{陆家嘴金融}微信号:\colorbox{blue!30}{FinanceLJZ}▲长按二维码“识别”关注推荐理由:助您洞悉\colorbox{green!30}{金融趋势},发现\colorbox{green!30}{投资机遇}!\\
+三、促进\colorbox{blue!30}{结构调整},化解\colorbox{blue!30}{过剩产能}为促进\colorbox{blue!30}{结构调整},化解\colorbox{blue!30}{过剩产能},\colorbox{blue!30}{国家}利用部分\colorbox{green!30}{电价}\colorbox{blue!30}{降价空间}设立\colorbox{green!30}{工业企业结构调整专项资金},支持地方在淘汰\colorbox{green!30}{煤炭}、\colorbox{green!30}{钢铁行业}\colorbox{blue!30}{落后产能}中安置\colorbox{blue!30}{下岗}\colorbox{green!30}{失业人员}等。\\
+\colorbox{green!30}{赵辰昕}说:“为做好\colorbox{blue!30}{全年经济社会发展工作},我\colorbox{blue!30}{委}和各\colorbox{blue!30}{部门}各\colorbox{blue!30}{地方}还将不断调整充实\colorbox{blue!30}{政策工具箱},按照\colorbox{green!30}{党中央国务院}的\colorbox{blue!30}{决策部署},适度扩大\colorbox{blue!30}{总需求},以\colorbox{green!30}{供给侧结构性改革}为主线,及时推出务实管用的政策措施,并切实抓好执行和落实,引导好发展预期,确保\colorbox{blue!30}{经济}运行在合理区间。”\colorbox{green!30}{去产能}:年底要一一盘点交账\colorbox{blue!30}{去产能}被排在今年\colorbox{green!30}{供给侧结构性改革}五大任务之首,\colorbox{green!30}{钢铁}和\colorbox{green!30}{煤炭行业}尤其是关键。\\
+还有一头,\colorbox{green!30}{税收领域}一个月1万收入的人,不知不觉需要缴纳6600的\colorbox{green!30}{税费}。\\
+另外,11月17日,\colorbox{green!30}{新加坡RQFII额度}扩大至1000亿元人民币,较之前增加500亿元。\\
+就\colorbox{blue!30}{公共部门}而言,虽然从国际比较来看,我国\colorbox{green!30}{政府债务率}并不高,但以如此快的速度\colorbox{green!30}{加杠杆}将大大\colorbox{blue!30}{透支}\colorbox{red!30}{未来}\colorbox{green!30}{财政政策}的操作空间,也很容易陷入\colorbox{red!30}{发达国家}那样的\colorbox{green!30}{财政}\colorbox{red!30}{困境},带来很多长期隐患。\\
+\colorbox{green!30}{铁物资}、\colorbox{green!30}{东北特钢}等信用违约事件频发,对\colorbox{blue!30}{企业}\colorbox{green!30}{融资成本}、借新还旧、\colorbox{green!30}{金融}\colorbox{blue!30}{稳定}、\colorbox{green!30}{风险溢价}等产生负面传染效应,\colorbox{green!30}{P2P}各种跑路,\colorbox{green!30}{金融风险防范压力}加大。\\
+\colorbox{green!30}{上海证券分析师胡月晓}表示,\colorbox{green!30}{PPI}持续改善,\colorbox{green!30}{环比}继续大幅明显上涨,超出\colorbox{green!30}{市场预期}。\\
+6.5%的\colorbox{green!30}{经济增速目标}对当前体量规模的\colorbox{green!30}{中国经济}较为适宜的,并且不难达成。\\
+当事实落地的时候\colorbox{green!30}{交易}的预期在发生转变,从\colorbox{green!30}{交易}的行为上来看,马上出现的是\colorbox{green!30}{平仓}的一个行为,典型的“买预期、卖事实”——当事实落地的时候\colorbox{red!30}{交易}的预期在发生转变。\\
+\colorbox{green!30}{国家统计局新闻发言人盛来运}表示,当前\colorbox{green!30}{供给侧结构性改革}取得积极进展,新的\colorbox{blue!30}{动能}在加快成长,因此“稳”的基础有所加强。\\
+往往\colorbox{green!30}{新兴行业},\colorbox{green!30}{利润}没有放出来,有的是还没有成熟的产品。\\
+2010年和2015年两次\colorbox{blue!30}{大涨}之间,经历了几次\colorbox{blue!30}{紧就跌松反弹},最后呈现大松大涨的局面。\\
+值得一提的是,去年\colorbox{green!30}{吉林省经济}\colorbox{blue!30}{增速}逐步上升:一、二、三季度的\colorbox{green!30}{GDP}\colorbox{blue!30}{增速}分别为6.2%、6.7%、6.9%。\\
+2015年12月,PMI为49.7%,高于上月0.1个百分点;非制造业商务活动指数为54.4%,比上月上升0.8个百分点,升至2015年以来的高点。\\
+有问题,对孩子一样的,该说也要说,直接说直接讲。\\
+核心原因是:（1）在风险监管及金融体制改革背景下,投资者风险偏好提升空间较为有限;（2）IPO开闸带来的新兴板块标的稀缺性缺失,使得估值提升空间有限。\\
+除对2016年全球经济增长预测外,科法斯还发布了最新国家风险评级调整名单（参见图表）。\\
+在投资及生活领域,坦伯顿深信绝对不要追随群众,而应逆势操作(Dontfollowthecrowd)的理念,他独具慧眼的前瞻视野,以及严谨的研究精神,将其终生成就臻至巅峰。\\
+其中,实物商品网上零售额21239亿元,增长26.1%,占社会消费品零售总额的比重为11.6%;在实物商品网上零售额中,吃、穿和用类商品分别增长30.8%、17.3%和29.4%。\\
+考虑到页岩油的威胁,意味着当前油价反弹很难突破50-60美元的天花板。\\
+风投从业者的性格一般都是怎样的?\\
+房地产回暖提供安全垫中国货币政策将呈现中性尽管没有降准降息等大规模货币政策出台,中国的货币市场利率总体平稳,并保持低位运行。\\
+而需求回暖、毛利可观,令生产依然旺盛。\\
+　　甘肃的棚改货币化安置率已高于全国水平。\\
+我们筛选出过去三年业绩亏损或者归属于母公司净利润大幅下降的标的公司;此外,大股东持股比例也是很重要的标准,第一大股东持股比例超过50%,有绝对控制权。\\
+因而,在金融监管的过程中,实体经济大概率也将被波及,进一步增加需求端的下行风险。\\
+写在前面的话by木头老师这一系列的内容是我按照《万物简史》这本书的知识脉络来讲的,涉及的内容非常广泛,从宇宙到恐龙,从黑洞到相对论,都是孩子们非常好奇的知识。\\
+总体上,发布会发言要点如下:1改革和稳定是相辅相成的。\\
+甘肃省住房和城乡建设厅一位工作人员介绍,2015年以来,甘肃省共有2.85万户棚改对象,通过货币化得到安置,货币化安置率为31%,高于全国同期水平5.6个百分点。\\
+目前三大股东分别为中油资产管理有限公司、天津经济技术开发区国有资产经营公司、广博投资控股有限公司,分别持股82.18%、12.82%和5%。\\
+农谚说:“春分麦起身,一刻值千金。”这时我国大部分地区越冬作物进入春季生长阶段,春耕、春种将进入繁忙阶段。\\
+上述债券基金经理表示,如果消息持续发酵,不少机构会出现跟风现象,届时就真的变成第二次“钱荒”。\\
+基金经理“一拖多”,表面上只是基金经理数量跟不上产品数量,实际上反映了诸多问题。\\
+6月经销商库存系数升至1.55,再度转差且仍高于警戒线,表明终端需求改善较为有限,厂家销量转化为经销商库存。\\
+研报受到“最大回撤”这一思想的启发,认为可以通过回撤来衡量股指期货价格序列的平稳度,进而判断今日行情的走势。\\
+供给侧改革将继续推进这些具体改革的前进。\\
+业主:水牛城与福特艾瑞公共桥梁署电话:1(716)884-674428、MBTAGreenLineExtension,Boston波士顿绿线地铁扩展项目,总投资30亿美元项目简介:该项目计划扩建波士顿绿线地铁,延长线全长6.9公里,项目正在审批中。\\
+一大早\colorbox{red!30}{美图}的\colorbox{red!30}{创始人之一蔡总}就在\colorbox{red!30}{朋友圈}里不断地直播着\colorbox{red!30}{美图奇迹}:下午2点左右\colorbox{red!30}{市值}900亿的\colorbox{red!30}{美图市值}出现,很显然\colorbox{red!30}{蔡老板}很兴奋;然后。\\
+对于\colorbox{red!30}{市场}关注的\colorbox{green!30}{房地产税},\colorbox{green!30}{盛松成}认为由于\colorbox{green!30}{房地产税}设计复杂,几年内很难推出。\\
+建议根据自身的\colorbox{green!30}{财富保值}、\colorbox{green!30}{增值需求},合理运用\colorbox{green!30}{保险}、\colorbox{green!30}{保险金信托}或\colorbox{green!30}{家族信托}等方式化解自身及子女\colorbox{green!30}{婚姻风险}带来的\colorbox{green!30}{财富缩水}。\\
+两年里面一块土地也不出,\colorbox{red!30}{市场}不就恢复到8点,还是严重供过于求,不供地有什么问题?\\
+“\colorbox{green!30}{非制造业},特别是\colorbox{green!30}{服务业}近两年总体保持了较快\colorbox{red!30}{增速},这与\colorbox{green!30}{中国经济结构持续优化}密切相关。\\
+要有人文关怀,带着感情,将心比心,设身处地为他们着想,既帮他们解决好生活困难,又助他们提高\colorbox{green!30}{再就业能力}。\\
+想要创业,一定要有一颗强大的内心,\colorbox{red!30}{创业}一定会遇到挫折。\\
+做好\colorbox{green!30}{明年经济工作},就是要把思想和行动统一到\colorbox{green!30}{中央}的思路和方法上来,服从和服务于大局,下好全国一盘棋,全面做好\colorbox{red!30}{稳增长}、\colorbox{red!30}{促}\colorbox{green!30}{改革}、\colorbox{red!30}{调结构}、\colorbox{red!30}{惠}\colorbox{green!30}{民生}、\colorbox{red!30}{防}\colorbox{green!30}{风险}各项工作。\\
+同时,大幅提升\colorbox{green!30}{制造业}的\colorbox{green!30}{研发投资强度},改变我国在\colorbox{red!30}{国际分工}中的不利地位。\\
+如果是这样的模式,那么拿到\colorbox{green!30}{不良贷款}的\colorbox{green!30}{资产管理公司}就可把\colorbox{red!30}{部分}\colorbox{green!30}{贷款}转换成\colorbox{green!30}{股权},这样也不一定就是糟糕的做法,或许这是应对某\colorbox{red!30}{具体}\colorbox{green!30}{贷款}的适当举措。\\
+二者均有助于缓和\colorbox{green!30}{企业部门资产质量}\colorbox{red!30}{恶化}、放缓\colorbox{green!30}{不良贷款生成速度}。\\
+\colorbox{green!30}{李迅雷}:从\colorbox{green!30}{国家统计局}公布的\colorbox{green!30}{数据}来看,\colorbox{green!30}{经济增速}整体平稳,6月份的\colorbox{green!30}{工业增加值增速}有所回升,这个\colorbox{green!30}{数据}比预期的要好一些,这可能有\colorbox{red!30}{一季度}\colorbox{green!30}{投资}\colorbox{red!30}{回升}后的\colorbox{green!30}{滞后效应}。\\
+这个非常重要,\colorbox{green!30}{实体经济}是\colorbox{green!30}{经济发展}的根基。\\
+万般皆下品,唯有买房高,正在成为事实。\\
+过剩的\colorbox{green!30}{货币}涌入\colorbox{green!30}{金融资产}中,\colorbox{green!30}{债市}、\colorbox{green!30}{股市}相继迎来\colorbox{green!30}{牛市},而\colorbox{green!30}{房地产市场}也大幅扩张。\\
+作为\colorbox{green!30}{货币超发}的后果之一,12年以来\colorbox{green!30}{中国居民中长贷}爆发式增长,\colorbox{green!30}{月均新增额}从12年的1120亿元飙升至16年上半年的4379亿元。\\
+因而以往\colorbox{green!30}{去产能}不但力度不足,且精力较为分散。\\
+\colorbox{green!30}{专家}认为,\colorbox{green!30}{中国}发展\colorbox{green!30}{智能制造}也需要加强\colorbox{green!30}{平台建设},让\colorbox{green!30}{行业}、\colorbox{green!30}{企业}、\colorbox{green!30}{科研院所}等各方广泛参与,共同谋划如何具体落实\colorbox{green!30}{中国制造}\colorbox{red!30}{智能升级}的\colorbox{red!30}{路线图}。\\
+\colorbox{green!30}{期权收盘涨跌幅}（%）\colorbox{green!30}{成交量}（手）50ETF2.3350-0.349502596250ETF购3月2.350.0089-27.0540,10950ETF沽3月2.350.0254.1736,7424\colorbox{green!30}{外汇}与\colorbox{green!30}{大宗商品美元指数}走弱,\colorbox{green!30}{工业品}\colorbox{blue!30}{整体回调}趋缓（\colorbox{red!30}{张磊}）今日,\colorbox{green!30}{美元指数}走弱,\colorbox{green!30}{COMEX黄金价格}跌到了1200附近的敏感区域,21点30分公布\colorbox{green!30}{美国非农}与\colorbox{green!30}{失业率},\colorbox{red!30}{市场}预期20万人左右。\\
+（6）\colorbox{green!30}{财政事务预算数}为14.81亿元,比2015年\colorbox{green!30}{执行数}增加1.57亿元,增长11.9%。\\
+我们认为至少应该尝试一下,看看是否有所收获。”他的\colorbox{green!30}{团队}所设想的那个实验,最终被证明对搜索至关重要:即文件排名与搜索请求的匹配程度有多高。\\
+\colorbox{green!30}{IMF}下调\colorbox{green!30}{16年全球经济增速预期}从3.4%至3.2%,上调\colorbox{green!30}{2016年中国经济增速预估}至6.5%。\\
+\colorbox{green!30}{中欧国际工商学院副院长张维烔}表示,自2015年\colorbox{green!30}{中央}明确提出着力加强\colorbox{green!30}{供给侧结构性改革}后,今年已经成为\colorbox{green!30}{供给侧改革}的元年。\\
+和\colorbox{green!30}{微面}相当的\colorbox{red!30}{价格},完全不同的\colorbox{green!30}{销售模式},想分得\colorbox{green!30}{农村消费升级市场}的一杯羹。\\
+据他介绍,目前\colorbox{green!30}{临汾市}有\colorbox{green!30}{焦化企业}20余家。\\
+\colorbox{green!30}{傅莹}:\colorbox{green!30}{房地产税立法}涉及多方利益,今年没有提请审议安排\colorbox{green!30}{澎湃新闻记者范瑟}来源:\colorbox{green!30}{澎湃新闻}3月4日,\colorbox{green!30}{十二届全国人大五次会议新闻发言人傅莹}表示,“今年没有把\colorbox{green!30}{房地产税草案}提请\colorbox{green!30}{全国人大常委会}审议的安排。”据\colorbox{green!30}{新华网}报道,\colorbox{green!30}{十二届全国人大五次会议首场新闻发布会}于3月4日上午11时举行,\colorbox{green!30}{大会新闻发言人傅莹}向\colorbox{green!30}{中外媒体}介绍本次\colorbox{blue!30}{大会}有关情况并回答\colorbox{blue!30}{记者}提问。\\
+\end{CJK*}
+\end{document}
