@@ -27,13 +27,13 @@ Use as an annotator ?
 * Click the `ReMap` button to store the map setting
 * Click `Open` button and select your input file. (You may set your file name ended with .txt or .ann if possible)
 
-This tool supports two ways of annotation:
+This tool supports two ways of annotation (annotated text format `[@the text span＃Location*]`):
 * Shortcut Key Annotation: select the text and press the corresponding shortcut (i.e. `c` for label `Cont`).
 * Command Line Annotation: type the code at command entry (at the bottom of the annotation interface). For example, type `2c3b1a` end with `<Enter>`, it will annotate the following `2` character as type `c: Cont`, the following `3` character as type `b: Loc`, then the following `1` character as  `a: Action`.
 
 Intelligent recommendation:
 * Intelligent recommendation is enabled or disabled by the button `RMOn` and `RMOff`, respectively.
-* If recommendation model is enabled, system will recommend entities based on the annotated text. Recommendation span is formatted as  `[$the text span＃Location*]`in green color.
+* If recommendation model is enabled, system will recommend entities based on the annotated text. Recommendation span is formatted as  `[$the text span＃Location*]`in green color. (Notice the difference of annotated and recommended span, the former starts with `[@` while the later starts with `[$`)
 
 The annotated results will be stored synchronously. Annotated file is located at the same directory with origin file with the name of ***"origin name + .ann"***
 
