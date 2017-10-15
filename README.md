@@ -15,10 +15,10 @@ Interface:
 ====
 It provides both annotator interface for efficient annotatation and admin interface for result analysis.
 * Annotator Interface:
- ![alt text](https://github.com/jiesutd/AnnTool/blob/master/EnglishInterface.png "English Interface demo")
- ![alt text](https://github.com/jiesutd/AnnTool/blob/master/ChineseInterface.png "Chinese Interface demo")
+ ![alt text](https://github.com/jiesutd/SUTDAnnotator/EnglishInterface.png "English Interface demo")
+ ![alt text](https://github.com/jiesutd/SUTDAnnotator/ChineseInterface.png "Chinese Interface demo")
 * Administrator Interface:
- ![alt text](https://github.com/jiesutd/AnnTool/blob/master/AdminInterface.png "Administrator Interface demo")
+ ![alt text](https://github.com/jiesutd/SUTDAnnotator/AdminInterface.png "Administrator Interface demo")
 
 Use as an annotator ?
 ====
@@ -42,7 +42,9 @@ Use as an administrator ?
 YEDDA provides a simple interface for administartor to evaluate and analyze annotation quality among multiple annotators. After collected multiple annotated `*.ann` files from multiple annotators (annotated on same plain text), YEDDA can give two toolkits to monitor the annotation quality: multi-annotator analysis and pairwise annotators comparison.
 * Start the interface: run `python YEDDA_Admin.py`
 * Multi-Annotator Analysis: press button `Multi-Annotator Analysis` and select multiple annotated `*.ann` files, it will give f-measure matrix among all annotators.
+ ![alt text](https://github.com/jiesutd/SUTDAnnotator/resultMatrix.png "Result Maxtix")
 * Pairwise Annotators Comparison: press button `Pairwise Comparison` and select two annotated `*.ann` files, it will generate a specific comparison report (in `.tex` format, can be compiled as `.pdf` file).
+![alt text](https://github.com/jiesutd/SUTDAnnotator/detailReport.png "Detail Report")
 
 
 Important features:
