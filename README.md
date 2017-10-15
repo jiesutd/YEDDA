@@ -60,8 +60,9 @@ Important features:
 
 
 Cite: 
-If you use YEDDA for research, please cite this report as follows:
 ========
+If you use YEDDA for research, please cite this report as follows:
+
     @article{yang2018yedda,  
      title={YEDDA: A Lightweight Collaborative Text Span Annotation Tool},  
      author={Jie Yang and Yue Zhang},  
