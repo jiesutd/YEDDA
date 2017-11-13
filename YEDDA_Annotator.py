@@ -2,7 +2,7 @@
 # @Author: Jie Yang from SUTD
 # @Date:   2016-Jan-06 17:11:59
 # @Last Modified by:   Jie Yang,     Contact: jieynlp@gmail.com
-# @Last Modified time: 2017-09-24 19:37:56
+# @Last Modified time: 2017-10-31 17:18:46
 #!/usr/bin/env python
 # coding=utf-8
 
@@ -229,7 +229,8 @@ class Example(Frame):
             text = self.readFile(fl)
             self.text.insert(END, text)
             self.setNameLabel("File: " + fl)
-            self.setDisplay()
+            self.autoLoadNewFile(self.fileName, "1.0")
+            # self.setDisplay()
             # self.initAnnotate()
             self.text.mark_set(INSERT, "1.0")
             self.setCursorLabel(self.text.index(INSERT))
@@ -602,66 +603,66 @@ class Example(Frame):
 
 
 
-    def setDisplay(self):
-        if self.debug:
-            print "Action Track: setDisplay"
-        self.text.config(insertbackground='red', insertwidth=4)
-        self.text.mark_set("matchStart", "1.0")
-        self.text.mark_set("matchEnd", "1.0") 
-        self.text.mark_set("searchLimit", 'end-1c')
+    # def setDisplay(self):
+    #     if self.debug:
+    #         print "Action Track: setDisplay"
+    #     self.text.config(insertbackground='red', insertwidth=4)
+    #     self.text.mark_set("matchStart", "1.0")
+    #     self.text.mark_set("matchEnd", "1.0") 
+    #     self.text.mark_set("searchLimit", 'end-1c')
 
-        self.text.mark_set("recommend_matchStart", "1.0")
-        self.text.mark_set("recommend_matchEnd", "1.0")
-        self.text.mark_set("recommend_searchLimit", 'end-1c')
+    #     self.text.mark_set("recommend_matchStart", "1.0")
+    #     self.text.mark_set("recommend_matchEnd", "1.0")
+    #     self.text.mark_set("recommend_searchLimit", 'end-1c')
 
-        countVar = StringVar()
-        ## match biggest span, ignore nest, scan from begin to end again
-        while True:
-            # self.text.tag_configure("catagory", background="LightSkyBlue1")
-            # self.text.tag_configure("edge", background="LightSkyBlue1")
-            self.text.tag_configure("catagory", background=self.entityColor)
-            self.text.tag_configure("edge", background=self.entityColor)
-            pos = self.text.search(self.entityRe, "matchEnd" , "searchLimit",  count=countVar, regexp=True)
-            if pos == "":
-                break
-            self.text.mark_set("matchStart", pos)
-            self.text.mark_set("matchEnd", "%s+%sc" % (pos, countVar.get()))
+    #     countVar = StringVar()
+    #     ## match biggest span, ignore nest, scan from begin to end again
+    #     while True:
+    #         # self.text.tag_configure("catagory", background="LightSkyBlue1")
+    #         # self.text.tag_configure("edge", background="LightSkyBlue1")
+    #         self.text.tag_configure("catagory", background=self.entityColor)
+    #         self.text.tag_configure("edge", background=self.entityColor)
+    #         pos = self.text.search(self.entityRe, "matchEnd" , "searchLimit",  count=countVar, regexp=True)
+    #         if pos == "":
+    #             break
+    #         self.text.mark_set("matchStart", pos)
+    #         self.text.mark_set("matchEnd", "%s+%sc" % (pos, countVar.get()))
             
-            first_pos = pos
-            second_pos = "%s+%sc" % (pos, str(1))
-            lastsecond_pos = "%s+%sc" % (pos, str(int(countVar.get())-1))
-            last_pos = "%s + %sc" %(pos, countVar.get())
+    #         first_pos = pos
+    #         second_pos = "%s+%sc" % (pos, str(1))
+    #         lastsecond_pos = "%s+%sc" % (pos, str(int(countVar.get())-1))
+    #         last_pos = "%s + %sc" %(pos, countVar.get())
 
-            self.text.tag_add("catagory", second_pos, lastsecond_pos)
-            self.text.tag_add("edge", first_pos, second_pos)
-            self.text.tag_add("edge", lastsecond_pos, last_pos)
-        ## color recommend type
-        while True:
-            self.text.tag_configure("recommend", background=self.recommendColor)
-            recommend_pos = self.text.search(self.recommendRe, "recommend_matchEnd" , "recommend_searchLimit",  count=countVar, regexp=True)
-            if recommend_pos =="":
-                break
-            self.text.mark_set("recommend_matchStart", recommend_pos)
-            self.text.mark_set("recommend_matchEnd", "%s+%sc" % (recommend_pos, countVar.get()))
+    #         self.text.tag_add("catagory", second_pos, lastsecond_pos)
+    #         self.text.tag_add("edge", first_pos, second_pos)
+    #         self.text.tag_add("edge", lastsecond_pos, last_pos)
+    #     ## color recommend type
+    #     while True:
+    #         self.text.tag_configure("recommend", background=self.recommendColor)
+    #         recommend_pos = self.text.search(self.recommendRe, "recommend_matchEnd" , "recommend_searchLimit",  count=countVar, regexp=True)
+    #         if recommend_pos =="":
+    #             break
+    #         self.text.mark_set("recommend_matchStart", recommend_pos)
+    #         self.text.mark_set("recommend_matchEnd", "%s+%sc" % (recommend_pos, countVar.get()))
             
-            first_pos = recommend_pos
-            # second_pos = "%s+%sc" % (recommend_pos, str(1))
-            lastsecond_pos = "%s+%sc" % (recommend_pos, str(int(countVar.get())))
-            self.text.tag_add("recommend", first_pos, lastsecond_pos)
+    #         first_pos = recommend_pos
+    #         # second_pos = "%s+%sc" % (recommend_pos, str(1))
+    #         lastsecond_pos = "%s+%sc" % (recommend_pos, str(int(countVar.get())))
+    #         self.text.tag_add("recommend", first_pos, lastsecond_pos)
 
-        ## match nested most inside span, scan from begin to end again
-        self.text.mark_set("matchEnd", "1.0") 
-        self.text.mark_set("searchLimit", 'end-1c')
-        while True:
-            self.text.tag_configure("insideEntityColor", background=self.insideNestEntityColor)
-            pos = self.text.search(self.insideNestEntityRe , "matchEnd" , "searchLimit",  count=countVar, regexp=True)
-            if pos == "":
-                break
-            self.text.mark_set("matchStart", pos)
-            self.text.mark_set("matchEnd", "%s+%sc" % (pos, countVar.get()))
-            first_pos = "%s + %sc" %(pos, 2)
-            last_pos = "%s + %sc" %(pos, str(int(countVar.get())-1))
-            self.text.tag_add("insideEntityColor", first_pos, last_pos)
+    #     ## match nested most inside span, scan from begin to end again
+    #     self.text.mark_set("matchEnd", "1.0") 
+    #     self.text.mark_set("searchLimit", 'end-1c')
+    #     while True:
+    #         self.text.tag_configure("insideEntityColor", background=self.insideNestEntityColor)
+    #         pos = self.text.search(self.insideNestEntityRe , "matchEnd" , "searchLimit",  count=countVar, regexp=True)
+    #         if pos == "":
+    #             break
+    #         self.text.mark_set("matchStart", pos)
+    #         self.text.mark_set("matchEnd", "%s+%sc" % (pos, countVar.get()))
+    #         first_pos = "%s + %sc" %(pos, 2)
+    #         last_pos = "%s + %sc" %(pos, str(int(countVar.get())-1))
+    #         self.text.tag_add("insideEntityColor", first_pos, last_pos)
             
     
     def pushToHistory(self):

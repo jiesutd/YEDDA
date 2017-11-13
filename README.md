@@ -3,7 +3,7 @@ YEDDA: A Lightweight Collaborative Text Span Annotation Tool
 
 About:
 ====
-YEDDA is developed for annotating chunk/entity/event on text manually. It supports shortcut annotation which is extremely efficient to annotate text by hand. The user only need to select text span and press shortcut key, the span will be annotated automatically. It also support command annotation model which annotates multiple entities in batch and support export annotated text into sequence text. Besides, intelligent recommendation and adminstrator analysis is also included in updated version. For more details, please refer to [our paper](lrec2018.pdf).
+YEDDA is developed for annotating chunk/entity/event on text manually. It supports shortcut annotation which is extremely efficient to annotate text by hand. The user only need to select text span and press shortcut key, the span will be annotated automatically. It also support command annotation model which annotates multiple entities in batch and support export annotated text into sequence text. Besides, intelligent recommendation and adminstrator analysis is also included in updated version. For more details, please refer to [our paper](https://arxiv.org/pdf/1711.03759.pdf).
 
 This GUI annotation tool is developed with tkinter package in Python. 
 
@@ -68,13 +68,14 @@ If you use YEDDA for research, please cite this report as follows:
     @article{yang2018yedda,  
      title={YEDDA: A Lightweight Collaborative Text Span Annotation Tool},  
      author={Jie Yang and Yue Zhang},  
-     year={2018}  
+     Journal = {arXiv preprint arXiv:1711.03759},
+     year={2017}  
     } 
 
 
 Updating...
 ====
-* 2017-Sep-27, (YEDDA V 1.0): project was officially named as YEDDA ! See our paper [here](lrec2018.pdf).
+* 2017-Sep-27, (YEDDA V 1.0): project was officially named as YEDDA ! See our paper [here](https://arxiv.org/pdf/1711.03759.pdf).
 * 2017-June-24, (V 0.6): support nested coloring; add event annotation beta version [Event_beta.py](Event_beta.py)
 * 2017-May-31, (V 0.6): optimize for Windows OS.
 * 2017-Apr-26, (V 0.5.3): fix bug with line merge when change entity type.
