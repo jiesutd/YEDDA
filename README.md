@@ -65,7 +65,7 @@ Cite:
 ========
 If you use YEDDA for research, please cite this report as follows:
 
-    @article{yang2018yedda,  
+    @article{yang2017yedda,  
      title={YEDDA: A Lightweight Collaborative Text Span Annotation Tool},  
      author={Jie Yang and Yue Zhang},  
      Journal = {arXiv preprint arXiv:1711.03759},
