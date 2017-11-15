@@ -2,7 +2,7 @@
 # @Author: Jie Yang from SUTD
 # @Date:   2016-Jan-06 17:11:59
 # @Last Modified by:   Jie Yang,     Contact: jieynlp@gmail.com
-# @Last Modified time: 2017-10-31 17:18:46
+# @Last Modified time: 2017-11-15 13:12:05
 #!/usr/bin/env python
 # coding=utf-8
 
@@ -52,7 +52,12 @@ class Example(Frame):
         self.textColumn = 5
         self.tagScheme = "BMES"
         self.onlyNP = False  ## for exporting sequence 
-        self.seged = True
+        '''
+        self.seged: for exporting sequence, if True then split words with space, else split character without space
+        for example, if your data is segmentated Chinese (or English) with words seperated by a space, you need to set this flag as true
+        if your data is Chinese without segmentation, you need to set this flag as False
+        '''
+        self.seged = True  
         self.configFile = "config"
         self.entityRe = r'\[\@.*?\#.*?\*\](?!\#)'
         self.insideNestEntityRe = r'\[\@\[\@(?!\[\@).*?\#.*?\*\]\#'
@@ -600,70 +605,6 @@ class Example(Frame):
             first_pos = "%s + %sc" %(pos, 2)
             last_pos = "%s + %sc" %(pos, str(int(countVar.get())-1))
             self.text.tag_add("insideEntityColor", first_pos, last_pos)   
-
-
-
-    # def setDisplay(self):
-    #     if self.debug:
-    #         print "Action Track: setDisplay"
-    #     self.text.config(insertbackground='red', insertwidth=4)
-    #     self.text.mark_set("matchStart", "1.0")
-    #     self.text.mark_set("matchEnd", "1.0") 
-    #     self.text.mark_set("searchLimit", 'end-1c')
-
-    #     self.text.mark_set("recommend_matchStart", "1.0")
-    #     self.text.mark_set("recommend_matchEnd", "1.0")
-    #     self.text.mark_set("recommend_searchLimit", 'end-1c')
-
-    #     countVar = StringVar()
-    #     ## match biggest span, ignore nest, scan from begin to end again
-    #     while True:
-    #         # self.text.tag_configure("catagory", background="LightSkyBlue1")
-    #         # self.text.tag_configure("edge", background="LightSkyBlue1")
-    #         self.text.tag_configure("catagory", background=self.entityColor)
-    #         self.text.tag_configure("edge", background=self.entityColor)
-    #         pos = self.text.search(self.entityRe, "matchEnd" , "searchLimit",  count=countVar, regexp=True)
-    #         if pos == "":
-    #             break
-    #         self.text.mark_set("matchStart", pos)
-    #         self.text.mark_set("matchEnd", "%s+%sc" % (pos, countVar.get()))
-            
-    #         first_pos = pos
-    #         second_pos = "%s+%sc" % (pos, str(1))
-    #         lastsecond_pos = "%s+%sc" % (pos, str(int(countVar.get())-1))
-    #         last_pos = "%s + %sc" %(pos, countVar.get())
-
-    #         self.text.tag_add("catagory", second_pos, lastsecond_pos)
-    #         self.text.tag_add("edge", first_pos, second_pos)
-    #         self.text.tag_add("edge", lastsecond_pos, last_pos)
-    #     ## color recommend type
-    #     while True:
-    #         self.text.tag_configure("recommend", background=self.recommendColor)
-    #         recommend_pos = self.text.search(self.recommendRe, "recommend_matchEnd" , "recommend_searchLimit",  count=countVar, regexp=True)
-    #         if recommend_pos =="":
-    #             break
-    #         self.text.mark_set("recommend_matchStart", recommend_pos)
-    #         self.text.mark_set("recommend_matchEnd", "%s+%sc" % (recommend_pos, countVar.get()))
-            
-    #         first_pos = recommend_pos
-    #         # second_pos = "%s+%sc" % (recommend_pos, str(1))
-    #         lastsecond_pos = "%s+%sc" % (recommend_pos, str(int(countVar.get())))
-    #         self.text.tag_add("recommend", first_pos, lastsecond_pos)
-
-    #     ## match nested most inside span, scan from begin to end again
-    #     self.text.mark_set("matchEnd", "1.0") 
-    #     self.text.mark_set("searchLimit", 'end-1c')
-    #     while True:
-    #         self.text.tag_configure("insideEntityColor", background=self.insideNestEntityColor)
-    #         pos = self.text.search(self.insideNestEntityRe , "matchEnd" , "searchLimit",  count=countVar, regexp=True)
-    #         if pos == "":
-    #             break
-    #         self.text.mark_set("matchStart", pos)
-    #         self.text.mark_set("matchEnd", "%s+%sc" % (pos, countVar.get()))
-    #         first_pos = "%s + %sc" %(pos, 2)
-    #         last_pos = "%s + %sc" %(pos, str(int(countVar.get())-1))
-    #         self.text.tag_add("insideEntityColor", first_pos, last_pos)
-            
     
     def pushToHistory(self):
         if self.debug:
@@ -754,7 +695,6 @@ class Example(Frame):
         new_filename = self.fileName.split('.ann')[0]+ '.anns'
         seqFile = open(new_filename, 'w')
         for line in fileLines:
-
             if len(line) <= 2:
                 seqFile.write('\n')
                 continue
@@ -779,7 +719,6 @@ def getWordTagPairs(tagedSentence, seged=True, tagScheme="BMES", onlyNP=False, e
     newSent = tagedSentence.strip('\n').decode('utf-8')
     filterList = re.findall(entityRe, newSent)
     newSentLength = len(newSent)
-    
     chunk_list = []
     start_pos = 0
     end_pos = 0
