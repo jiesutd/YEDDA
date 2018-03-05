@@ -2,7 +2,7 @@
 # @Author: Jie Yang from SUTD
 # @Date:   2016-Jan-06 17:11:59
 # @Last Modified by:   Jie Yang,     Contact: jieynlp@gmail.com
-# @Last Modified time: 2018-03-05 17:14:43
+# @Last Modified time: 2018-03-05 17:41:03
 #!/usr/bin/env python
 # coding=utf-8
 
@@ -60,7 +60,7 @@ class Example(Frame):
         for example, if your data is segmentated Chinese (or English) with words seperated by a space, you need to set this flag as true
         if your data is Chinese without segmentation, you need to set this flag as False
         '''
-        self.seged = False  
+        self.seged = False  ## False for non-segmentated Chinese, True for English or Segmented Chinese
         self.configFile = "config"
         self.entityRe = r'\[\@.*?\#.*?\*\](?!\#)'
         self.insideNestEntityRe = r'\[\@\[\@(?!\[\@).*?\#.*?\*\]\#'
