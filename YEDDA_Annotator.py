@@ -2,7 +2,7 @@
 # @Author: Jie Yang from SUTD
 # @Date:   2016-Jan-06 17:11:59
 # @Last Modified by:   Jie Yang,     Contact: jieynlp@gmail.com
-# @Last Modified time: 2017-11-15 13:12:05
+# @Last Modified time: 2018-03-05 17:14:43
 #!/usr/bin/env python
 # coding=utf-8
 
@@ -52,16 +52,22 @@ class Example(Frame):
         self.textColumn = 5
         self.tagScheme = "BMES"
         self.onlyNP = False  ## for exporting sequence 
+        self.keepRecommend = True
+        
+
         '''
         self.seged: for exporting sequence, if True then split words with space, else split character without space
         for example, if your data is segmentated Chinese (or English) with words seperated by a space, you need to set this flag as true
         if your data is Chinese without segmentation, you need to set this flag as False
         '''
-        self.seged = True  
+        self.seged = False  
         self.configFile = "config"
         self.entityRe = r'\[\@.*?\#.*?\*\](?!\#)'
         self.insideNestEntityRe = r'\[\@\[\@(?!\[\@).*?\#.*?\*\]\#'
         self.recommendRe = r'\[\$.*?\#.*?\*\](?!\#)'
+        self.goldAndrecomRe = r'\[\@.*?\#.*?\*\](?!\#)'
+        if self.keepRecommend:
+            self.goldAndrecomRe = r'\[[\@\$)].*?\#.*?\*\](?!\#)'
         ## configure color
         self.entityColor = "SkyBlue1"
         self.insideNestEntityColor = "light slate blue"
@@ -699,8 +705,9 @@ class Example(Frame):
                 seqFile.write('\n')
                 continue
             else:
-                line = removeRecommendContent(line, self.recommendRe)
-                wordTagPairs = getWordTagPairs(line, self.seged, self.tagScheme, self.onlyNP, self.entityRe)
+                if not self.keepRecommend:
+                    line = removeRecommendContent(line, self.recommendRe)
+                wordTagPairs = getWordTagPairs(line, self.seged, self.tagScheme, self.onlyNP, self.goldAndrecomRe)
                 for wordTag in wordTagPairs:
                     seqFile.write(wordTag)
                 ## use null line to seperate sentences
@@ -709,8 +716,10 @@ class Example(Frame):
         print "Exported file into sequence style in file: ",new_filename
         print "Line number:",lineNum
         showMessage =  "Exported file successfully!\n\n"   
-        showMessage += "Tag scheme:" +self.tagScheme + "\n\n"
-        showMessage += "Line Number:" + str(lineNum)+ "\n\n"
+        showMessage += "Tag scheme: " +self.tagScheme + "\n\n"
+        showMessage += "Keep Recom: " +str(self.keepRecommend) + "\n\n"
+        showMessage += "Text Seged: " +str(self.seged) + "\n\n"
+        showMessage += "Line Number: " + str(lineNum)+ "\n\n"
         showMessage += "Saved to File: " + new_filename
         tkMessageBox.showinfo("Export Message", showMessage)
 
@@ -733,6 +742,7 @@ def getWordTagPairs(tagedSentence, seged=True, tagScheme="BMES", onlyNP=False, e
         singleChunkList = []
     else:
         for pattern in filterList:
+            # print pattern
             singleChunkList = []
             start_pos = end_pos + newSent[end_pos:].find(pattern)
             end_pos = start_pos + len(pattern)
@@ -774,7 +784,7 @@ def turnFullListToOutputPair(fullList, seged=True, tagScheme="BMES", onlyNP=Fals
     pairList = []
     for eachList in fullList:
         if eachList[3]:
-            contLabelList = eachList[0].strip('[@]').rsplit('#', 1)
+            contLabelList = eachList[0].strip('[@$]').rsplit('#', 1)
             if len(contLabelList) != 2:
                 print "Error: sentence format error!"
             label = contLabelList[1].strip('*')
