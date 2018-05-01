@@ -5,7 +5,7 @@ About:
 ====
 YEDDA is developed for annotating chunk/entity/event on text (almost all languages including English, Chinese), symbol and even emoji. It supports shortcut annotation which is extremely efficient to annotate text by hand. The user only need to select text span and press shortcut key, the span will be annotated automatically. It also support command annotation model which annotates multiple entities in batch and support export annotated text into sequence text. Besides, intelligent recommendation and adminstrator analysis is also included in updated version. It is compatiable with all mainstream operating systems includings Windows, Linux and MacOS. 
 
-For more details, please refer to [our paper](https://arxiv.org/pdf/1711.03759.pdf).
+For more details, please refer to [our paper (ACL2018:demo)](https://arxiv.org/pdf/1711.03759.pdf).
 
 This GUI annotation tool is developed with tkinter package in Python. 
 
@@ -69,8 +69,8 @@ If you use YEDDA for research, please cite this report as follows:
 
     @article{yang2017yedda,  
      title={YEDDA: A Lightweight Collaborative Text Span Annotation Tool},  
-     author={Jie Yang and Yue Zhang},  
-     Journal = {arXiv preprint arXiv:1711.03759},
+     author={Yang, Jie and Zhang, Yue and Li, Linwei and Li, Xingxuan},  
+     booktitle={Proceedings of the 56th Annual Meeting of the Association for Computational Linguistics (ACL): Demonstration},
      year={2017}  
     } 
 

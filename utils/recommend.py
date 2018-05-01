@@ -2,7 +2,7 @@
 # @Author: Jie Yang
 # @Date:   2017-09-14 16:38:21
 # @Last Modified by:   Jie Yang,     Contact: jieynlp@gmail.com
-# @Last Modified time: 2017-09-18 12:20:34
+# @Last Modified time: 2018-05-01 21:17:27
 
 import re
 
@@ -38,7 +38,7 @@ def maximum_matching(train_text, decode_text, entityRe = r'\[\@.*?\#.*?\*\](?!\#
 			new_string = sentences[idx] + '\n'
 		else:
 			new_string = sentences[idx]
-		if idx > 10 :
+		if idx > 20 :
 			far_sentences += new_string
 		else:
 			near_sentences += new_string
