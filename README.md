@@ -71,12 +71,13 @@ If you use YEDDA for research, please cite this report as follows:
      title={YEDDA: A Lightweight Collaborative Text Span Annotation Tool},  
      author={Yang, Jie and Zhang, Yue and Li, Linwei and Li, Xingxuan},  
      booktitle={Proceedings of the 56th Annual Meeting of the Association for Computational Linguistics (ACL): Demonstration},
-     year={2017}  
+     year={2018}  
     } 
 
 
 Updating...
 ====
+* 2018-May-01, Our paper has been accepted as a demonstration at ACL 2018.
 * 2017-Sep-27, (YEDDA V 1.0): project was officially named as YEDDA ! See our paper [here](https://arxiv.org/pdf/1711.03759.pdf).
 * 2017-June-24, (V 0.6): support nested coloring; add event annotation beta version [Event_beta.py](Event_beta.py)
 * 2017-May-31, (V 0.6): optimize for Windows OS.
