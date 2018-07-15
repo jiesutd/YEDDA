@@ -2,7 +2,7 @@
 # @Author: Jie
 # @Date:   2017-04-25 11:07:00
 # @Last Modified by:   Jie Yang,     Contact: jieynlp@gmail.com
-# @Last Modified time: 2017-09-21 20:50:55
+# @Last Modified time: 2018-07-15 21:39:29
  
 
 import re
@@ -37,7 +37,7 @@ def compareBoundary(gold_file, pred_file, out_file):
     gold_entity = []
     pred_entity = []
     match_entity = []
-    start_line = 18
+    start_line = 0
     end_line = sentence_num
     write_head(out_file)
     out_file.write("\\section{Overall Statistics}\n")
