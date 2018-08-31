@@ -2,7 +2,7 @@
 # @Author: Jie
 # @Date:   2017-04-25 11:07:00
 # @Last Modified by:   Jie Yang,     Contact: jieynlp@gmail.com
-# @Last Modified time: 2018-07-15 21:39:29
+# @Last Modified time: 2018-08-30 16:26:39
  
 
 import re
@@ -41,8 +41,8 @@ def compareBoundary(gold_file, pred_file, out_file):
     end_line = sentence_num
     write_head(out_file)
     out_file.write("\\section{Overall Statistics}\n")
-    out_file.write("File1 color: "+ "\colorbox{blue!30}{Blue}; Dir: \colorbox{blue!30}{"+gold_file+"}"+'\\\\'+'\n')
-    out_file.write("File2 color: "+"\colorbox{red!30}{Red}; Dir: \colorbox{red!30}{"+pred_file+"}"+'\\\\'+'\n')
+    out_file.write("File1 color: "+ "\colorbox{blue!30}{Blue}; Dir: \colorbox{blue!30}{"+gold_file.replace("_", "\_")+"}"+'\\\\'+'\n')
+    out_file.write("File2 color: "+"\colorbox{red!30}{Red}; Dir: \colorbox{red!30}{"+pred_file.replace("_", "\_")+"}"+'\\\\'+'\n')
     final_f = compare_f_measure_by_type(gold_file, pred_file)
     # print final_f
     out_file.write("\\begin{table}[!htbp]\n")
@@ -360,6 +360,10 @@ def generate_latex(sentence, gold_bound, pred_bound):
                     word_segment = word
                     # print "segment 1:", word_segment
         else:
+            # print "".join(sentence)
+            # print gold_bound
+            # print pred_bound
+            # print len(pred_bound),len(gold_bound), len(sentence), idx
             if pred_bound[idx] == 1:
                 if segment_tag == -1:
                     word_segment += word
@@ -395,7 +399,8 @@ def generate_latex(sentence, gold_bound, pred_bound):
         elif color_chunk[idx] == -1:
             output_string += "\colorbox{red!30}{" + word_chunk[idx] + '}'
 
-
+    if "%" in  output_string:
+        output_string = output_string.replace("%", "\%")
     return output_string
 
 
@@ -420,7 +425,7 @@ def get_ner_from_sentence(sentence, remove_seg=True):
     for idx in range(sentence_len):
         if sentence[idx] == '[':
             left_bracket = True 
-        elif sentence[idx] == '@':
+        elif sentence[idx] == '@' or sentence[idx] == '$':
             if last_char == '[':
                 entity_start.append(word_id)
             else:
@@ -515,8 +520,8 @@ def simplified_name(file_name):
     return name
 
 if __name__ == '__main__':
-    gold_file = "../demotext/UserA.ann"
-    pred_file = "../demotext/UserB.ann"
+    gold_file = "../../Linwei/NER_Labeling1.txt.ann"
+    pred_file = "../../Xingxuan/NER_Labeling2.txt.ann"
     output_file = open("../tex2pdf/test.tex",'w')
 
     compareBoundary(gold_file,pred_file,output_file)

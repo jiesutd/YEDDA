@@ -65,7 +65,7 @@ Important features:
 
 Cite: 
 ========
-If you use YEDDA for research, please cite this report as follows:
+If you use YEDDA for research, please cite our [ACL paper](https://arxiv.org/pdf/1711.03759.pdf) as follows:
 
     @article{yang2017yedda,  
      title={YEDDA: A Lightweight Collaborative Text Span Annotation Tool},  
