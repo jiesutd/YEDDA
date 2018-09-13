@@ -3,69 +3,116 @@ YEDDA: A Lightweight Collaborative Text Span Annotation Tool
 
 About:
 ====
-YEDDA (the previous SUTDAnnotator) is developed for annotating chunk/entity/event on text (almost all languages including English, Chinese), symbol and even emoji. It supports shortcut annotation which is extremely efficient to annotate text by hand. The user only need to select text span and press shortcut key, the span will be annotated automatically. It also support command annotation model which annotates multiple entities in batch and support export annotated text into sequence text. Besides, intelligent recommendation and adminstrator analysis is also included in updated version. It is compatiable with all mainstream operating systems includings Windows, Linux and MacOS. 
+YEDDA (previously SUTDAnnotator) is developed for annotating chunk/entity/event
+on text (almost all languages including English, Chinese), symbols, even emoji.
 
-For more details, please refer to [our paper (ACL2018:demo, best demo nomination)](https://arxiv.org/pdf/1711.03759.pdf).
+It supports shortcut annotation which makes it extremely efficient to annotate
+text by hand. The user needs only select a text span and press a shortcut key,
+the span will be annotated automatically. It also supports command annotation
+model for annotating multiple entities in a single batch, as well as exporting
+annotated text into sequence text.
 
-This GUI annotation tool is developed with tkinter package in Python. 
+Intelligent recommendation and administrator analysis is also included in the
+updated version. It is compatible with all mainstream operating systems, such
+as Windows, Linux, and MacOS.
 
-System required: Python 2.7
+For more details, please refer to [our paper (ACL2018:demo)][arxiv].
+
+This GUI annotation tool is developed with the tkinter package and Python 2.7.
 
 Author: [Jie Yang](https://jiesutd.github.io), Phd Candidate of SUTD.
 
 Interface:
 ====
-It provides both annotator interface for efficient annotatation and admin interface for result analysis.
+It provides both an annotator interface for efficient annotation and an admin
+interface for result analysis.
+
 * Annotator Interface:
- ![alt text](https://github.com/jiesutd/SUTDAnnotator/blob/master/EnglishInterface.png "English Interface demo")
- ![alt text](https://github.com/jiesutd/SUTDAnnotator/blob/master/ChineseInterface.png "Chinese Interface demo")
+ ![alt text](/EnglishInterface.png "English Interface demo")
+ ![alt text](/ChineseInterface.png "Chinese Interface demo")
 * Administrator Interface:
- ![alt text](https://github.com/jiesutd/SUTDAnnotator/blob/master/AdminInterface.png "Administrator Interface demo")
+ ![alt text](/AdminInterface.png "Administrator Interface demo")
 
-Use as an annotator ?
+Use as an annotator
 ====
-* Start the interface: run `python YEDDA_Annotator.py`
-* Configure your shortcut map in the right side of annotation interface, you can leave other labels empty if the shortcut number is enough. For example: `a: Action; b: Loc; c: Cont`
-* Click the `ReMap` button to store the map setting
-* Click `Open` button and select your input file. (You may set your file name ended with .txt or .ann if possible)
+* Start the interface: run `python YEDDA_Annotator.py`.
+* Configure a shortcut map on the right side of the annotation interface. Leave
+  other labels empty if you don't need them, e.g. `a: Action; b: Loc; c: Cont`
+* Click the `ReMap` button to store the map setting.
+* Click `Open` button and select your input file. (Use the `.txt` or `.ann` file
+  endings if you like)
 
-This tool supports two ways of annotation (annotated text format `[@the text span＃Location*]`):
-* Shortcut Key Annotation: select the text and press the corresponding shortcut (i.e. `c` for label `Cont`).
-* Command Line Annotation: type the code at command entry (at the bottom of the annotation interface). For example, type `2c3b1a` end with `<Enter>`, it will annotate the following `2` character as type `c: Cont`, the following `3` character as type `b: Loc`, then the following `1` character as  `a: Action`.
+YEDDA supports two annotation methods: (output format `[@text span＃Location*]`):
+* Shortcut Key Annotation: select the text and press the corresponding shortcut
+  (e.g. `c` for label `Cont`).
+* Command Line Annotation: type the code at command entry (at the bottom of the
+  annotation interface). For example, type `2c3b1a` end with `<Enter>`, it will
+  annotate the following `2` characters as type `c: Cont`, the next `3` characters
+  as type `b: Loc`, then the following `1` character as `a: Action`.
 
 Intelligent recommendation:
-* Intelligent recommendation is enabled or disabled by the button `RMOn` and `RMOff`, respectively.
-* If recommendation model is enabled, system will recommend entities based on the annotated text. Recommendation span is formatted as  `[$the text span＃Location*]`in green color. (Notice the difference of annotated and recommended span, the former starts with `[@` while the later starts with `[$`)
+* Intelligent recommendation is toggled by the `RMOn` and `RMOff` buttons.
+* If recommendation model is enabled, system will recommend entities based on
+  the annotated text. The Recommended span appears as `[$text span＃Location*]`
+  in green color. (Note that the annotated span starts with `[@`, while the
+  recommended span starts with `[$`).
 
-The annotated results will be stored synchronously. Annotated file is located at the same directory with origin file with the name of ***"origin name + .ann"***
+The annotated results will be stored synchronously. Annotated file is located
+at the same directory as the original file with the name of ***"original name
++ .ann"***
 
-Use as an administrator ?
+Use as an administrator
 ====
-YEDDA provides a simple interface for administartor to evaluate and analyze annotation quality among multiple annotators. After collected multiple annotated `*.ann` files from multiple annotators (annotated on same plain text), YEDDA can give two toolkits to monitor the annotation quality: multi-annotator analysis and pairwise annotators comparison.
+YEDDA provides a simple interface for an administrator to evaluate and analyze
+annotation quality among multiple annotators. After collecting multiple annotated
+`*.ann` files from multiple annotators (annotated on same plain text), YEDDA can
+offer two toolkits to monitor the annotation quality: multi-annotator analysis
+and pairwise annotator comparison.
+
 * Start the interface: run `python YEDDA_Admin.py`
-* Multi-Annotator Analysis: press button `Multi-Annotator Analysis` and select multiple annotated `*.ann` files, it will give f-measure matrix among all annotators. The result matrix is shown below:
+* Multi-Annotator Analysis: press button `Multi-Annotator Analysis` and select
+  multiple annotated `*.ann` files, it will give f-measure matrix among all
+  annotators. The result matrix is shown below:
 
- ![alt text](https://github.com/jiesutd/SUTDAnnotator/blob/master/resultMatrix.png "Result Maxtix")
-* Pairwise Annotators Comparison: press button `Pairwise Comparison` and select two annotated `*.ann` files, it will generate a specific comparison report (in `.tex` format, can be compiled as `.pdf` file). The demo pdf file is shown below:
+  ![alt text](https://github.com/jiesutd/SUTDAnnotator/blob/master/resultMatrix.png "Result Matrix")
 
-![alt text](https://github.com/jiesutd/SUTDAnnotator/blob/master/detailReport.png "Detail Report")
+* Pairwise Annotators Comparison: press button `Pairwise Comparison` and select
+  two annotated `*.ann` files, it will generate a specific comparison report
+  (in `.tex` format, can be compiled as `.pdf` file). The demo pdf file is shown
+  below:
+
+  ![alt text](https://github.com/jiesutd/SUTDAnnotator/blob/master/detailReport.png "Detail Report")
 
 
 Important features:
 =====
-1. Type `ctrl + z` will undo  the most recent modification
-2. Put cursor within an entity span, press shortcut key (e.g. `x`) to update label (binded with `x`) of the entity where cursor is belonging. (`q` for remove the label)
-3. Selected the annotated text, such as `[@美国＃Location*]`, then press `q`, the annotated text will be recoverd to unannotate format (i.e. "美国").
-4. Change label directly, select entity content or put cursor inside the entity span (such as `[@美国＃Location*]`), then press `x`, the annotated text will change to new label mapped with shortcut `x` (e.g. `[@美国#Organization*]`).
-5. Confirm or remove recommended entity: put cursor inside of the entity span and press `y` (yes) or `q` (quit).
-6. In the command entry, just type `Enter` without any command, the cursor in text will move to the head of next line. (You can monitor this through "Cursor").
-7. The "Cursor" shows the current cursor position in text widget, with `row` and `col` represent the row and column number, respectively.
-8. `Export` button will export the ***".ann"*** file as a identity name with ***".anns"*** in the same directory. The exported file list the content in sequence format. In the source code, there is a flag `self.seged` which controls the exported bahaviour. If your sentences are consist of words seperated with space (such as segmentated Chinese and English), then you may set it `True`, otherwise set it as `False` (for sentences which are consist of characters without space, such as unsegmentated Chinese text). Besides, another flag `self.tagScheme` controls the exporting format, the exported ***".anns"*** will use the `BMES` format if this flag is set to `"BMES"`, otherwise the exported file is formatted as `"BIO".`
+1. Typing `Ctrl + Z` will undo the most recent modification
+2. With the cursor inside an entity span, pressing a shortcut key (e.g. `x`)
+   will update the label (bound with `x`) of the entity where cursor is. (`q`
+   will remove the label)
+3. Selecting the annotated text, such as `[@美国＃Location*]`, then pressing
+   `q`, will restore the annotated text to its unannotated state (i.e. "美国").
+4. Confirm or remove recommended entity: put cursor inside of the entity span
+   and press `y` (yes) or `q` (quit).
+5. In the command entry, just type `Enter` without any command, the cursor in
+   text will move to the head of next line. (You can monitor this with "Cursor").
+6. "Cursor" shows the current cursor position, with the row and column number
+   represented in `row` and `col` respectively.
+7. The "Export" button will export the ***".ann"*** file as a sequence file,
+   ***".anns"***, in the same directory. In the source code, the `self.seged`
+   flag controls the export behaviour. If your sentences consist of words
+   separated with spaces (such as segmented Chinese and English), then you may
+   set it to `True`, otherwise set it to `False` (for sentences consisting of
+   characters without spaces, such as unsegmented Chinese text). Another flag
+   `self.tagScheme` controls the export format, the exported ***".anns"*** will
+   use the `BMES` format if this flag is set to `"BMES"`, otherwise the file is
+   formatted as `"BIO".`
 
 
 Cite: 
 ========
-If you use YEDDA for research, please cite our [ACL paper](https://arxiv.org/pdf/1711.03759.pdf) as follows:
+If you use YEDDA for research, please cite our [ACL paper](https://arxiv.org/pdf/1711.03759.pdf)
+as follows:
 
     @article{yang2017yedda,  
      title={YEDDA: A Lightweight Collaborative Text Span Annotation Tool},  
@@ -94,3 +141,4 @@ Updating...
 * 2016-Jan-11, (V 0.2): add sequence format export function.
 * 2016-Jan-09, (V 0.1): init version.
 
+[arxiv]: https://arxiv.org/pdf/1711.03759.pdf
