@@ -3,14 +3,14 @@
 # @Date:   2016-Jan-06 17:11:59
 # @Last Modified by:   Jie Yang,     Contact: jieynlp@gmail.com
 # @Last Modified time: 2018-07-15 20:33:40
-#!/usr/bin/env python
+# !/usr/bin/env python
 # coding=utf-8
 
 from Tkinter import *
-from ttk import *#Frame, Button, Label, Style, Scrollbar
+from ttk import *  # Frame, Button, Label, Style, Scrollbar
 import tkFileDialog
 import tkFont
-import re
+import json
 from collections import deque
 import pickle
 import os.path
@@ -31,17 +31,17 @@ class Example(Frame):
         self.recommendFlag = True
         self.history = deque(maxlen=20)
         self.currentContent = deque(maxlen=1)
-        self.pressCommand = {'a':"Artifical",
-                             'b':"Event",
-                             'c':"Fin-Concept",
-                             'd':"Location",
-                             'e':"Organization",
-                             'f':"Person",
-                             'g':"Sector",
-                             'h':"Other"
+        self.pressCommand = {'a': "Artificial",
+                             'b': "Event",
+                             'c': "Fin-Concept",
+                             'd': "Location",
+                             'e': "Organization",
+                             'f': "Person",
+                             'g': "Sector",
+                             'h': "Other"
                              }
         self.allKey = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
-        self.controlCommand = {'q':"unTag", 'ctrl+z':'undo'}
+        self.controlCommand = {'q': "unTag", 'ctrl+z': 'undo'}
         self.labelEntryList = []
         self.shortcutLabelList = []
         # default GUI display parameter
@@ -50,136 +50,245 @@ class Example(Frame):
         else:
             self.textRow = 20
         self.textColumn = 5
+        self.questionHeight = 4
+        self.questionWidth = 50
+        self.answerHeight = 3
+        self.answerWidth = 50
         self.tagScheme = "BMES"
-        self.onlyNP = False  ## for exporting sequence 
+        self.onlyNP = False  # for exporting sequence
         self.keepRecommend = True
-        
 
-        '''
-        self.seged: for exporting sequence, if True then split words with space, else split character without space
-        for example, if your data is segmentated Chinese (or English) with words seperated by a space, you need to set this flag as true
-        if your data is Chinese without segmentation, you need to set this flag as False
-        '''
-        self.seged = True  ## False for non-segmentated Chinese, True for English or Segmented Chinese
+        self.seged = True  # False for non-segmentated Chinese, True for English or Segmented Chinese
         self.configFile = "config"
-        self.entityRe = r'\[\@.*?\#.*?\*\](?!\#)'
+        self.entityRe = r'\[\@.*?\@\]'
         self.insideNestEntityRe = r'\[\@\[\@(?!\[\@).*?\#.*?\*\]\#'
         self.recommendRe = r'\[\$.*?\#.*?\*\](?!\#)'
         self.goldAndrecomRe = r'\[\@.*?\#.*?\*\](?!\#)'
         if self.keepRecommend:
             self.goldAndrecomRe = r'\[[\@\$)].*?\#.*?\*\](?!\#)'
-        ## configure color
         self.entityColor = "SkyBlue1"
         self.insideNestEntityColor = "light slate blue"
         self.recommendColor = 'lightgreen'
         self.selectColor = 'light salmon'
         self.textFontStyle = "Times"
+        self.currentQuestionID = 0    #  the id of question that is currently presented
+        self.currentBeginningAnswerID = 0
+        self.currentTextQuestionBrief = {}
+        self.keyPhraseDict = {}  #  key:questionID, value: set of keyphrases
         self.initUI()
-        
-        
+
     def initUI(self):
-      
         self.parent.title(self.Version)
         self.pack(fill=BOTH, expand=True)
-        
-        for idx in range(0,self.textColumn):
-            self.columnconfigure(idx, weight =2)
-        # self.columnconfigure(0, weight=2)
-        self.columnconfigure(self.textColumn+2, weight=1)
-        self.columnconfigure(self.textColumn+4, weight=1)
-        for idx in range(0,16):
-            self.rowconfigure(idx, weight =1)
-        
-        self.lbl = Label(self, text="File: no file is opened")
-        self.lbl.grid(sticky=W, pady=4, padx=5)
-        self.fnt = tkFont.Font(family=self.textFontStyle,size=self.textRow,weight="bold",underline=0)
-        self.text = Text(self, font=self.fnt, selectbackground=self.selectColor)
-        self.text.grid(row=1, column=0, columnspan=self.textColumn, rowspan=self.textRow, padx=12, sticky=E+W+S+N)
 
-        self.sb = Scrollbar(self)
-        self.sb.grid(row = 1, column = self.textColumn, rowspan = self.textRow, padx=0, sticky = E+W+S+N)
-        self.text['yscrollcommand'] = self.sb.set 
-        self.sb['command'] = self.text.yview 
-        # self.sb.pack()
+        self.lbl = Label(self, text="File: no file is opened")
+        self.lbl.grid(sticky=W)
+
+        self.fnt = tkFont.Font(family=self.textFontStyle, size=self.textRow,weight="bold", underline=0)
+
+        self.questionLabel = Label(self, text="Question:")
+        self.questionLabel.grid(row=1, sticky=W)
+
+        self.question = Text(self, font=self.fnt, selectbackground=self.selectColor,  height=self.questionHeight,
+                             width=self.questionWidth)
+        self.question.grid(row=2, columnspan=self.textColumn, sticky=E+W+S+N)
+
+        self.sbQuestion = Scrollbar(self)
+        self.sbQuestion.grid(row=2, column=self.textColumn, rowspan=self.questionHeight, sticky=E+W+S+N)
+        self.question['yscrollcommand'] = self.sbQuestion.set
+        self.sbQuestion['command'] = self.question.yview
+
+        self.answer1Label = Label(self, text="Answer 1:")
+        self.answer1Label.grid(row=6, sticky=W)
+
+        self.answerText1 = Text(self, font=self.fnt, selectbackground=self.selectColor, height=self.answerHeight,
+                                width=self.answerWidth)
+        self.answerText1.grid(row=7, columnspan=self.textColumn, sticky=E+W+S+N)
+
+        self.sbAnswer1 = Scrollbar(self)
+        self.sbAnswer1.grid(row=7, column=self.textColumn, rowspan=self.answerHeight, padx=0, sticky=E+W+S+N)
+        self.answerText1['yscrollcommand'] = self.sbAnswer1.set
+        self.sbAnswer1['command'] = self.answerText1.yview
+
+        self.answer2Label = Label(self, text="Answer 2:")
+        self.answer2Label.grid(row=10, sticky=W)
+
+        self.answerText2 = Text(self, font=self.fnt, selectbackground=self.selectColor, height=self.answerHeight,
+                                width=self.answerWidth)
+        self.answerText2.grid(row=11, columnspan=self.textColumn, sticky=E+W+S+N)
+
+        self.sbAnswer2 = Scrollbar(self)
+        self.sbAnswer2.grid(row=11, column=self.textColumn, rowspan=self.answerHeight, padx=0, sticky=E+W+S+N)
+        self.answerText2['yscrollcommand'] = self.sbAnswer2.set
+        self.sbAnswer2['command'] = self.answerText2.yview
+
+        self.answer3Label = Label(self, text="Answer 3:")
+        self.answer3Label.grid(row=14, sticky=W)
+
+        self.answerText3 = Text(self, font=self.fnt, selectbackground=self.selectColor, height=self.answerHeight,
+                                width=self.answerWidth)
+        self.answerText3.grid(row=15, columnspan=self.textColumn, sticky=E+W+S+N)
+
+        self.sbAnswer3 = Scrollbar(self)
+        self.sbAnswer3.grid(row=15, column=self.textColumn, rowspan=self.answerHeight, padx=0, sticky=E+W+S+N)
+        self.answerText3['yscrollcommand'] = self.sbAnswer3.set
+        self.sbAnswer3['command'] = self.answerText3.yview
+
+        self.answer4Label = Label(self, text="Answer 4:")
+        self.answer4Label.grid(row=18, sticky=W)
+
+        self.answerText4 = Text(self, font=self.fnt, selectbackground=self.selectColor, height=self.answerHeight,
+                                width=self.answerWidth)
+        self.answerText4.grid(row=19, columnspan=self.textColumn, sticky=E+W+S+N)
+
+        self.sbAnswer4 = Scrollbar(self)
+        self.sbAnswer4.grid(row=19, column=self.textColumn, rowspan=self.answerHeight, padx=0, sticky=E+W+S+N)
+        self.answerText4['yscrollcommand'] = self.sbAnswer4.set
+        self.sbAnswer4['command'] = self.answerText4.yview
+
+        self.answer5Label = Label(self, text="Answer 5:")
+        self.answer5Label.grid(row=22, sticky=W)
+
+        self.answerText5 = Text(self, font=self.fnt, selectbackground=self.selectColor, height=self.answerHeight,
+                                width=self.answerWidth)
+        self.answerText5.grid(row=23, columnspan=self.textColumn, sticky=E+W+S+N)
+
+        self.sbAnswer5 = Scrollbar(self)
+        self.sbAnswer5.grid(row=23, column=self.textColumn, rowspan=self.answerHeight, padx=0, sticky=E+W+S+N)
+        self.answerText5['yscrollcommand'] = self.sbAnswer5.set
+        self.sbAnswer5['command'] = self.answerText5.yview
+
+        nextButton = Button(self, text="Next", command=self.nextPage)
+        nextButton.grid(row=26, column=self.textColumn)
+
+        backButton = Button(self, text="Back", command=self.prevPage)
+        backButton.grid(row=26, column=self.textColumn - 1)
 
         abtn = Button(self, text="Open", command=self.onOpen)
-        abtn.grid(row=1, column=self.textColumn +1)
+        abtn.grid(row=26, column=self.textColumn - 2)
 
-        recButton = Button(self, text="RMOn", command=self.setInRecommendModel)
-        recButton.grid(row=2, column=self.textColumn +1)
+        nextQuestionBtn = Button(self, text="NextQuestion", command=self.nextQuestion)
+        nextQuestionBtn.grid(row=26, column=self.textColumn - 3)
 
-        noRecButton = Button(self, text="RMOff", command=self.setInNotRecommendModel)
-        noRecButton.grid(row=3, column=self.textColumn +1)
+        prevQuestionBtn = Button(self, text="PrevQuestion", command=self.prevQuestion)
+        prevQuestionBtn.grid(row=26, column=self.textColumn - 4)
 
-        ubtn = Button(self, text="ReMap", command=self.renewPressCommand)
-        ubtn.grid(row=4, column=self.textColumn +1, pady=4)
+        exportBtn = Button(self, text="Export", command=self.exportToJSON)
+        exportBtn.grid(row=26, column=self.textColumn - 5)
 
-        exportbtn = Button(self, text="Export", command=self.generateSequenceFile)
-        exportbtn.grid(row=5, column=self.textColumn + 1, pady=4)
-        
-
-        cbtn = Button(self, text="Quit", command=self.quit)
-        cbtn.grid(row=6, column=self.textColumn + 1, pady=4)
-
-        self.cursorName = Label(self, text="Cursor: ", foreground="Blue", font=(self.textFontStyle, 14, "bold"))
-        self.cursorName.grid(row=9, column=self.textColumn +1, pady=4)
-        self.cursorIndex = Label(self, text=("row: %s\ncol: %s" % (0, 0)), foreground="red", font=(self.textFontStyle, 14, "bold"))
-        self.cursorIndex.grid(row=10, column=self.textColumn + 1, pady=4)
-
-        self.RecommendModelName = Label(self, text="RModel: ", foreground="Blue", font=(self.textFontStyle, 14, "bold"))
-        self.RecommendModelName.grid(row=12, column=self.textColumn +1, pady=4)
-        self.RecommendModelFlag = Label(self, text=str(self.recommendFlag), foreground="red", font=(self.textFontStyle, 14, "bold"))
-        self.RecommendModelFlag.grid(row=13, column=self.textColumn + 1, pady=4)
-
-        # recommend_value = StringVar()
-        # recommend_value.set("R")
-        # a = Radiobutton(self.parent,  text="Recommend",   width=12, variable=recommend_value, value="R")
-        # # a.grid(row =1 , column = 2)
-        # a.pack(side='left')
-        # b = Radiobutton(self.parent, text="NotRecommend",   width=12,  variable=recommend_value, value="N")
-        # # b.grid(row =1 , column = 3)
-        # b.pack(side='left')
-       
-
-        lbl_entry = Label(self, text="Command:")
-        lbl_entry.grid(row = self.textRow +1,  sticky = E+W+S+N, pady=4,padx=4)
-        self.entry = Entry(self)
-        self.entry.grid(row = self.textRow +1, columnspan=self.textColumn + 1, rowspan = 1, sticky = E+W+S+N, pady=4, padx=80)
-        self.entry.bind('<Return>', self.returnEnter)
-
-        
-
-        
-        # for press_key in self.pressCommand.keys():
         for idx in range(0, len(self.allKey)):
             press_key = self.allKey[idx]
+            self.answerText1.bind(press_key, self.answer1ReturnEnter)
+            self.answerText2.bind(press_key, self.answer2ReturnEnter)
+            self.answerText3.bind(press_key, self.answer3ReturnEnter)
+            self.answerText4.bind(press_key, self.answer4ReturnEnter)
+            self.answerText5.bind(press_key, self.answer5ReturnEnter)
+            simplePressKey = " <KeyRelease-" + press_key + ">"
+            self.answerText1.bind(simplePressKey, self.deleteText1Input)
+            self.answerText2.bind(simplePressKey, self.deleteText2Input)
+            self.answerText3.bind(simplePressKey, self.deleteText3Input)
+            self.answerText4.bind(simplePressKey, self.deleteText4Input)
+            self.answerText5.bind(simplePressKey, self.deleteText5Input)
 
-            # self.text.bind(press_key, lambda event, arg=press_key:self.textReturnEnter(event,arg))
-            self.text.bind(press_key, self.textReturnEnter)
-            simplePressKey = "<KeyRelease-" + press_key + ">"
-            self.text.bind(simplePressKey, self.deleteTextInput)
-            if self.OS != "windows":
-                controlPlusKey = "<Control-Key-" + press_key + ">"
-                self.text.bind(controlPlusKey, self.keepCurrent)
-                altPlusKey = "<Command-Key-" + press_key + ">"
-                self.text.bind(altPlusKey, self.keepCurrent)
 
+        self.presentTextLabel = Label(self, text="Label Result:")
+        self.presentTextLabel.grid(row=1, column=self.textColumn+1)
+        self.presentText = Text(self, font=self.fnt, selectbackground=self.selectColor, height=self.questionHeight,
+                               width=self.answerWidth - 25)
+        self.presentText.grid(row=2, column=self.textColumn+1, sticky=E+W+S+N)
+        self.sbPresentText = Scrollbar(self)
+        self.sbPresentText.grid(row=2, column=self.textColumn+ 1 + self.answerWidth - 25, rowspan=self.answerHeight, sticky=W+E+S+N)
+        self.presentText['yscrollcommand'] = self.sbPresentText.set
+        self.sbPresentText['command'] = self.presentText.yview
 
-        self.text.bind('<Control-Key-z>', self.backToHistory)
-        ## disable the default  copy behaivour when right click. For MacOS, right click is button 2, other systems are button3
-        self.text.bind('<Button-2>', self.rightClick)
-        self.text.bind('<Button-3>', self.rightClick)
+    def exportToJSON(self):
+        exportObj = []
+        for questionID in self.keyPhraseDict:
+            dict = {}
+            dict["Title"] = self.form_json[questionID]["Title"]
+            dict["IsShortTextQuestion"] = self.form_json[questionID]["IsShortTextQuestion"]
+            dict["KeyPhrases"] = list(self.keyPhraseDict[questionID])
+            exportObj.append(dict)
 
-        self.text.bind('<Double-Button-1>', self.doubleLeftClick)
-        self.text.bind('<ButtonRelease-1>', self.singleLeftClick)
+        newContent = json.dumps(exportObj)
 
-        self.setMapShow()
+        new_name = self.fileName + '_labeling.json'
+        label_file = open(new_name, 'w')
+        label_file.write(newContent)
+        label_file.close()
 
-        self.enter = Button(self, text="Enter", command=self.returnButton)
-        self.enter.grid(row=self.textRow +1, column=self.textColumn +1) 
-    
+    def prevPage(self):
+        responseList = self.currentTextQuestionBrief["Responses"]
+        if (self.currentBeginningAnswerID - 5 >= 0):
+            self.currentBeginningAnswerID = self.currentBeginningAnswerID - 5
+        if (self.currentBeginningAnswerID >= 0):
+            reachBeginning = False
+        else:
+            reachBeginning = True
+        if (reachBeginning is False):
+            for i in range(0, 5):
+                currentAnswerID = self.currentBeginningAnswerID + i
+                if currentAnswerID < len(responseList):
+                    if i == 0:
+                        self.answerText1.delete("1.0", END)
+                        self.answerText1.insert(END, responseList[currentAnswerID])
+                    if i == 1:
+                        self.answerText2.delete("1.0", END)
+                        self.answerText2.insert(END, responseList[currentAnswerID])
+                    if i == 2:
+                        self.answerText3.delete("1.0", END)
+                        self.answerText3.insert(END, responseList[currentAnswerID])
+                    if i == 3:
+                        self.answerText4.delete("1.0", END)
+                        self.answerText4.insert(END, responseList[currentAnswerID])
+                    if i == 4:
+                        self.answerText5.delete("1.0", END)
+                        self.answerText5.insert(END, responseList[currentAnswerID])
+                else:
+                    break
 
-    ## cursor index show with the left click
+    ##  cursor index show with the left click
+    def nextPage(self):
+        responseList = self.currentTextQuestionBrief["Responses"]
+        if (self.currentBeginningAnswerID  + 5 < len(responseList)):
+            self.currentBeginningAnswerID = self.currentBeginningAnswerID + 5
+        if (self.currentBeginningAnswerID < len(responseList)):
+            reachEnd = False
+        else:
+            reachEnd = True
+        for i in range(0, 5):
+            currentAnswerID = self.currentBeginningAnswerID + i
+            if currentAnswerID < len(responseList):
+                if i == 0:
+                    self.answerText1.delete("1.0", END)
+                    self.answerText1.insert(END, responseList[currentAnswerID])
+                if i == 1:
+                    self.answerText2.delete("1.0", END)
+                    self.answerText2.insert(END, responseList[currentAnswerID])
+                if i == 2:
+                    self.answerText3.delete("1.0", END)
+                    self.answerText3.insert(END, responseList[currentAnswerID])
+                if i == 3:
+                    self.answerText4.delete("1.0", END)
+                    self.answerText4.insert(END, responseList[currentAnswerID])
+                if i == 4:
+                    self.answerText5.delete("1.0", END)
+                    self.answerText5.insert(END, responseList[currentAnswerID])
+            elif reachEnd is False:
+                if i == 0:
+                    self.answerText1.delete("1.0", END)
+                if i == 1:
+                    self.answerText2.delete("1.0", END)
+                if i == 2:
+                    self.answerText3.delete("1.0", END)
+                if i == 3:
+                    self.answerText4.delete("1.0", END)
+                if i == 4:
+                    self.answerText5.delete("1.0", END)
+            else:
+                break
+
+    ##  cursor index show with the left click
     def singleLeftClick(self, event):
         if self.debug:
             print "Action Track: singleLeftClick"
@@ -188,7 +297,6 @@ class Example(Frame):
         cursor_text = ("row: %s\ncol: %s" % (row_column[0], row_column[-1]))
         self.cursorIndex.config(text=cursor_text)
 
-    
     ## TODO: select entity by double left click
     def doubleLeftClick(self, event):
         if self.debug:
@@ -198,8 +306,6 @@ class Example(Frame):
         # start_index = ("%s - %sc" % (cursor_index, 5))
         # end_index = ("%s + %sc" % (cursor_index, 5))
         # self.text.tag_add('SEL', '1.0',"end-1c")
-        
-        
 
     ## Disable right click default copy selection behaviour
     def rightClick(self, event):
@@ -218,7 +324,6 @@ class Example(Frame):
         self.RecommendModelFlag.config(text = str(self.recommendFlag))
         tkMessageBox.showinfo("Recommend Model", "Recommend Model has been activated!")
 
-
     def setInNotRecommendModel(self):
         self.recommendFlag = False 
         self.RecommendModelFlag.config(text = str(self.recommendFlag))
@@ -227,24 +332,108 @@ class Example(Frame):
         self.writeFile(self.fileName, content, '1.0')
         tkMessageBox.showinfo("Recommend Model", "Recommend Model has been deactivated!")
 
-
     def onOpen(self):
-        ftypes = [('all files', '.*'), ('text files', '.txt'), ('ann files', '.ann')]
-        dlg = tkFileDialog.Open(self, filetypes = ftypes)
-        # file_opt = options =  {}
-        # options['filetypes'] = [('all files', '.*'), ('text files', '.txt')]
-        # dlg = tkFileDialog.askopenfilename(**options)
+        ftypes = [('json files', '.json')]
+        dlg = tkFileDialog.Open(self, filetypes=ftypes)
         fl = dlg.show()
         if fl != '':
-            self.text.delete("1.0",END)
             text = self.readFile(fl)
-            self.text.insert(END, text)
             self.setNameLabel("File: " + fl)
-            self.autoLoadNewFile(self.fileName, "1.0")
-            # self.setDisplay()
-            # self.initAnnotate()
-            self.text.mark_set(INSERT, "1.0")
-            self.setCursorLabel(self.text.index(INSERT))
+            self.form_json = json.loads(text)
+
+            if self.form_json:
+                for i in range(0, len(self.form_json)):
+                    self.keyPhraseDict[i] = set()
+                self.currentTextQuestionBrief = self.form_json[0]
+                questionText = self.currentTextQuestionBrief["Title"]
+                self.question.delete("1.0", END)
+                self.question.insert(END, questionText)
+                responseList = self.currentTextQuestionBrief["Responses"]
+                for i in range(0, 5):
+                    currentAnswerID = self.currentBeginningAnswerID + i
+                    if currentAnswerID < len(responseList):
+                        if i == 0:
+                            self.answerText1.delete("1.0", END)
+                            self.answerText1.insert(END, responseList[currentAnswerID])
+                        if i == 1:
+                            self.answerText2.delete("1.0", END)
+                            self.answerText2.insert(END, responseList[currentAnswerID])
+                        if i == 2:
+                            self.answerText3.delete("1.0", END)
+                            self.answerText3.insert(END, responseList[currentAnswerID])
+                        if i == 3:
+                            self.answerText4.delete("1.0", END)
+                            self.answerText4.insert(END, responseList[currentAnswerID])
+                        if i == 4:
+                            self.answerText5.delete("1.0", END)
+                            self.answerText5.insert(END, responseList[currentAnswerID])
+                    else:
+                        break
+
+    def prevQuestion(self):
+        if self.form_json:
+            if (self.currentQuestionID - 1 >= 0):
+                self.currentQuestionID = self.currentQuestionID - 1
+            self.showLabeledKeyPhrase()
+            self.currentBeginningAnswerID = 0
+            self.currentTextQuestionBrief = self.form_json[self.currentQuestionID]
+            questionText = self.currentTextQuestionBrief["Title"]
+            self.question.delete("1.0", END)
+            self.question.insert(END, questionText)
+            responseList = self.currentTextQuestionBrief["Responses"]
+            for i in range(0, 5):
+                currentAnswerID = self.currentBeginningAnswerID + i
+                if currentAnswerID < len(responseList):
+                    if i == 0:
+                        self.answerText1.delete("1.0", END)
+                        self.answerText1.insert(END, responseList[currentAnswerID])
+                    if i == 1:
+                        self.answerText2.delete("1.0", END)
+                        self.answerText2.insert(END, responseList[currentAnswerID])
+                    if i == 2:
+                        self.answerText3.delete("1.0", END)
+                        self.answerText3.insert(END, responseList[currentAnswerID])
+                    if i == 3:
+                        self.answerText4.delete("1.0", END)
+                        self.answerText4.insert(END, responseList[currentAnswerID])
+                    if i == 4:
+                        self.answerText5.delete("1.0", END)
+                        self.answerText5.insert(END, responseList[currentAnswerID])
+                else:
+                    break
+
+
+    def nextQuestion(self):
+        if self.form_json:
+            if (self.currentQuestionID + 1 < len(self.form_json)):
+                self.currentQuestionID = self.currentQuestionID + 1
+            self.showLabeledKeyPhrase()
+            self.currentBeginningAnswerID = 0
+            self.currentTextQuestionBrief = self.form_json[self.currentQuestionID]
+            questionText = self.currentTextQuestionBrief["Title"]
+            self.question.delete("1.0", END)
+            self.question.insert(END, questionText)
+            responseList = self.currentTextQuestionBrief["Responses"]
+            for i in range(0, 5):
+                currentAnswerID = self.currentBeginningAnswerID + i
+                if currentAnswerID < len(responseList):
+                    if i == 0:
+                        self.answerText1.delete("1.0", END)
+                        self.answerText1.insert(END, responseList[currentAnswerID])
+                    if i == 1:
+                        self.answerText2.delete("1.0", END)
+                        self.answerText2.insert(END, responseList[currentAnswerID])
+                    if i == 2:
+                        self.answerText3.delete("1.0", END)
+                        self.answerText3.insert(END, responseList[currentAnswerID])
+                    if i == 3:
+                        self.answerText4.delete("1.0", END)
+                        self.answerText4.insert(END, responseList[currentAnswerID])
+                    if i == 4:
+                        self.answerText5.delete("1.0", END)
+                        self.answerText5.insert(END, responseList[currentAnswerID])
+                else:
+                    break
 
     def readFile(self, filename):
         f = open(filename, "rU")
@@ -270,16 +459,6 @@ class Example(Frame):
         cursor_text = ("row: %s\ncol: %s" % (row_column[0], row_column[-1]))
         self.cursorIndex.config(text=cursor_text)
 
-    def returnButton(self):
-        if self.debug:
-            print "Action Track: returnButton"
-        self.pushToHistory()
-        # self.returnEnter(event)
-        content = self.entry.get()
-        self.clearCommand()
-        self.executeEntryCommand(content)
-        return content
-
 
     def returnEnter(self,event):
         if self.debug:
@@ -291,18 +470,35 @@ class Example(Frame):
         return content
 
 
-    def textReturnEnter(self,event):
+    def answer1ReturnEnter(self,event):
         press_key = event.char
-        if self.debug:
-            print "Action Track: textReturnEnter"
-        self.pushToHistory()
         print "event: ", press_key
-        # content = self.text.get()
-        self.clearCommand()
-        self.executeCursorCommand(press_key.lower())
-        # self.deleteTextInput()
+        self.executeCursorCommand(press_key.lower(), self.answerText1, 0)
         return press_key
 
+    def answer2ReturnEnter(self,event):
+        press_key = event.char
+        print "event: ", press_key
+        self.executeCursorCommand(press_key.lower(), self.answerText2, 1)
+        return press_key
+
+    def answer3ReturnEnter(self,event):
+        press_key = event.char
+        print "event: ", press_key
+        self.executeCursorCommand(press_key.lower(), self.answerText3, 2)
+        return press_key
+
+    def answer4ReturnEnter(self,event):
+        press_key = event.char
+        print "event: ", press_key
+        self.executeCursorCommand(press_key.lower(), self.answerText4, 3)
+        return press_key
+
+    def answer5ReturnEnter(self,event):
+        press_key = event.char
+        print "event: ", press_key
+        self.executeCursorCommand(press_key.lower(), self.answerText5, 4)
+        return press_key
 
     def backToHistory(self,event):
         if self.debug:
@@ -332,183 +528,163 @@ class Example(Frame):
             print "Action Track: clearCommand"
         self.entry.delete(0, 'end')
 
-
     def getText(self):
         textContent = self.text.get("1.0","end-1c")
         textContent = textContent.encode('utf-8')
         return textContent
 
-    def executeCursorCommand(self,command):
-        if self.debug:
-            print "Action Track: executeCursorCommand"
-        content = self.getText()
+    ## TODO
+    def showLabeledKeyPhrase(self):
+        #this is the keyPhrase set for the question id
+        set = self.keyPhraseDict[self.currentQuestionID]
+        string = ''
+        for keyphrase in set:
+            ## insert each key phrase into the text widget
+            string = string + keyphrase
+            string = string + '\n'
+        self.presentText.delete("1.0", END)
+        self.presentText.insert(END, string)
+
+    #press a key
+
+    def executeCursorCommand(self, command, textWidget, index):
+        #content = self.getText()
         print("Command:"+command)
-        try:
-            firstSelection_index = self.text.index(SEL_FIRST)
-            cursor_index = self.text.index(SEL_LAST)
-            aboveHalf_content = self.text.get('1.0',firstSelection_index)
-            followHalf_content = self.text.get(firstSelection_index, "end-1c")
-            selected_string = self.text.selection_get()
-            if re.match(self.entityRe,selected_string) != None : 
-                ## if have selected entity
-                new_string_list = selected_string.strip('[@]').rsplit('#',1)
-                new_string = new_string_list[0]
-                followHalf_content = followHalf_content.replace(selected_string, new_string, 1)
-                selected_string = new_string
-                # cursor_index = "%s - %sc" % (cursor_index, str(len(new_string_list[1])+4))
-                cursor_index = cursor_index.split('.')[0]+"."+str(int(cursor_index.split('.')[1])-len(new_string_list[1])+4)
-            afterEntity_content = followHalf_content[len(selected_string):]
+        firstSelection_index = textWidget.index(SEL_FIRST)
+        cursor_index = textWidget.index(SEL_LAST)
 
-            if command == "q":
-                print 'q: remove entity label'
-            else:
-                if len(selected_string) > 0:
-                    entity_content, cursor_index = self.replaceString(selected_string, selected_string, command, cursor_index)
-            aboveHalf_content += entity_content
-            content = self.addRecommendContent(aboveHalf_content, afterEntity_content, self.recommendFlag)      
-            content = content.encode('utf-8')
-            self.writeFile(self.fileName, content, cursor_index)
-        except TclError:
-            ## not select text
-            cursor_index = self.text.index(INSERT)
-            [line_id, column_id] = cursor_index.split('.')
-            aboveLine_content =  self.text.get('1.0', str(int(line_id)-1) + '.end')
-            belowLine_content = self.text.get(str(int(line_id)+1)+'.0', "end-1c")
-            line = self.text.get(line_id + '.0', line_id + '.end')
-            matched_span =  (-1,-1)
-            detected_entity = -1 ## detected entity type:－1 not detected, 1 detected gold, 2 detected recommend
-            for match in re.finditer(self.entityRe, line):
-                if  match.span()[0]<= int(column_id) & int(column_id) <= match.span()[1]:
-                    matched_span = match.span()
-                    detected_entity = 1
-                    break
-            if detected_entity == -1:
-                for match in re.finditer(self.recommendRe, line):
-                    if  match.span()[0]<= int(column_id) & int(column_id) <= match.span()[1]:
-                        matched_span = match.span()
-                        detected_entity = 2
-                        break
-            line_before_entity = line
-            line_after_entity = ""
-            if matched_span[1] > 0 :
-                selected_string = line[matched_span[0]:matched_span[1]]
-                if detected_entity == 1:
-                    new_string_list = selected_string.strip('[@*]').rsplit('#',1)
-                elif detected_entity == 2:
-                    new_string_list = selected_string.strip('[$*]').rsplit('#',1)
-                new_string = new_string_list[0]
-                old_entity_type = new_string_list[1]
-                line_before_entity = line[:matched_span[0]]
-                line_after_entity =  line[matched_span[1]:]
-                selected_string = new_string
-                entity_content = selected_string
-                cursor_index = line_id + '.'+ str(int(matched_span[1])-(len(new_string_list[1])+4))
-                if command == "q":
-                    print 'q: remove entity label'
-                elif command == 'y':
-                    print "y: comfirm recommend label"
-                    old_key = self.pressCommand.keys()[self.pressCommand.values().index(old_entity_type)]
-                    entity_content, cursor_index = self.replaceString(selected_string, selected_string, old_key, cursor_index)
-                else:
-                    if len(selected_string) > 0:
-                        if command in self.pressCommand:
-                            entity_content, cursor_index = self.replaceString(selected_string, selected_string, command, cursor_index)
-                        else:
-                            return
-                line_before_entity += entity_content   
-            if aboveLine_content != '':
-                aboveHalf_content = aboveLine_content+ '\n' + line_before_entity
-            else:
-                aboveHalf_content =  line_before_entity
-                
-            if belowLine_content != '':
-                followHalf_content = line_after_entity + '\n' + belowLine_content
-            else:
-                followHalf_content = line_after_entity 
-                
-            content = self.addRecommendContent(aboveHalf_content, followHalf_content, self.recommendFlag)
-            content = content.encode('utf-8')
-            self.writeFile(self.fileName, content, cursor_index)
+        aboveHalf_content = textWidget.get('1.0', firstSelection_index)   #text before selected text
+        followHalf_content = textWidget.get(firstSelection_index, "end-1c")   #text begin at selected text
+        selected_string = textWidget.selection_get()
+        #if the selcted string has not been labeled
+        if re.match(self.entityRe, selected_string) != None :
+            ## if have selected entity
+            new_string = selected_string.strip('[@@]')
+            followHalf_content = followHalf_content.replace(selected_string, new_string, 1)
+            selected_string = new_string
+            cursor_index = cursor_index.split('.')[0]+"."+str(int(cursor_index.split('.')[1])-4)
+        afterEntity_content = followHalf_content[len(selected_string):]
 
+        if self.currentQuestionID not in self.keyPhraseDict:
+            self.keyPhraseDict[self.currentQuestionID] = set()
 
-    def executeEntryCommand(self,command):
-        if self.debug:
-            print "Action Track: executeEntryCommand"
-        if len(command) == 0:
-            currentCursor = self.text.index(INSERT)
-            newCurrentCursor = str(int(currentCursor.split('.')[0])+1) + ".0"
-            self.text.mark_set(INSERT, newCurrentCursor)
-            self.setCursorLabel(newCurrentCursor)
+        self.keyPhraseDict[self.currentQuestionID].add(selected_string.strip())
+        self.showLabeledKeyPhrase()
+        if command == "q":
+            print 'q: remove entity label'
         else:
-            command_list = decompositCommand(command)
-            for idx in range(0, len(command_list)):
-                command = command_list[idx]
-                if len(command) == 2:
-                    select_num = int(command[0])
-                    command = command[1]
-                    content = self.getText()
-                    cursor_index = self.text.index(INSERT)
-                    newcursor_index = cursor_index.split('.')[0]+"."+str(int(cursor_index.split('.')[1])+select_num)
-                    # print "new cursor position: ", select_num, " with ", newcursor_index, "with ", newcursor_index
-                    selected_string = self.text.get(cursor_index, newcursor_index).encode('utf-8')
-                    aboveHalf_content = self.text.get('1.0',cursor_index).encode('utf-8')
-                    followHalf_content = self.text.get(cursor_index, "end-1c").encode('utf-8')
-                    if command in self.pressCommand:
-                        if len(selected_string) > 0:
-                            # print "insert index: ", self.text.index(INSERT) 
-                            followHalf_content, newcursor_index = self.replaceString(followHalf_content, selected_string, command, newcursor_index)
-                            content = self.addRecommendContent(aboveHalf_content, followHalf_content, self.recommendFlag)
-                            # content = aboveHalf_content + followHalf_content
-                    self.writeFile(self.fileName, content, newcursor_index)
-            
+            if len(selected_string) > 0:
+                entity_content, cursor_index = self.replaceString(selected_string, selected_string, cursor_index)
+        aboveHalf_content += entity_content #first half content plus selected text with framework
+        #content = self.addRecommendContent(aboveHalf_content, afterEntity_content, self.recommendFlag)
+        ##  TODO
+        content = aboveHalf_content + afterEntity_content
+        content = content.encode('utf-8')
+        self.writeFile(self.fileName, content, index)
 
-    def deleteTextInput(self,event):
+    def deleteText1Input(self,event):
         if self.debug:
             print "Action Track: deleteTextInput"
-        get_insert = self.text.index(INSERT)
-        print "delete insert:",get_insert
+        get_insert = self.answerText1.index(INSERT)
+        print "delete insert:", get_insert
         insert_list = get_insert.split('.')
         last_insert = insert_list[0] + "." + str(int(insert_list[1])-1)
-        get_input = self.text.get(last_insert, get_insert).encode('utf-8')
+        get_input = self.answerText1.get(last_insert, get_insert).encode('utf-8')
         # print "get_input: ", get_input
-        aboveHalf_content = self.text.get('1.0',last_insert).encode('utf-8')
-        followHalf_content = self.text.get(last_insert, "end-1c").encode('utf-8')
+        aboveHalf_content = self.answerText1.get('1.0', last_insert).encode('utf-8')
+        followHalf_content = self.answerText1.get(last_insert, "end-1c").encode('utf-8')
         if len(get_input) > 0: 
             followHalf_content = followHalf_content.replace(get_input, '', 1)
         content = aboveHalf_content + followHalf_content
-        self.writeFile(self.fileName, content, last_insert)
+        self.writeFile(self.fileName, content, 0)
 
+    def deleteText2Input(self,event):
+        if self.debug:
+            print "Action Track: deleteTextInput"
+        get_insert = self.answerText2.index(INSERT)
+        print "delete insert:", get_insert
+        insert_list = get_insert.split('.')
+        last_insert = insert_list[0] + "." + str(int(insert_list[1])-1)
+        get_input = self.answerText2.get(last_insert, get_insert).encode('utf-8')
+        # print "get_input: ", get_input
+        aboveHalf_content = self.answerText2.get('1.0', last_insert).encode('utf-8')
+        followHalf_content = self.answerText2.get(last_insert, "end-1c").encode('utf-8')
+        if len(get_input) > 0:
+            followHalf_content = followHalf_content.replace(get_input, '', 1)
+        content = aboveHalf_content + followHalf_content
+        self.writeFile(self.fileName, content, 1)
 
+    def deleteText3Input(self,event):
+        if self.debug:
+            print "Action Track: deleteTextInput"
+        get_insert = self.answerText3.index(INSERT)
+        print "delete insert:", get_insert
+        insert_list = get_insert.split('.')
+        last_insert = insert_list[0] + "." + str(int(insert_list[1])-1)
+        get_input = self.answerText3.get(last_insert, get_insert).encode('utf-8')
+        # print "get_input: ", get_input
+        aboveHalf_content = self.answerText3.get('1.0', last_insert).encode('utf-8')
+        followHalf_content = self.answerText3.get(last_insert, "end-1c").encode('utf-8')
+        if len(get_input) > 0:
+            followHalf_content = followHalf_content.replace(get_input, '', 1)
+        content = aboveHalf_content + followHalf_content
+        self.writeFile(self.fileName, content, 2)
 
-    def replaceString(self, content, string, replaceType, cursor_index):
-        if replaceType in self.pressCommand:
-            new_string = "[@" + string + "#" + self.pressCommand[replaceType] + "*]" 
-            newcursor_index = cursor_index.split('.')[0]+"."+str(int(cursor_index.split('.')[1])+len(self.pressCommand[replaceType])+5)
-        else:
-            print "Invaild command!"  
-            print "cursor index: ", self.text.index(INSERT)  
-            return content, cursor_index
+    def deleteText4Input(self,event):
+        if self.debug:
+            print "Action Track: deleteTextInput"
+        get_insert = self.answerText4.index(INSERT)
+        print "delete insert:", get_insert
+        insert_list = get_insert.split('.')
+        last_insert = insert_list[0] + "." + str(int(insert_list[1])-1)
+        get_input = self.answerText4.get(last_insert, get_insert).encode('utf-8')
+        # print "get_input: ", get_input
+        aboveHalf_content = self.answerText4.get('1.0', last_insert).encode('utf-8')
+        followHalf_content = self.answerText4.get(last_insert, "end-1c").encode('utf-8')
+        if len(get_input) > 0:
+            followHalf_content = followHalf_content.replace(get_input, '', 1)
+        content = aboveHalf_content + followHalf_content
+        self.writeFile(self.fileName, content, 3)
+
+    def deleteText5Input(self, event):
+        if self.debug:
+            print "Action Track: deleteTextInput"
+        get_insert = self.answerText5.index(INSERT)
+        print "delete insert:", get_insert
+        insert_list = get_insert.split('.')
+        last_insert = insert_list[0] + "." + str(int(insert_list[1]) - 1)
+        get_input = self.answerText5.get(last_insert, get_insert).encode('utf-8')
+        # print "get_input: ", get_input
+        aboveHalf_content = self.answerText5.get('1.0', last_insert).encode('utf-8')
+        followHalf_content = self.answerText5.get(last_insert, "end-1c").encode('utf-8')
+        if len(get_input) > 0:
+            followHalf_content = followHalf_content.replace(get_input, '', 1)
+        content = aboveHalf_content + followHalf_content
+        self.writeFile(self.fileName, content, 4)
+
+    def replaceString(self, content, string, cursor_index):
+        new_string = "[@" + string + "@]"
+        newcursor_index = cursor_index.split('.')[0]+"."+str(int(cursor_index.split('.')[1])+4)
+
         content = content.replace(string, new_string, 1)
         return content, newcursor_index
 
-
-    def writeFile(self, fileName, content, newcursor_index):
-        if self.debug:
-                print "Action track: writeFile"
-
+    def writeFile(self, fileName, content, index):
         if len(fileName) > 0:
+            self.form_json[self.currentQuestionID]["Responses"][self.currentBeginningAnswerID + index]=content
+            newContent=json.dumps(self.form_json)
+
             if ".ann" in fileName:
                 new_name = fileName
                 ann_file = open(new_name, 'w')
-                ann_file.write(content)
+                ann_file.write(newContent)
                 ann_file.close()
             else:
                 new_name = fileName+'.ann'
                 ann_file = open(new_name, 'w')
-                ann_file.write(content)
-                ann_file.close()   
-            # print "Writed to new file: ", new_name 
-            self.autoLoadNewFile(new_name, newcursor_index)
+                ann_file.write(newContent)
+                ann_file.close()
+            self.autoLoadNewFile(new_name)
             # self.generateSequenceFile()
         else:
             print "Don't write to empty file!"        
@@ -521,20 +697,6 @@ class Example(Frame):
                 print "Action Track: addRecommendContent, start Recommend entity"
             content = maximum_matching(train_data, decode_data)
         return content
-
-    def autoLoadNewFile(self, fileName, newcursor_index):
-        if self.debug:
-            print "Action Track: autoLoadNewFile"
-        if len(fileName) > 0:
-            self.text.delete("1.0",END)
-            text = self.readFile(fileName)
-            self.text.insert("end-1c", text)
-            self.setNameLabel("File: " + fileName)
-            self.text.mark_set(INSERT, newcursor_index)
-            self.text.see(newcursor_index)
-            self.setCursorLabel(newcursor_index)
-            self.setColorDisplay()
-            
 
     def setColorDisplay(self):
         if self.debug:
@@ -658,6 +820,37 @@ class Example(Frame):
         self.setMapShow()
         tkMessageBox.showinfo("Remap Notification", "Shortcut map has been updated!\n\nConfigure file has been saved in File:" + self.configFile)
 
+    def autoLoadNewFile(self, fileName):
+        if len(fileName) > 0:
+            text = self.readFile(fileName)
+            self.form_json = json.loads(text)
+
+            if self.form_json:
+                self.currentTextQuestionBrief = self.form_json[self.currentQuestionID]
+                questionText = self.currentTextQuestionBrief["Title"]
+                self.question.delete("1.0", END)
+                self.question.insert(END, questionText)
+                responseList = self.currentTextQuestionBrief["Responses"]
+                for i in range(0, 5):
+                    currentAnswerID = self.currentBeginningAnswerID + i
+                    if currentAnswerID < len(responseList):
+                        if i == 0:
+                            self.answerText1.delete("1.0", END)
+                            self.answerText1.insert(END, responseList[currentAnswerID])
+                        if i == 1:
+                            self.answerText2.delete("1.0", END)
+                            self.answerText2.insert(END, responseList[currentAnswerID])
+                        if i == 2:
+                            self.answerText3.delete("1.0", END)
+                            self.answerText3.insert(END, responseList[currentAnswerID])
+                        if i == 3:
+                            self.answerText4.delete("1.0", END)
+                            self.answerText4.insert(END, responseList[currentAnswerID])
+                        if i == 4:
+                            self.answerText5.delete("1.0", END)
+                            self.answerText5.insert(END, responseList[currentAnswerID])
+                    else:
+                        break
 
     ## show shortcut map
     def setMapShow(self):
@@ -668,7 +861,7 @@ class Example(Frame):
         width = 2
         row = 0
         mapLabel = Label(self, text ="Shortcuts map Labels", foreground="blue", font=(self.textFontStyle, 14, "bold"))
-        mapLabel.grid(row=0, column = self.textColumn +2,columnspan=2, rowspan = 1, padx = 10)
+        mapLabel.grid(row=0, column = self.textColumn + 2, columnspan=2, rowspan = 1, padx = 10)
         self.labelEntryList = []
         self.shortcutLabelList = []
         for key in sorted(self.pressCommand):
@@ -844,11 +1037,6 @@ def removeRecommendContent(content, recommendRe = r'\[\$.*?\#.*?\*\](?!\#)'):
     output_content += content[last_match_end:]
     return output_content
 
-
-
-
-
-
 def decompositCommand(command_string):
     command_list = []
     each_command = []
@@ -865,17 +1053,14 @@ def decompositCommand(command_string):
     # print command_list
     return command_list
 
-
-
 def main():
     print("SUTDAnnotator launched!")
     print(("OS:%s")%(platform.system()))
     root = Tk()
-    root.geometry("1300x700+200+200")
+    root.geometry("1300x800+200+200")
     app = Example(root)
     app.setFont(17)
     root.mainloop()  
-
 
 if __name__ == '__main__':
     main()
