@@ -1,0 +1,5 @@
+# Binary components
+*.pyc
+
+# Images which can be regenerated
+*.png
