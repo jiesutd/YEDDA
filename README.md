@@ -25,8 +25,10 @@ It provides both annotator interface for efficient annotatation and admin interf
 Use as an annotator ?
 ====
 * Start the interface: run `python YEDDA_Annotator.py`
+* Select a shortcut map from `./configs/` in the right top drop-down list
 * Configure your shortcut map in the right side of annotation interface, you can leave other labels empty if the shortcut number is enough. For example: `a: Action; b: Loc; c: Cont`
 * Click the `ReMap` button to store the map setting
+* Click the `ReMap` button to overwrite and store the map setting, or click the `NewMap` button to store the map setting in a new file under `./configs/`
 * Click `Open` button and select your input file. (You may set your file name ended with .txt or .ann if possible)
 
 This tool supports two ways of annotation (annotated text format `[@the text span＃Location*]`):
@@ -38,6 +40,7 @@ Intelligent recommendation:
 * If recommendation model is enabled, system will recommend entities based on the annotated text. Recommendation span is formatted as  `[$the text span＃Location*]`in green color. (Notice the difference of annotated and recommended span, the former starts with `[@` while the later starts with `[$`)
 
 The annotated results will be stored synchronously. Annotated file is located at the same directory with origin file with the name of ***"origin name + .ann"***
+Please also note that the shortcut map can be switched seamlessly in the right top drop-down list
 
 Use as an administrator ?
 ====
@@ -78,6 +81,7 @@ If you use YEDDA for research, please cite our [ACL paper](https://arxiv.org/pdf
 
 Updating...
 ====
+* 2018-Oct-20, YEDDA has a slight update in which shortcut maps can be edited, stored and switched seamlessly.
 * 2018-May-07, Repository is renamed as YEDDA now!
 * 2018-May-01, Our paper has been accepted as a demonstration at ACL 2018.
 * 2017-Sep-27, (YEDDA V 1.0): project was officially named as YEDDA ! See our paper [here](https://arxiv.org/pdf/1711.03759.pdf).
