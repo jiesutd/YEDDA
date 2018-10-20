@@ -44,6 +44,8 @@ class Example(Frame):
         self.controlCommand = {'q':"unTag", 'ctrl+z':'undo'}
         self.labelEntryList = []
         self.shortcutLabelList = []
+        self.configListLabel = None
+        self.configListBox = None
         # default GUI display parameter
         if len(self.pressCommand) > 20:
             self.textRow = len(self.pressCommand)
@@ -701,15 +703,10 @@ class Example(Frame):
                 self.pressCommand = pickle.load(fp)
         hight = len(self.pressCommand)
         width = 2
-        row = 1
-        configListBox = Combobox(self, values=getConfigList(), state='readonly')
-        configListBox.grid(row=0, column = self.textColumn +2,columnspan=2, rowspan = 1, padx = 6)
-        # select current config file
-        configListBox.set(self.configFile.split(os.sep)[-1])
-        # configListBox.pack()
-        configListBox.bind('<<ComboboxSelected>>', self.on_select)
+        row = 0
+
         mapLabel = Label(self, text ="Shortcuts map Labels", foreground="blue", font=(self.textFontStyle, 14, "bold"))
-        mapLabel.grid(row=1, column = self.textColumn +2,columnspan=2, rowspan = 1, padx = 10)
+        mapLabel.grid(row=0, column = self.textColumn +2,columnspan=2, rowspan = 1, padx = 10)
 
         # destroy all previous widgets before switching shortcut maps
         if self.labelEntryList is not None and type(self.labelEntryList) is type([]):
@@ -733,6 +730,18 @@ class Example(Frame):
             labelEntry.grid(row=row, column = self.textColumn +3, columnspan=1, rowspan = 1)
             self.labelEntryList.append(labelEntry)
             # print "row: ", row
+
+        if self.configListLabel is not None:
+            self.configListLabel.destroy()
+        if self.configListBox is not None:
+            self.configListBox.destroy()
+        self.configListLabel = Label(self, text="Map Templates", foreground="blue", font=(self.textFontStyle, 14, "bold"))
+        self.configListLabel.grid(row=row + 1, column=self.textColumn + 2, columnspan=2, rowspan=1, padx=10)
+        self.configListBox = Combobox(self, values=getConfigList(), state='readonly')
+        self.configListBox.grid(row=row + 2, column=self.textColumn + 2, columnspan=2, rowspan=1, padx=6)
+        # select current config file
+        self.configListBox.set(self.configFile.split(os.sep)[-1])
+        self.configListBox.bind('<<ComboboxSelected>>', self.on_select)
 
     def on_select(self, event=None):
         if event and self.debug:
