@@ -2,7 +2,7 @@
 # @Author: Jie Yang from SUTD
 # @Date:   2016-Jan-06 17:11:59
 # @Last Modified by:   Jie Yang,     Contact: jieynlp@gmail.com
-# @Last Modified time: 2018-07-15 20:33:40
+# @Last Modified time: 2018-10-20 17:01:40
 #!/usr/bin/env python
 # coding=utf-8
 
@@ -53,7 +53,7 @@ class Example(Frame):
         self.tagScheme = "BMES"
         self.onlyNP = False  ## for exporting sequence 
         self.keepRecommend = True
-        
+
 
         '''
         self.seged: for exporting sequence, if True then split words with space, else split character without space
@@ -61,7 +61,7 @@ class Example(Frame):
         if your data is Chinese without segmentation, you need to set this flag as False
         '''
         self.seged = True  ## False for non-segmentated Chinese, True for English or Segmented Chinese
-        self.configFile = "config"
+        self.configFile = "configs/default.config"
         self.entityRe = r'\[\@.*?\#.*?\*\](?!\#)'
         self.insideNestEntityRe = r'\[\@\[\@(?!\[\@).*?\#.*?\*\]\#'
         self.recommendRe = r'\[\$.*?\#.*?\*\](?!\#)'
@@ -75,13 +75,13 @@ class Example(Frame):
         self.selectColor = 'light salmon'
         self.textFontStyle = "Times"
         self.initUI()
-        
-        
+
+
     def initUI(self):
-      
+
         self.parent.title(self.Version)
         self.pack(fill=BOTH, expand=True)
-        
+
         for idx in range(0,self.textColumn):
             self.columnconfigure(idx, weight =2)
         # self.columnconfigure(0, weight=2)
@@ -89,7 +89,7 @@ class Example(Frame):
         self.columnconfigure(self.textColumn+4, weight=1)
         for idx in range(0,16):
             self.rowconfigure(idx, weight =1)
-        
+
         self.lbl = Label(self, text="File: no file is opened")
         self.lbl.grid(sticky=W, pady=4, padx=5)
         self.fnt = tkFont.Font(family=self.textFontStyle,size=self.textRow,weight="bold",underline=0)
@@ -98,8 +98,8 @@ class Example(Frame):
 
         self.sb = Scrollbar(self)
         self.sb.grid(row = 1, column = self.textColumn, rowspan = self.textRow, padx=0, sticky = E+W+S+N)
-        self.text['yscrollcommand'] = self.sb.set 
-        self.sb['command'] = self.text.yview 
+        self.text['yscrollcommand'] = self.sb.set
+        self.sb['command'] = self.text.yview
         # self.sb.pack()
 
         abtn = Button(self, text="Open", command=self.onOpen)
@@ -114,12 +114,15 @@ class Example(Frame):
         ubtn = Button(self, text="ReMap", command=self.renewPressCommand)
         ubtn.grid(row=4, column=self.textColumn +1, pady=4)
 
+        ubtn = Button(self, text="NewMap", command=self.savenewPressCommand)
+        ubtn.grid(row=5, column=self.textColumn +1, pady=4)
+
         exportbtn = Button(self, text="Export", command=self.generateSequenceFile)
-        exportbtn.grid(row=5, column=self.textColumn + 1, pady=4)
-        
+        exportbtn.grid(row=6, column=self.textColumn + 1, pady=4)
+
 
         cbtn = Button(self, text="Quit", command=self.quit)
-        cbtn.grid(row=6, column=self.textColumn + 1, pady=4)
+        cbtn.grid(row=7, column=self.textColumn + 1, pady=4)
 
         self.cursorName = Label(self, text="Cursor: ", foreground="Blue", font=(self.textFontStyle, 14, "bold"))
         self.cursorName.grid(row=9, column=self.textColumn +1, pady=4)
@@ -139,7 +142,7 @@ class Example(Frame):
         # b = Radiobutton(self.parent, text="NotRecommend",   width=12,  variable=recommend_value, value="N")
         # # b.grid(row =1 , column = 3)
         # b.pack(side='left')
-       
+
 
         lbl_entry = Label(self, text="Command:")
         lbl_entry.grid(row = self.textRow +1,  sticky = E+W+S+N, pady=4,padx=4)
@@ -147,9 +150,9 @@ class Example(Frame):
         self.entry.grid(row = self.textRow +1, columnspan=self.textColumn + 1, rowspan = 1, sticky = E+W+S+N, pady=4, padx=80)
         self.entry.bind('<Return>', self.returnEnter)
 
-        
 
-        
+
+
         # for press_key in self.pressCommand.keys():
         for idx in range(0, len(self.allKey)):
             press_key = self.allKey[idx]
@@ -176,19 +179,19 @@ class Example(Frame):
         self.setMapShow()
 
         self.enter = Button(self, text="Enter", command=self.returnButton)
-        self.enter.grid(row=self.textRow +1, column=self.textColumn +1) 
-    
+        self.enter.grid(row=self.textRow +1, column=self.textColumn +1)
+
 
     ## cursor index show with the left click
     def singleLeftClick(self, event):
         if self.debug:
             print "Action Track: singleLeftClick"
-        cursor_index = self.text.index(INSERT) 
+        cursor_index = self.text.index(INSERT)
         row_column = cursor_index.split('.')
         cursor_text = ("row: %s\ncol: %s" % (row_column[0], row_column[-1]))
         self.cursorIndex.config(text=cursor_text)
 
-    
+
     ## TODO: select entity by double left click
     def doubleLeftClick(self, event):
         if self.debug:
@@ -198,8 +201,8 @@ class Example(Frame):
         # start_index = ("%s - %sc" % (cursor_index, 5))
         # end_index = ("%s + %sc" % (cursor_index, 5))
         # self.text.tag_add('SEL', '1.0',"end-1c")
-        
-        
+
+
 
     ## Disable right click default copy selection behaviour
     def rightClick(self, event):
@@ -220,7 +223,7 @@ class Example(Frame):
 
 
     def setInNotRecommendModel(self):
-        self.recommendFlag = False 
+        self.recommendFlag = False
         self.RecommendModelFlag.config(text = str(self.recommendFlag))
         content = self.getText()
         content = removeRecommendContent(content,self.recommendRe)
@@ -259,7 +262,7 @@ class Example(Frame):
         _underline=0
         fnt = tkFont.Font(family= _family,size= _size,weight= _weight,underline= _underline)
         Text(self, font=fnt)
-    
+
     def setNameLabel(self, new_file):
         self.lbl.config(text=new_file)
 
@@ -349,7 +352,7 @@ class Example(Frame):
             aboveHalf_content = self.text.get('1.0',firstSelection_index)
             followHalf_content = self.text.get(firstSelection_index, "end-1c")
             selected_string = self.text.selection_get()
-            if re.match(self.entityRe,selected_string) != None : 
+            if re.match(self.entityRe,selected_string) != None :
                 ## if have selected entity
                 new_string_list = selected_string.strip('[@]').rsplit('#',1)
                 new_string = new_string_list[0]
@@ -365,7 +368,7 @@ class Example(Frame):
                 if len(selected_string) > 0:
                     entity_content, cursor_index = self.replaceString(selected_string, selected_string, command, cursor_index)
             aboveHalf_content += entity_content
-            content = self.addRecommendContent(aboveHalf_content, afterEntity_content, self.recommendFlag)      
+            content = self.addRecommendContent(aboveHalf_content, afterEntity_content, self.recommendFlag)
             content = content.encode('utf-8')
             self.writeFile(self.fileName, content, cursor_index)
         except TclError:
@@ -415,17 +418,17 @@ class Example(Frame):
                             entity_content, cursor_index = self.replaceString(selected_string, selected_string, command, cursor_index)
                         else:
                             return
-                line_before_entity += entity_content   
+                line_before_entity += entity_content
             if aboveLine_content != '':
                 aboveHalf_content = aboveLine_content+ '\n' + line_before_entity
             else:
                 aboveHalf_content =  line_before_entity
-                
+
             if belowLine_content != '':
                 followHalf_content = line_after_entity + '\n' + belowLine_content
             else:
-                followHalf_content = line_after_entity 
-                
+                followHalf_content = line_after_entity
+
             content = self.addRecommendContent(aboveHalf_content, followHalf_content, self.recommendFlag)
             content = content.encode('utf-8')
             self.writeFile(self.fileName, content, cursor_index)
@@ -460,7 +463,7 @@ class Example(Frame):
                             content = self.addRecommendContent(aboveHalf_content, followHalf_content, self.recommendFlag)
                             # content = aboveHalf_content + followHalf_content
                     self.writeFile(self.fileName, content, newcursor_index)
-            
+
 
     def deleteTextInput(self,event):
         if self.debug:
@@ -473,7 +476,7 @@ class Example(Frame):
         # print "get_input: ", get_input
         aboveHalf_content = self.text.get('1.0',last_insert).encode('utf-8')
         followHalf_content = self.text.get(last_insert, "end-1c").encode('utf-8')
-        if len(get_input) > 0: 
+        if len(get_input) > 0:
             followHalf_content = followHalf_content.replace(get_input, '', 1)
         content = aboveHalf_content + followHalf_content
         self.writeFile(self.fileName, content, last_insert)
@@ -482,11 +485,11 @@ class Example(Frame):
 
     def replaceString(self, content, string, replaceType, cursor_index):
         if replaceType in self.pressCommand:
-            new_string = "[@" + string + "#" + self.pressCommand[replaceType] + "*]" 
+            new_string = "[@" + string + "#" + self.pressCommand[replaceType] + "*]"
             newcursor_index = cursor_index.split('.')[0]+"."+str(int(cursor_index.split('.')[1])+len(self.pressCommand[replaceType])+5)
         else:
-            print "Invaild command!"  
-            print "cursor index: ", self.text.index(INSERT)  
+            print "Invaild command!"
+            print "cursor index: ", self.text.index(INSERT)
             return content, cursor_index
         content = content.replace(string, new_string, 1)
         return content, newcursor_index
@@ -506,12 +509,12 @@ class Example(Frame):
                 new_name = fileName+'.ann'
                 ann_file = open(new_name, 'w')
                 ann_file.write(content)
-                ann_file.close()   
-            # print "Writed to new file: ", new_name 
+                ann_file.close()
+            # print "Writed to new file: ", new_name
             self.autoLoadNewFile(new_name, newcursor_index)
             # self.generateSequenceFile()
         else:
-            print "Don't write to empty file!"        
+            print "Don't write to empty file!"
 
     def addRecommendContent(self, train_data, decode_data, recommendMode):
         if not recommendMode:
@@ -534,7 +537,7 @@ class Example(Frame):
             self.text.see(newcursor_index)
             self.setCursorLabel(newcursor_index)
             self.setColorDisplay()
-            
+
 
     def setColorDisplay(self):
         if self.debug:
@@ -545,7 +548,7 @@ class Example(Frame):
         currentCursor = self.text.index(INSERT)
         lineStart = currentCursor.split('.')[0] + '.0'
         lineEnd = currentCursor.split('.')[0] + '.end'
-         
+
         if self.colorAllChunk:
             self.text.mark_set("matchStart", "1.0")
             self.text.mark_set("matchEnd", "1.0")
@@ -568,7 +571,7 @@ class Example(Frame):
                 break
             self.text.mark_set("matchStart", pos)
             self.text.mark_set("matchEnd", "%s+%sc" % (pos, countVar.get()))
-            
+
             first_pos = pos
             second_pos = "%s+%sc" % (pos, str(1))
             lastsecond_pos = "%s+%sc" % (pos, str(int(countVar.get())-1))
@@ -576,7 +579,7 @@ class Example(Frame):
 
             self.text.tag_add("catagory", second_pos, lastsecond_pos)
             self.text.tag_add("edge", first_pos, second_pos)
-            self.text.tag_add("edge", lastsecond_pos, last_pos)   
+            self.text.tag_add("edge", lastsecond_pos, last_pos)
         ## color recommend type
         while True:
             self.text.tag_configure("recommend", background=self.recommendColor)
@@ -585,14 +588,14 @@ class Example(Frame):
                 break
             self.text.mark_set("recommend_matchStart", recommend_pos)
             self.text.mark_set("recommend_matchEnd", "%s+%sc" % (recommend_pos, countVar.get()))
-            
+
             first_pos = recommend_pos
             # second_pos = "%s+%sc" % (recommend_pos, str(1))
             lastsecond_pos = "%s+%sc" % (recommend_pos, str(int(countVar.get())))
             self.text.tag_add("recommend", first_pos, lastsecond_pos)
-            
-        
-        ## color the most inside span for nested span, scan from begin to end again  
+
+
+        ## color the most inside span for nested span, scan from begin to end again
         if self.colorAllChunk:
             self.text.mark_set("matchStart", "1.0")
             self.text.mark_set("matchEnd", "1.0")
@@ -610,8 +613,8 @@ class Example(Frame):
             self.text.mark_set("matchEnd", "%s+%sc" % (pos, countVar.get()))
             first_pos = "%s + %sc" %(pos, 2)
             last_pos = "%s + %sc" %(pos, str(int(countVar.get())-1))
-            self.text.tag_add("insideEntityColor", first_pos, last_pos)   
-    
+            self.text.tag_add("insideEntityColor", first_pos, last_pos)
+
     def pushToHistory(self):
         if self.debug:
             print "Action Track: pushToHistory"
@@ -646,18 +649,50 @@ class Example(Frame):
             label = self.labelEntryList[seq].get()
             if len(label) > 0:
                 new_dict[key] = label
-            else: 
+            else:
                 delete_num += 1
             seq += 1
         self.pressCommand = new_dict
         for idx in range(1, delete_num+1):
             self.labelEntryList[listLength-idx].delete(0,END)
-            self.shortcutLabelList[listLength-idx].config(text="NON= ") 
+            self.shortcutLabelList[listLength-idx].config(text="NON= ")
         with open(self.configFile, 'wb') as fp:
             pickle.dump(self.pressCommand, fp)
         self.setMapShow()
         tkMessageBox.showinfo("Remap Notification", "Shortcut map has been updated!\n\nConfigure file has been saved in File:" + self.configFile)
 
+    ## save as new shortcut map
+    def savenewPressCommand(self):
+        if self.debug:
+            print "Action Track: savenewPressCommand"
+        seq = 0
+        new_dict = {}
+        listLength = len(self.labelEntryList)
+        delete_num = 0
+        for key in sorted(self.pressCommand):
+            label = self.labelEntryList[seq].get()
+            if len(label) > 0:
+                new_dict[key] = label
+            else:
+                delete_num += 1
+            seq += 1
+        self.pressCommand = new_dict
+        for idx in range(1, delete_num+1):
+            self.labelEntryList[listLength-idx].delete(0,END)
+            self.shortcutLabelList[listLength-idx].config(text="NON= ")
+        # prompt to ask configFile name
+        self.configFile = tkFileDialog.asksaveasfilename(initialdir="./configs/",
+                                                         title="Save New Config",
+                                                         filetypes=(("YEDDA configs", "*.config"), ("all files", "*.*")))
+        # change to relative path following self.init()
+        self.configFile = os.path.relpath(self.configFile)
+        # make sure ending with ".config"
+        if not self.configFile.endswith(".config"):
+            self.configFile += ".config"
+        with open(self.configFile, 'wb') as fp:
+            pickle.dump(self.pressCommand, fp)
+        self.setMapShow()
+        tkMessageBox.showinfo("Save New Map Notification", "Shortcut map has been saved and updated!\n\nConfigure file has been saved in File:" + self.configFile)
 
     ## show shortcut map
     def setMapShow(self):
@@ -666,11 +701,26 @@ class Example(Frame):
                 self.pressCommand = pickle.load(fp)
         hight = len(self.pressCommand)
         width = 2
-        row = 0
+        row = 1
+        configListBox = Combobox(self, values=getConfigList(), state='readonly')
+        configListBox.grid(row=0, column = self.textColumn +2,columnspan=2, rowspan = 1, padx = 6)
+        # select current config file
+        configListBox.set(self.configFile.split(os.sep)[-1])
+        # configListBox.pack()
+        configListBox.bind('<<ComboboxSelected>>', self.on_select)
         mapLabel = Label(self, text ="Shortcuts map Labels", foreground="blue", font=(self.textFontStyle, 14, "bold"))
-        mapLabel.grid(row=0, column = self.textColumn +2,columnspan=2, rowspan = 1, padx = 10)
+        mapLabel.grid(row=1, column = self.textColumn +2,columnspan=2, rowspan = 1, padx = 10)
+
+        # destroy all previous widgets before switching shortcut maps
+        if self.labelEntryList is not None and type(self.labelEntryList) is type([]):
+            for x in self.labelEntryList:
+                x.destroy()
+        if self.shortcutLabelList is not None and type(self.shortcutLabelList) is type([]):
+            for x in self.shortcutLabelList:
+                x.destroy()
         self.labelEntryList = []
         self.shortcutLabelList = []
+
         for key in sorted(self.pressCommand):
             row += 1
             # print "key: ", key, "  command: ", self.pressCommand[key]
@@ -684,13 +734,18 @@ class Example(Frame):
             self.labelEntryList.append(labelEntry)
             # print "row: ", row
 
+    def on_select(self, event=None):
+        if event and self.debug:
+            print("Change shortcut map to: ", event.widget.get())
+        self.configFile = os.path.join("configs", event.widget.get())
+        self.setMapShow()
 
     def getCursorIndex(self):
         return self.text.index(INSERT)
 
 
     def generateSequenceFile(self):
-        if (".ann" not in self.fileName) and (".txt" not in self.fileName): 
+        if (".ann" not in self.fileName) and (".txt" not in self.fileName):
             out_error = "Export only works on filename ended in .ann or .txt!\nPlease rename file."
             print out_error
             tkMessageBox.showerror("Export error!", out_error)
@@ -715,7 +770,7 @@ class Example(Frame):
         seqFile.close()
         print "Exported file into sequence style in file: ",new_filename
         print "Line number:",lineNum
-        showMessage =  "Exported file successfully!\n\n"   
+        showMessage =  "Exported file successfully!\n\n"
         showMessage += "Tag scheme: " +self.tagScheme + "\n\n"
         showMessage += "Keep Recom: " +str(self.keepRecommend) + "\n\n"
         showMessage += "Text Seged: " +str(self.seged) + "\n\n"
@@ -723,6 +778,11 @@ class Example(Frame):
         showMessage += "Saved to File: " + new_filename
         tkMessageBox.showinfo("Export Message", showMessage)
 
+
+def getConfigList():
+    fileNames = os.listdir("./configs")
+    filteredFileNames = sorted(filter(lambda x: (not x.startswith(".")) and (x.endswith(".config")), fileNames))
+    return list(filteredFileNames)
 
 def getWordTagPairs(tagedSentence, seged=True, tagScheme="BMES", onlyNP=False, entityRe=r'\[\@.*?\#.*?\*\]'):
     newSent = tagedSentence.strip('\n').decode('utf-8')
@@ -800,7 +860,7 @@ def turnFullListToOutputPair(fullList, seged=True, tagScheme="BMES", onlyNP=Fals
                 eachList[0] = eachList[0].split()
             for idx in range(0, len(eachList[0])):
                 basicContent = eachList[0][idx]
-                if basicContent == ' ': 
+                if basicContent == ' ':
                     continue
                 pair = basicContent + ' ' + 'O\n'
                 pairList.append(pair.encode('utf-8'))
@@ -874,7 +934,7 @@ def main():
     root.geometry("1300x700+200+200")
     app = Example(root)
     app.setFont(17)
-    root.mainloop()  
+    root.mainloop()
 
 
 if __name__ == '__main__':
