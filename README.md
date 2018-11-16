@@ -1,4 +1,4 @@
-![YEDDA Logo](https://github.com/jiesutd/YEDDA/blob/master/YEDDAlogo.png) YEDDA: A Lightweight Collaborative Text Span Annotation Tool
+![YEDDA Logo](https://github.com/jiesutd/YEDDA/blob/master/YEDDAlogo.png) #YEDDA: A Lightweight Collaborative Text Span Annotation Tool
 
 --------------------------------------------------------------------------------
 
