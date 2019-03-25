@@ -28,7 +28,7 @@ It provides both annotator interface for efficient annotatation and admin interf
 
 Use as an annotator ?
 ====
-* Start the interface: run `python YEDDA_Annotator.py`
+* Start the interface: run `python YEDDA.py`
 * Select a shortcut map from `./configs/` in the right bottom drop-down list
 * Configure your shortcut map in the right side of annotation interface, you can leave other labels empty if the shortcut number is enough. For example: `a: Action; b: Loc; c: Cont`
 * Click the `ReMap` button to overwrite and store the map setting, or click the `NewMap` button to store the map setting in a new file under `./configs/`
@@ -66,7 +66,7 @@ Important features:
 5. Confirm or remove recommended entity: put cursor inside of the entity span and press `y` (yes) or `q` (quit).
 6. In the command entry, just type `Enter` without any command, the cursor in text will move to the head of next line. (You can monitor this through "Cursor").
 7. The "Cursor" shows the current cursor position in text widget, with `row` and `col` represent the row and column number, respectively.
-8. `Export` button will export the ***".ann"*** file as a identity name with ***".anns"*** in the same directory. The exported file list the content in sequence format. In the source code, there is a flag `self.seged` which controls the exported bahaviour. If your sentences are consist of words seperated with space (such as segmentated Chinese and English), then you may set it `True`, otherwise set it as `False` (for sentences which are consist of characters without space, such as unsegmentated Chinese text). Besides, another flag `self.tagScheme` controls the exporting format, the exported ***".anns"*** will use the `BMES` format if this flag is set to `"BMES"`, otherwise the exported file is formatted as `"BIO".`
+8. `Export` button will export the ***".ann"*** file as a identity name with ***".anns"*** in the same directory. The exported file list the content in sequence format. In the source code, there is a flag `self.seged` which controls the exported bahaviour. a). If your sentences are consist of words seperated with space (e.g. segmentated Chinese and English), then you may set `self.seged=True`. b). If your sentences are consist of characters without space (e.g. unsegmentated Chinese text), set `self.seged=False`. Another flag `self.tagScheme` controls the exporting format, the exported ***".anns"*** will use the `BMES` format if this flag is set to `"BMES"`, otherwise the exported file is formatted as `"BIO".`
 
 
 Cite: 
