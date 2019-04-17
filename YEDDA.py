@@ -700,7 +700,7 @@ class Example(Frame):
     ## show shortcut map
     def setMapShow(self):
         if os.path.isfile(self.configFile):
-            with open (self.configFile, 'rb') as fp:
+            with open (self.configFile, 'r') as fp:
                 self.pressCommand = pickle.load(fp)
         hight = len(self.pressCommand)
         width = 2
