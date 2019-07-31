@@ -30,7 +30,7 @@ Use as an annotator ?
 ====
 * Start the interface: run `python YEDDA.py`
 * Select a shortcut map from `./configs/` in the right bottom drop-down list
-* Configure your shortcut map in the right side of annotation interface, you can leave other labels empty if the shortcut number is enough. For example: `a: Action; b: Loc; c: Cont`
+* Configure your shortcut map in the right side of annotation interface, you can leave other labels empty if the shortcut number is enough. For example: `a: Action; b: Loc; c: Cont`. You can also change the map directly on the file`./configs/XX.config` which is in JSON format.
 * Click the `ReMap` button to overwrite and store the map setting, or click the `NewMap` button to store the map setting in a new file under `./configs/`
 * Click `Open` button and select your input file. (You may set your file name ended with .txt or .ann if possible)
 
@@ -84,6 +84,7 @@ If you use YEDDA for research, please cite our [ACL paper](https://arxiv.org/pdf
 
 Updating...
 ====
+* 2018-Oct-20, Convert the config file into JSON format.
 * 2018-Oct-20, YEDDA has a slight update in which shortcut maps can be edited, stored and switched seamlessly.
 * 2018-May-07, Repository is renamed as YEDDA now!
 * 2018-May-01, Our paper has been accepted as a demonstration at ACL 2018.

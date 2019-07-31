@@ -2,7 +2,7 @@
 # @Author: Jie Yang from SUTD
 # @Date:   2016-Jan-06 17:11:59
 # @Last Modified by:   Jie Yang,     Contact: jieynlp@gmail.com
-# @Last Modified time: 2019-03-25 11:18:55
+# @Last Modified time: 2019-07-31 10:51:48
 #!/usr/bin/env python
 # coding=utf-8
 
@@ -12,11 +12,12 @@ import tkFileDialog
 import tkFont
 import re
 from collections import deque
-import pickle
+# import pickle
 import os.path
 import platform
 from utils.recommend import *
 import tkMessageBox
+import json
 
 
 class Example(Frame):
@@ -660,7 +661,7 @@ class Example(Frame):
             self.labelEntryList[listLength-idx].delete(0,END)
             self.shortcutLabelList[listLength-idx].config(text="NON= ")
         with open(self.configFile, 'wb') as fp:
-            pickle.dump(self.pressCommand, fp)
+            json.dump(self.pressCommand, fp)
         self.setMapShow()
         tkMessageBox.showinfo("Remap Notification", "Shortcut map has been updated!\n\nConfigure file has been saved in File:" + self.configFile)
 
@@ -693,7 +694,7 @@ class Example(Frame):
         if not self.configFile.endswith(".config"):
             self.configFile += ".config"
         with open(self.configFile, 'wb') as fp:
-            pickle.dump(self.pressCommand, fp)
+            json.dump(self.pressCommand, fp)
         self.setMapShow()
         tkMessageBox.showinfo("Save New Map Notification", "Shortcut map has been saved and updated!\n\nConfigure file has been saved in File:" + self.configFile)
 
@@ -701,7 +702,7 @@ class Example(Frame):
     def setMapShow(self):
         if os.path.isfile(self.configFile):
             with open (self.configFile, 'r') as fp:
-                self.pressCommand = pickle.load(fp)
+                self.pressCommand = json.load(fp)
         hight = len(self.pressCommand)
         width = 2
         row = 0
