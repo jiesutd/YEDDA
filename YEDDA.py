@@ -5,18 +5,22 @@
 # @Last Modified time: 2019-07-31 10:51:48
 #!/usr/bin/env python
 # coding=utf-8
-
-from Tkinter import *
-from ttk import *#Frame, Button, Label, Style, Scrollbar
-import tkFileDialog
-import tkFont
+#from Tkinter import *
+from tkinter import *
+from tkinter.ttk import *#Frame, Button, Label, Style, Scrollbar
+#from ttk import *#Frame, Button, Label, Style, Scrollbar
+import tkinter.filedialog as tkFileDialog
+import tkinter.font as tkFont
+#import  tkFileDialog
+#import  tkFont
 import re
 from collections import deque
 # import pickle
 import os.path
 import platform
 from utils.recommend import *
-import tkMessageBox
+import tkinter.messagebox as tkMessageBox
+#import  tkMessageBox
 import json
 
 
@@ -215,7 +219,7 @@ class Example(Frame):
         try:
             firstSelection_index = self.text.index(SEL_FIRST)
             cursor_index = self.text.index(SEL_LAST)
-            content = self.text.get('1.0',"end-1c").encode('utf-8')
+            content = self.text.get('1.0',"end-1c")
             self.writeFile(self.fileName, content, cursor_index)
         except TclError:
             pass
@@ -254,7 +258,7 @@ class Example(Frame):
             self.setCursorLabel(self.text.index(INSERT))
 
     def readFile(self, filename):
-        f = open(filename, "rU")
+        f = open(filename, "r")
         text = f.read()
         self.fileName = filename
         return text
@@ -342,7 +346,7 @@ class Example(Frame):
 
     def getText(self):
         textContent = self.text.get("1.0","end-1c")
-        textContent = textContent.encode('utf-8')
+        textContent = textContent
         return textContent
 
     def executeCursorCommand(self,command):
@@ -373,7 +377,7 @@ class Example(Frame):
                     entity_content, cursor_index = self.replaceString(selected_string, selected_string, command, cursor_index)
             aboveHalf_content += entity_content
             content = self.addRecommendContent(aboveHalf_content, afterEntity_content, self.recommendFlag)
-            content = content.encode('utf-8')
+            content = content
             self.writeFile(self.fileName, content, cursor_index)
         except TclError:
             ## not select text
@@ -434,7 +438,7 @@ class Example(Frame):
                 followHalf_content = line_after_entity
 
             content = self.addRecommendContent(aboveHalf_content, followHalf_content, self.recommendFlag)
-            content = content.encode('utf-8')
+            content = content
             self.writeFile(self.fileName, content, cursor_index)
 
 
@@ -457,9 +461,9 @@ class Example(Frame):
                     cursor_index = self.text.index(INSERT)
                     newcursor_index = cursor_index.split('.')[0]+"."+str(int(cursor_index.split('.')[1])+select_num)
                     # print "new cursor position: ", select_num, " with ", newcursor_index, "with ", newcursor_index
-                    selected_string = self.text.get(cursor_index, newcursor_index).encode('utf-8')
-                    aboveHalf_content = self.text.get('1.0',cursor_index).encode('utf-8')
-                    followHalf_content = self.text.get(cursor_index, "end-1c").encode('utf-8')
+                    selected_string = self.text.get(cursor_index, newcursor_index)
+                    aboveHalf_content = self.text.get('1.0',cursor_index)
+                    followHalf_content = self.text.get(cursor_index, "end-1c")
                     if command in self.pressCommand:
                         if len(selected_string) > 0:
                             # print "insert index: ", self.text.index(INSERT) 
@@ -476,11 +480,12 @@ class Example(Frame):
         print("delete insert:",get_insert)
         insert_list = get_insert.split('.')
         last_insert = insert_list[0] + "." + str(int(insert_list[1])-1)
-        get_input = self.text.get(last_insert, get_insert).encode('utf-8')
+        get_input = self.text.get(last_insert, get_insert)
         # print "get_input: ", get_input
-        aboveHalf_content = self.text.get('1.0',last_insert).encode('utf-8')
-        followHalf_content = self.text.get(last_insert, "end-1c").encode('utf-8')
+        aboveHalf_content = self.text.get('1.0',last_insert)
+        followHalf_content = self.text.get(last_insert, "end-1c")
         if len(get_input) > 0:
+            print(get_input)
             followHalf_content = followHalf_content.replace(get_input, '', 1)
         content = aboveHalf_content + followHalf_content
         self.writeFile(self.fileName, content, last_insert)
@@ -660,8 +665,8 @@ class Example(Frame):
         for idx in range(1, delete_num+1):
             self.labelEntryList[listLength-idx].delete(0,END)
             self.shortcutLabelList[listLength-idx].config(text="NON= ")
-        with open(self.configFile, 'wb') as fp:
-            json.dump(self.pressCommand, fp)
+        with open(self.configFile, 'w') as fp:
+            fp.write(str(self.pressCommand))
         self.setMapShow()
         tkMessageBox.showinfo("Remap Notification", "Shortcut map has been updated!\n\nConfigure file has been saved in File:" + self.configFile)
 
@@ -693,8 +698,8 @@ class Example(Frame):
         # make sure ending with ".config"
         if not self.configFile.endswith(".config"):
             self.configFile += ".config"
-        with open(self.configFile, 'wb') as fp:
-            json.dump(self.pressCommand, fp)
+        with open(self.configFile, 'w') as fp:
+            fp.write(str(self.pressCommand))
         self.setMapShow()
         tkMessageBox.showinfo("Save New Map Notification", "Shortcut map has been saved and updated!\n\nConfigure file has been saved in File:" + self.configFile)
 
@@ -702,7 +707,7 @@ class Example(Frame):
     def setMapShow(self):
         if os.path.isfile(self.configFile):
             with open (self.configFile, 'r') as fp:
-                self.pressCommand = json.load(fp)
+                self.pressCommand = eval(fp.read())
         hight = len(self.pressCommand)
         width = 2
         row = 0
@@ -762,7 +767,7 @@ class Example(Frame):
             tkMessageBox.showerror("Export error!", out_error)
 
             return -1
-        fileLines = open(self.fileName, 'rU').readlines()
+        fileLines = open(self.fileName, 'r').readlines()
         lineNum = len(fileLines)
         new_filename = self.fileName.split('.ann')[0]+ '.anns'
         seqFile = open(new_filename, 'w')
@@ -796,7 +801,7 @@ def getConfigList():
     return list(filteredFileNames)
 
 def getWordTagPairs(tagedSentence, seged=True, tagScheme="BMES", onlyNP=False, entityRe=r'\[\@.*?\#.*?\*\]'):
-    newSent = tagedSentence.strip('\n').decode('utf-8')
+    newSent = tagedSentence.strip('\n')
     filterList = re.findall(entityRe, newSent)
     newSentLength = len(newSent)
     chunk_list = []
@@ -874,7 +879,7 @@ def turnFullListToOutputPair(fullList, seged=True, tagScheme="BMES", onlyNP=Fals
                 if basicContent == ' ':
                     continue
                 pair = basicContent + ' ' + 'O\n'
-                pairList.append(pair.encode('utf-8'))
+                pairList.append(pair)
     return pairList
 
 
@@ -884,7 +889,7 @@ def outputWithTagScheme(input_list, label, tagScheme="BMES"):
     if tagScheme=="BMES":
         if list_length ==1:
             pair = input_list[0]+ ' ' + 'S-' + label + '\n'
-            output_list.append(pair.encode('utf-8'))
+            output_list.append(pair)
         else:
             for idx in range(list_length):
                 if idx == 0:
@@ -893,14 +898,14 @@ def outputWithTagScheme(input_list, label, tagScheme="BMES"):
                     pair = input_list[idx]+ ' ' + 'E-' + label + '\n'
                 else:
                     pair = input_list[idx]+ ' ' + 'M-' + label + '\n'
-                output_list.append(pair.encode('utf-8'))
+                output_list.append(pair)
     else:
         for idx in range(list_length):
             if idx == 0:
                 pair = input_list[idx]+ ' ' + 'B-' + label + '\n'
             else:
                 pair = input_list[idx]+ ' ' + 'I-' + label + '\n'
-            output_list.append(pair.encode('utf-8'))
+            output_list.append(pair)
     return output_list
 
 
