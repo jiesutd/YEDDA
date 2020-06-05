@@ -1,24 +1,12 @@
 # -*- coding: utf-8 -*-
-# @Author: Jie Yang from SUTD
-# @Date:   2016-Jan-06 17:11:59
-# @Last Modified by:   Jie Yang,     Contact: jieynlp@gmail.com
-# @Last Modified time: 2017-09-24 21:47:14
-#!/usr/bin/env python
-# coding=utf-8
-
-from Tkinter import *
-from ttk import *#Frame, Button, Label, Style, Scrollbar
-import tkFileDialog
-import tkFont
-import re
-from collections import deque
-import pickle
-import os.path
 import platform
-from utils.recommend import *
-from utils.metric4ann import *
+import tkinter.filedialog as tkFileDialog
+import tkinter.messagebox as tkMessageBox
+from tkinter import *
+from tkinter.ttk import *  # Frame, Button, Label, Style, Scrollbar
+
 from utils.compareAnn import *
-import tkMessageBox
+from utils.metric4ann import *
 
 
 class Example(Frame):
@@ -29,17 +17,17 @@ class Example(Frame):
         self.parent = parent
         self.fileName = ""
         # default GUI display parameter
-        
+
         self.textColumn = 3
 
         self.initUI()
-        
-        
+
+
     def initUI(self):
-      
+
         self.parent.title(self.Version)
         self.pack(fill=BOTH, expand=True)
-        
+
         for idx in range(0,self.textColumn):
             if idx == 1:
                 self.columnconfigure(idx, weight =10)
@@ -58,7 +46,7 @@ class Example(Frame):
 
         recButton = Button(self, text="Pairwise Comparison", command=self.compareTwoFiles,  width = width_size)
         recButton.grid(row=1, column=1)
-        
+
 
         cbtn = Button(self, text="Quit", command=self.quit, width = width_size)
         cbtn.grid(row=2, column=1)
@@ -117,8 +105,8 @@ class Example(Frame):
 
         win2.minsize(30,30)
     def selection(self):
-        print self.popup.selection
-        
+        print(self.popup.selection)
+
 
     def multiFiles(self):
         ftypes = [('ann files', '.ann')]
@@ -145,7 +133,7 @@ class Example(Frame):
             else:
                 tkMessageBox.showinfo("Latex Error", "Latex generated Error, two files don't have same sentence number!")
             f.close()
-            
+
 
 
 
@@ -155,8 +143,8 @@ def main():
     root = Tk()
     root.geometry("400x100")
     app = Example(root)
-    
-    root.mainloop()  
+
+    root.mainloop()
 
 
 if __name__ == '__main__':

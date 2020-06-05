@@ -1,15 +1,6 @@
 # -*- coding: utf-8 -*-
-# @Author: Jie
-# @Date:   2017-04-25 11:07:00
-# @Last Modified by:   Jie Yang,     Contact: jieynlp@gmail.com
-# @Last Modified time: 2018-08-30 16:26:39
- 
+from .metric4ann import *
 
-import re
-import sys
-import numpy as np
-from metric4ann import *
-import copy
 
 def lines_to_label_list(input_lines):
     label_list = []
@@ -28,8 +19,8 @@ def compareBoundary(gold_file, pred_file, out_file):
     # print "Compare files..."
     # print "Gold file:", gold_file
     # print "Pred file:", pred_file
-    gold_lines = open(gold_file, 'rU').readlines()
-    pred_lines = open(pred_file, 'rU').readlines()
+    gold_lines = open(gold_file, encoding='utf-8').readlines()
+    pred_lines = open(pred_file, encoding='utf-8').readlines()
     # out_file = open(output_file,'w')
     sentence_num = len(gold_lines)
     if sentence_num != len(pred_lines):
@@ -91,7 +82,7 @@ def compareBoundary(gold_file, pred_file, out_file):
 
 ## generate specific latex code for each sentence
 def generate_specific_latex(sentence, gold_entity_list, pred_entity_list):
-    print "".join(sentence)
+    print("".join(sentence))
     final_segment = generate_specific_segment(sentence, gold_entity_list, pred_entity_list)
     segment_dict = {}
     for segment in final_segment:
@@ -166,16 +157,16 @@ def generate_overlap(sentence, match_segment):
     overlap_words = "".join(sentence[overlap_start:overlap_end])
     if front_words:
         if front_flag == "P":
-            output_string += "\underline{\\text{"+ front_words + "}}"
+            output_string += r"\underline{\\text{"+ front_words + "}}"
         else:
-            output_string += "\overline{\\text{"+ front_words + "}}"
-    output_string += "\overline{\underline{\\text{"+ overlap_words + "}}}"
+            output_string += r"\overline{\\text{"+ front_words + "}}"
+    output_string += r"\overline{\underline{\\text{"+ overlap_words + "}}}"
     if back_words:
         if back_flag == "P":
-            output_string += "\underline{\\text{"+ back_words + "}}"
+            output_string += r"\underline{\\text{"+ back_words + "}}"
         else:
-            output_string += "\overline{\\text{"+ back_words + "}}"
-    output_string += "$}$^{{\color{blue}{"+gold_type+"}}}_{{\color{red}{"+pred_type+"}}}$"
+            output_string += r"\overline{\\text{"+ back_words + "}}"
+    output_string += r"$}$^{{\color{blue}{"+gold_type+r"}}}_{{\color{red}{"+pred_type+"}}}$"
 
     return output_string
 
@@ -187,7 +178,7 @@ def generate_match(sentence, match_segment):
     start = int(pos[0])
     end = int(pos[1])
     words = sentence[start:end+1]
-    output_string = "\colorbox{green!30}{$\underline{\overline{\\text{" +''.join(words)+"}}}$}$^{{\color{blue}{"+entity_type+"}}}_{{\color{red}{"+entity_type+"}}}$"
+    output_string = r"\colorbox{green!30}{$\underline{\overline{\\text{" +''.join(words)+r"}}}$}$^{{\color{blue}{"+entity_type+r"}}}_{{\color{red}{"+entity_type+"}}}$"
     return output_string
 
 def generate_not_entity(sentence, match_segment):
@@ -216,7 +207,7 @@ def generate_pred_left(sentence, match_segment):
     start = int(pos[0])
     end = int(pos[1])
     words = sentence[start:end+1]
-    output_string = "\colorbox{red!30}{$\underline{\\text{" +''.join(words)+"}}$}$_{{\color{red}{"+entity_type+"}}}$"
+    output_string = r"\colorbox{red!30}{$\underline{\\text{" +''.join(words)+r"}}$}$_{{\color{red}{"+entity_type+"}}}$"
     return output_string
 
 
@@ -233,7 +224,7 @@ def generate_specific_segment(sentence, gold_entity_list, pred_entity_list):
     for entity in pred_entity_list:
         if entity not in gold_entity_list:
             pred_left.append(entity)
-    print "match:",matched_entity
+    print("match:",matched_entity)
     overlaped_entity = []
     gold_overlaped = []
     pred_overlaped = []
@@ -254,7 +245,7 @@ def generate_specific_segment(sentence, gold_entity_list, pred_entity_list):
         gold_left.remove(entity)
     for entity in pred_overlaped:
         pred_left.remove(entity)
-    print "overlap:",overlaped_entity
+    print("overlap:",overlaped_entity)
     new_gold_left = []
     new_pred_left = []
     for entity in gold_left:
@@ -262,8 +253,8 @@ def generate_specific_segment(sentence, gold_entity_list, pred_entity_list):
     for entity in pred_left:
         new_pred_left.append('P'+entity)
 
-    print "final gold:",new_gold_left
-    print "final pred:",new_pred_left
+    print("final gold:",new_gold_left)
+    print("final pred:",new_pred_left)
     final_segment = matched_entity + overlaped_entity + new_gold_left + new_pred_left
     matched_flag = [0]*sent_length
     for entity in final_segment:
@@ -289,8 +280,7 @@ def generate_specific_segment(sentence, gold_entity_list, pred_entity_list):
             if start != -1:
                 final_segment.append("N["+str(start)+","+str(idx-1)+"]")
                 start = -1
-    print "final",final_segment
-    print
+    print("final",final_segment)
     # print "match:",generate_match(sentence,matched_entity[0])
     # print "overlap:",generate_overlap(sentence,overlaped_entity[0])
     # print "no entity:",generate_not_entity(sentence,final_segment[-1])
@@ -337,7 +327,7 @@ def generate_latex(sentence, gold_bound, pred_bound):
     segment_tag = -2
     output_string = ''
     for idx in range(sent_length):
-        word = sentence[idx].encode('utf-8')
+        word = sentence[idx]
         if gold_bound[idx] == 1:
             if pred_bound[idx] == 1:
                 if segment_tag == 2:
@@ -408,9 +398,9 @@ def generate_latex(sentence, gold_bound, pred_bound):
 def get_ner_from_sentence(sentence, remove_seg=True):
     ## remove segmentation space, avoid segmentation changes
     if remove_seg:
-        sentence = sentence.strip().replace(' ', '').decode('utf-8')
+        sentence = sentence.strip().replace(' ', '')
     else:
-        sentence = sentence.strip().decode('utf-8')
+        sentence = sentence.strip()
     sentence_len = len(sentence)
     # print sentence
     entity_start = []
@@ -448,7 +438,7 @@ def get_ner_from_sentence(sentence, remove_seg=True):
                     entity_type_start = False
                 elif len(entity_start) == 1:
                     entity_info = '['+str(entity_start[0])+','+str(word_id-1) +']:'+entity_type.strip('*')
-                    entity_list.append(entity_info.encode('utf-8'))
+                    entity_list.append(entity_info)
                     entity_type = ''
                     entity_start = []
                     entity_type_start = False
@@ -487,20 +477,20 @@ def calculate_average(input_array):
 
 def write_head(out_file):
     out_file.write("%%%%%%%%%%%%%%%%%%%%%%% file typeinst.tex %%%%%%%%%%%%%%%%%%%%%%%%%\n")
-    out_file.write("\documentclass[runningheads,a4paper]{llncs}\n")
-    out_file.write("\usepackage{amssymb}\n")
-    out_file.write("\setcounter{tocdepth}{3}\n")
-    out_file.write("\usepackage{graphicx}\n")
-    out_file.write("\usepackage{multirow}\n")
-    out_file.write("\usepackage{subfigure}\n")
-    out_file.write("\usepackage{amsmath}\n")
-    out_file.write("\usepackage{CJK}\n")
-    out_file.write("\usepackage{color}\n")
-    out_file.write("\usepackage{xcolor}\n")
-    out_file.write("\usepackage{url}\n")
+    out_file.write(r"\documentclass[runningheads,a4paper]{llncs}\n")
+    out_file.write(r"\usepackage{amssymb}\n")
+    out_file.write(r"\setcounter{tocdepth}{3}\n")
+    out_file.write(r"\usepackage{graphicx}\n")
+    out_file.write(r"\usepackage{multirow}\n")
+    out_file.write(r"\usepackage{subfigure}\n")
+    out_file.write(r"\usepackage{amsmath}\n")
+    out_file.write(r"\usepackage{CJK}\n")
+    out_file.write(r"\usepackage{color}\n")
+    out_file.write(r"\usepackage{xcolor}\n")
+    out_file.write(r"\usepackage{url}\n")
     out_file.write("\\begin{document}\n")
     out_file.write("\\begin{CJK*}{UTF8}{gbsn}\n")
-    out_file.write("\mainmatter  % start of an individual contribution\n")
+    out_file.write(r"\mainmatter  % start of an individual contribution\n")
     out_file.write("\\title{Annotation Comparison Report}\n")
     out_file.write("\\author{SUTDNLP Group}\n")
     out_file.write("\\institute{Singapore University of Technology and Design}\n")
@@ -510,8 +500,8 @@ def write_head(out_file):
 
 
 def write_end(out_file):
-    out_file.write("\end{CJK*}\n")
-    out_file.write("\end{document}\n")
+    out_file.write(r"\end{CJK*}\n")
+    out_file.write(r"\end{document}\n")
     
 
 

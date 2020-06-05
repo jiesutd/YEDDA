@@ -1,13 +1,8 @@
 # -*- coding: utf-8 -*-
-# @Author: Jie
-# @Date:   2017-04-25 11:07:00
-# @Last Modified by:   Jie Yang,     Contact: jieynlp@gmail.com
-# @Last Modified time: 2017-09-19 16:06:59
- 
-
-import re
 import sys
+
 import numpy as np
+
 
 def lines_to_label_list(input_lines):
     label_list = []
@@ -60,8 +55,8 @@ def get_final_score(gold_num, pred_num, match_num):
 
 
 def get_matched_ner_from_file(gold_file, pred_file, up_ignore_layer = 0):
-    gold_lines = open(gold_file, 'rU').readlines()
-    pred_lines = open(pred_file, 'rU').readlines()
+    gold_lines = open(gold_file, encoding='utf-8').readlines()
+    pred_lines = open(pred_file, encoding='utf-8').readlines()
     sentence_num = len(gold_lines)
     assert(sentence_num == len(pred_lines))
     gold_entity = []
@@ -82,7 +77,7 @@ def get_matched_ner_from_file(gold_file, pred_file, up_ignore_layer = 0):
         match = list(set(gold_filter_entity).intersection(set(pred_filter_entity)))
         gold_entity += gold_filter_entity
         pred_entity += pred_filter_entity
-        match_entity += match 
+        match_entity += match
     return gold_entity, pred_entity, match_entity
 
 
@@ -144,7 +139,7 @@ def compare_f_measure_by_type(gold_file, pred_file):
 
 def get_ner_from_sentence(sentence):
     ## remove segmentation space, avoid segmentation changes
-    sentence = sentence.strip().replace(' ', '').decode('utf-8')
+    sentence = sentence.strip().replace(' ', '')
     sentence_len = len(sentence)
     # print sentence
     entity_start = []
@@ -156,7 +151,7 @@ def get_ner_from_sentence(sentence):
     entity_list = []
     for idx in range(sentence_len):
         if sentence[idx] == '[':
-            left_bracket = True 
+            left_bracket = True
         elif sentence[idx] == '@':
             if last_char == '[':
                 entity_start.append(word_id)
@@ -178,7 +173,7 @@ def get_ner_from_sentence(sentence):
                     entity_type_start = False
                 elif len(entity_start) == 1:
                     entity_info = '['+str(entity_start[0])+','+str(word_id-1) +']:'+entity_type.strip('*')
-                    entity_list.append(entity_info.encode('utf-8'))
+                    entity_list.append(entity_info)
                     entity_type = ''
                     entity_start = []
                     entity_type_start = False
@@ -224,9 +219,9 @@ def filter_entity(entity_list, up_ignore_layer = 0):
 
 def generate_f_value_report():
     file_list = [
-                # "exercise.chenhua.100.ann", 
-                "exercise.yangjie.100.ann", 
-                "exercise.shaolei.100.ann", 
+                # "exercise.chenhua.100.ann",
+                "exercise.yangjie.100.ann",
+                "exercise.shaolei.100.ann",
                 "exercise.yuanye.100.ann",
                 # "exercise.yanxia.100.ann",
                 # "exercise.yuanye.100.ann",
@@ -252,20 +247,18 @@ def generate_f_value_report():
             result_matrix_ignore_1_layer[idy][idx] = f1
             result_matrix_ignore_2_layer[idx][idy] = f2
             result_matrix_ignore_2_layer[idy][idx] = f2
-    print 
     ## show final results
-    print "FINAL REPORT:  all_catagory/ignore_sub_catogary/entity_chunk"
-    print "F1-value".rjust(10),
+    print("FINAL REPORT:  all_catagory/ignore_sub_catogary/entity_chunk")
+    print("F1-value".rjust(10),)
     for idx in range(file_num):
-        print simplified_name(file_list[idx]).rjust(15), 
-    print 
+        print(simplified_name(file_list[idx]).rjust(15),)
+    print()
     for idx in range(file_num):
-        print simplified_name(file_list[idx]).rjust(15), 
+        print(simplified_name(file_list[idx]).rjust(15),)
         for idy in range(file_num):
             result = output_model(result_matrix[idx][idy], result_matrix_ignore_1_layer[idx][idy], result_matrix_ignore_2_layer[idx][idy])
-            print result.rjust(15),
-        print
-
+            print(result.rjust(15),)
+        print()
 
 def calculate_average(input_array):
     length = input_array.shape[0]
@@ -334,7 +327,7 @@ if __name__ == '__main__':
         compare_files(sys.argv[1], sys.argv[2])
     else:
         generate_f_value_report()
-    
+
 
 
 
