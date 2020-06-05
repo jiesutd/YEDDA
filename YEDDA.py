@@ -55,7 +55,7 @@ class Example(Frame):
         for example, if your data is segmentated Chinese (or English) with words seperated by a space, you need to set this flag as true
         if your data is Chinese without segmentation, you need to set this flag as False
         '''
-        self.seged = True  ## False for non-segmentated Chinese, True for English or Segmented Chinese
+        self.segmented = True  ## False for non-segmentated Chinese, True for English or Segmented Chinese
         self.configFile = "configs/default.config"
         self.entityRe = r'\[\@.*?\#.*?\*\](?!\#)'
         self.insideNestEntityRe = r'\[\@\[\@(?!\[\@).*?\#.*?\*\]\#'
@@ -72,7 +72,6 @@ class Example(Frame):
         self.initUI()
 
     def initUI(self):
-
         self.parent.title(self.Version)
         self.pack(fill=BOTH, expand=True)
 
@@ -623,8 +622,8 @@ class Example(Frame):
             fp.write(str(self.pressCommand))
         self.setMapShow()
         messagebox.showinfo("Remap Notification",
-                              "Shortcut map has been updated!\n\n" +
-                              "Configure file has been saved in File:" + self.configFile)
+                            "Shortcut map has been updated!\n\n" +
+                            "Configure file has been saved in File:" + self.configFile)
 
     ## save as new shortcut map
     def savenewPressCommand(self):
@@ -659,8 +658,8 @@ class Example(Frame):
             fp.write(str(self.pressCommand))
         self.setMapShow()
         messagebox.showinfo("Save New Map Notification",
-                              "Shortcut map has been saved and updated!\n\n"
-                              + "Configure file has been saved in File:" + self.configFile)
+                            "Shortcut map has been saved and updated!\n\n"
+                            + "Configure file has been saved in File:" + self.configFile)
 
     ## show shortcut map
     def setMapShow(self):
@@ -737,7 +736,7 @@ class Example(Frame):
             else:
                 if not self.keepRecommend:
                     line = removeRecommendContent(line, self.recommendRe)
-                wordTagPairs = getWordTagPairs(line, self.seged, self.tagScheme, self.onlyNP, self.goldAndrecomRe)
+                wordTagPairs = getWordTagPairs(line, self.segmented, self.tagScheme, self.onlyNP, self.goldAndrecomRe)
                 for wordTag in wordTagPairs:
                     seqFile.write(wordTag)
                 ## use null line to seperate sentences
@@ -748,7 +747,7 @@ class Example(Frame):
         showMessage = "Exported file successfully!\n\n"
         showMessage += "Tag scheme: " + self.tagScheme + "\n\n"
         showMessage += "Keep Recom: " + str(self.keepRecommend) + "\n\n"
-        showMessage += "Text Seged: " + str(self.seged) + "\n\n"
+        showMessage += "Text Seged: " + str(self.segmented) + "\n\n"
         showMessage += "Line Number: " + str(lineNum) + "\n\n"
         showMessage += "Saved to File: " + new_filename
         messagebox.showinfo("Export Message", showMessage)
