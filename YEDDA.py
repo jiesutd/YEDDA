@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 import os.path
 import platform
-import tkinter.filedialog as tkFileDialog
-import tkinter.font as tkFont
-import tkinter.messagebox as tkMessageBox
+from tkinter import filedialog
+from tkinter import font
+from tkinter import messagebox
 from collections import deque
 from tkinter import *
 from tkinter.ttk import *  # Frame, Button, Label, Style, Scrollbar
@@ -86,7 +86,7 @@ class Example(Frame):
 
         self.lbl = Label(self, text="File: no file is opened")
         self.lbl.grid(sticky=W, pady=4, padx=5)
-        self.fnt = tkFont.Font(family=self.textFontStyle, size=self.textRow, weight="bold", underline=0)
+        self.fnt = font.Font(family=self.textFontStyle, size=self.textRow, weight="bold", underline=0)
         self.text = Text(self, font=self.fnt, selectbackground=self.selectColor)
         self.text.grid(row=1, column=0, columnspan=self.textColumn, rowspan=self.textRow, padx=12, sticky=E + W + S + N)
 
@@ -178,7 +178,7 @@ class Example(Frame):
             print("Action Track: singleLeftClick")
         cursor_index = self.text.index(INSERT)
         row_column = cursor_index.split('.')
-        cursor_text = ("row: %s\ncol: %s" % (row_column[0], row_column[-1]))
+        cursor_text = f"row: {row_column[0]}\ncol: {row_column[-1]}"
         self.cursorIndex.config(text=cursor_text)
 
     ## TODO: select entity by double left click
@@ -206,7 +206,7 @@ class Example(Frame):
     def setInRecommendModel(self):
         self.recommendFlag = True
         self.RecommendModelFlag.config(text=str(self.recommendFlag))
-        tkMessageBox.showinfo("Recommend Model", "Recommend Model has been activated!")
+        messagebox.showinfo("Recommend Model", "Recommend Model has been activated!")
 
     def setInNotRecommendModel(self):
         self.recommendFlag = False
@@ -214,23 +214,17 @@ class Example(Frame):
         content = self.getText()
         content = removeRecommendContent(content, self.recommendRe)
         self.writeFile(self.fileName, content, '1.0')
-        tkMessageBox.showinfo("Recommend Model", "Recommend Model has been deactivated!")
+        messagebox.showinfo("Recommend Model", "Recommend Model has been deactivated!")
 
     def onOpen(self):
-        ftypes = [('all files', '.*'), ('text files', '.txt'), ('ann files', '.ann')]
-        dlg = tkFileDialog.Open(self, filetypes=ftypes)
-        # file_opt = options =  {}
-        # options['filetypes'] = [('all files', '.*'), ('text files', '.txt')]
-        # dlg = tkFileDialog.askopenfilename(**options)
-        fl = dlg.show()
-        if fl != '':
+        filename = filedialog.askopenfilename(
+            filetypes=[('all files', '.*'), ('text files', '.txt'), ('ann files', '.ann')])
+        if filename != '':
             self.text.delete("1.0", END)
-            text = self.readFile(fl)
+            text = self.readFile(filename)
             self.text.insert(END, text)
-            self.setNameLabel("File: " + fl)
+            self.setNameLabel("File: " + filename)
             self.autoLoadNewFile(self.fileName, "1.0")
-            # self.setDisplay()
-            # self.initAnnotate()
             self.text.mark_set(INSERT, "1.0")
             self.setCursorLabel(self.text.index(INSERT))
 
@@ -250,7 +244,7 @@ class Example(Frame):
         _size = value
         _weight = "bold"
         _underline = 0
-        fnt = tkFont.Font(family=_family, size=_size, weight=_weight, underline=_underline)
+        fnt = font.Font(family=_family, size=_size, weight=_weight, underline=_underline)
         Text(self, font=fnt)
 
     def setNameLabel(self, new_file):
@@ -260,7 +254,7 @@ class Example(Frame):
         if self.debug:
             print("Action Track: setCursorLabel")
         row_column = cursor_index.split('.')
-        cursor_text = ("row: %s\ncol: %s" % (row_column[0], row_column[-1]))
+        cursor_text = f"row: {row_column[0]}\ncol: {row_column[-1]}"
         self.cursorIndex.config(text=cursor_text)
 
     def returnButton(self):
@@ -312,7 +306,7 @@ class Example(Frame):
     def keepCurrent(self, event):
         if self.debug:
             print("Action Track: keepCurrent")
-        print("keep current, insert:%s" % (INSERT))
+        print("keep current, insert:", INSERT)
         print("before:", self.text.index(INSERT))
         self.text.insert(INSERT, 'p')
         print("after:", self.text.index(INSERT))
@@ -560,12 +554,12 @@ class Example(Frame):
             if pos == "":
                 break
             self.text.mark_set("matchStart", pos)
-            self.text.mark_set("matchEnd", "%s+%sc" % (pos, countVar.get()))
+            self.text.mark_set("matchEnd", f"{pos}+{countVar.get()}c")
 
             first_pos = pos
-            second_pos = "%s+%sc" % (pos, str(1))
-            lastsecond_pos = "%s+%sc" % (pos, str(int(countVar.get()) - 1))
-            last_pos = "%s + %sc" % (pos, countVar.get())
+            second_pos = f"{pos}+1c"
+            lastsecond_pos = f"{pos}+{int(countVar.get()) - 1}c"
+            last_pos = f"{pos} + {countVar.get()}c"
 
             self.text.tag_add("catagory", second_pos, lastsecond_pos)
             self.text.tag_add("edge", first_pos, second_pos)
@@ -578,11 +572,11 @@ class Example(Frame):
             if recommend_pos == "":
                 break
             self.text.mark_set("recommend_matchStart", recommend_pos)
-            self.text.mark_set("recommend_matchEnd", "%s+%sc" % (recommend_pos, countVar.get()))
+            self.text.mark_set("recommend_matchEnd", f"{recommend_pos}+{countVar.get()}c")
 
             first_pos = recommend_pos
             # second_pos = "%s+%sc" % (recommend_pos, str(1))
-            lastsecond_pos = "%s+%sc" % (recommend_pos, str(int(countVar.get())))
+            lastsecond_pos = f"{recommend_pos}+{countVar.get()}c"
             self.text.tag_add("recommend", first_pos, lastsecond_pos)
 
         ## color the most inside span for nested span, scan from begin to end again
@@ -601,8 +595,8 @@ class Example(Frame):
                 break
             self.text.mark_set("matchStart", pos)
             self.text.mark_set("matchEnd", "%s+%sc" % (pos, countVar.get()))
-            first_pos = "%s + %sc" % (pos, 2)
-            last_pos = "%s + %sc" % (pos, str(int(countVar.get()) - 1))
+            first_pos = f"{pos} + 2c"
+            last_pos = f"{pos} + {int(countVar.get()) - 1}c"
             self.text.tag_add("insideEntityColor", first_pos, last_pos)
 
     def pushToHistory(self):
@@ -649,8 +643,9 @@ class Example(Frame):
         with open(self.configFile, 'w') as fp:
             fp.write(str(self.pressCommand))
         self.setMapShow()
-        tkMessageBox.showinfo("Remap Notification",
-                              "Shortcut map has been updated!\n\nConfigure file has been saved in File:" + self.configFile)
+        messagebox.showinfo("Remap Notification",
+                              "Shortcut map has been updated!\n\n" +
+                              "Configure file has been saved in File:" + self.configFile)
 
     ## save as new shortcut map
     def savenewPressCommand(self):
@@ -672,7 +667,7 @@ class Example(Frame):
             self.labelEntryList[listLength - idx].delete(0, END)
             self.shortcutLabelList[listLength - idx].config(text="NON= ")
         # prompt to ask configFile name
-        self.configFile = tkFileDialog.asksaveasfilename(
+        self.configFile = filedialog.asksaveasfilename(
             initialdir="./configs/",
             title="Save New Config",
             filetypes=(("YEDDA configs", "*.config"), ("all files", "*.*")))
@@ -684,8 +679,9 @@ class Example(Frame):
         with open(self.configFile, 'w') as fp:
             fp.write(str(self.pressCommand))
         self.setMapShow()
-        tkMessageBox.showinfo("Save New Map Notification",
-                              "Shortcut map has been saved and updated!\n\nConfigure file has been saved in File:" + self.configFile)
+        messagebox.showinfo("Save New Map Notification",
+                              "Shortcut map has been saved and updated!\n\n"
+                              + "Configure file has been saved in File:" + self.configFile)
 
     ## show shortcut map
     def setMapShow(self):
@@ -748,7 +744,7 @@ class Example(Frame):
         if (".ann" not in self.fileName) and (".txt" not in self.fileName):
             out_error = "Export only works on filename ended in .ann or .txt!\nPlease rename file."
             print(out_error)
-            tkMessageBox.showerror("Export error!", out_error)
+            messagebox.showerror("Export error!", out_error)
 
             return -1
         fileLines = open(self.fileName, 'r').readlines()
@@ -776,7 +772,7 @@ class Example(Frame):
         showMessage += "Text Seged: " + str(self.seged) + "\n\n"
         showMessage += "Line Number: " + str(lineNum) + "\n\n"
         showMessage += "Saved to File: " + new_filename
-        tkMessageBox.showinfo("Export Message", showMessage)
+        messagebox.showinfo("Export Message", showMessage)
 
 
 def getConfigList():
@@ -843,7 +839,7 @@ def getWordTagPairs(tagedSentence, seged=True, tagScheme="BMES", onlyNP=False, e
     return turnFullListToOutputPair(full_list, seged, tagScheme, onlyNP)
 
 
-def turnFullListToOutputPair(fullList, seged=True, tagScheme="BMES", onlyNP=False):
+def turnFullListToOutputPair(fullList, segmented=True, tagScheme="BMES", onlyNP=False):
     pairList = []
     for eachList in fullList:
         if eachList[3]:
@@ -851,7 +847,7 @@ def turnFullListToOutputPair(fullList, seged=True, tagScheme="BMES", onlyNP=Fals
             if len(contLabelList) != 2:
                 print("Error: sentence format error!")
             label = contLabelList[1].strip('*')
-            if seged:
+            if segmented:
                 contLabelList[0] = contLabelList[0].split()
             if onlyNP:
                 label = "NP"
@@ -859,7 +855,7 @@ def turnFullListToOutputPair(fullList, seged=True, tagScheme="BMES", onlyNP=Fals
             for eachItem in outList:
                 pairList.append(eachItem)
         else:
-            if seged:
+            if segmented:
                 eachList[0] = eachList[0].split()
             for idx in range(0, len(eachList[0])):
                 basicContent = eachList[0][idx]
@@ -921,13 +917,12 @@ def decompositCommand(command_string):
             command_list.append(each_command)
             each_command = []
             num_select = ''
-    # print command_list
     return command_list
 
 
 def main():
     print("SUTDAnnotator launched!")
-    print(("OS:%s") % (platform.system()))
+    print("OS:", platform.system())
     root = Tk()
     root.geometry("1300x700+200+200")
     app = Example(root)
