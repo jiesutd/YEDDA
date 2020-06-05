@@ -145,7 +145,7 @@ def merge_text_with_entity(origin_text, recognized_list, recommend_list):
 		elif combine_list[idx].startswith("I-"):
 			entity_string += origin_text[idx]
 		else:
-			print "merge_text_with_entity error!"
+			print("merge_text_with_entity error!")
 	if entity_string:
 		new_string += "["+entity_source + entity_string + "#" + entity_type +"*]"
 		entity_string = ""
@@ -165,4 +165,4 @@ def merge_text_with_entity(origin_text, recognized_list, recommend_list):
 if __name__ == '__main__':
 	train_text = "于是我就给[@朱物华#Location*]校长、[@张钟俊#Location*]院长给他们写了一个报告!"
 	decode_text = "张钟俊院长，给他[$张钟俊#Location*][$张钟俊#Location*]..[@朱物华#Location*]."
-	print maximum_matching(train_text,decode_text)
+	print(maximum_matching(train_text,decode_text))

@@ -51,6 +51,7 @@ class Example(Frame):
         self.shortcutLabelList = []
         self.configListLabel = None
         self.configListBox = None
+        self.file_encoding = 'utf-8'
 
         # default GUI display parameter
         if len(self.pressCommand) > 20:
@@ -258,8 +259,13 @@ class Example(Frame):
             self.setCursorLabel(self.text.index(INSERT))
 
     def readFile(self, filename):
-        f = open(filename, "r")
-        text = f.read()
+        f = open(filename)
+        try:
+            text = f.read()
+            self.file_encoding = f.encoding
+        except UnicodeDecodeError:
+            f = open(filename, encoding='utf-8')
+            text = f.read()
         self.fileName = filename
         return text
 
@@ -511,12 +517,12 @@ class Example(Frame):
         if len(fileName) > 0:
             if ".ann" in fileName:
                 new_name = fileName
-                ann_file = open(new_name, 'w')
+                ann_file = open(new_name, 'w', encoding=self.file_encoding)
                 ann_file.write(content)
                 ann_file.close()
             else:
                 new_name = fileName+'.ann'
-                ann_file = open(new_name, 'w')
+                ann_file = open(new_name, 'w', encoding=self.file_encoding)
                 ann_file.write(content)
                 ann_file.close()
             # print "Writed to new file: ", new_name
