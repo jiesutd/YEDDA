@@ -20,7 +20,7 @@ class Example(Frame):
         self.fileName = ""
         self.debug = False
         self.colorAllChunk = True
-        self.recommendFlag = True
+        self.use_recommend = BooleanVar(self, True)
         self.history = deque(maxlen=20)
         self.currentContent = deque(maxlen=1)
         self.pressCommand = {'a': "Artifical",
@@ -99,12 +99,6 @@ class Example(Frame):
         abtn = Button(self, text="Open", command=self.onOpen)
         abtn.grid(row=1, column=self.textColumn + 1)
 
-        recButton = Button(self, text="RMOn", command=self.setInRecommendModel)
-        recButton.grid(row=2, column=self.textColumn + 1)
-
-        noRecButton = Button(self, text="RMOff", command=self.setInNotRecommendModel)
-        noRecButton.grid(row=3, column=self.textColumn + 1)
-
         ubtn = Button(self, text="ReMap", command=self.renewPressCommand)
         ubtn.grid(row=4, column=self.textColumn + 1, pady=4)
 
@@ -123,20 +117,10 @@ class Example(Frame):
                                  font=(self.textFontStyle, 14, "bold"))
         self.cursorIndex.grid(row=10, column=self.textColumn + 1, pady=4)
 
-        self.RecommendModelName = Label(self, text="RModel: ", foreground="Blue", font=(self.textFontStyle, 14, "bold"))
-        self.RecommendModelName.grid(row=12, column=self.textColumn + 1, pady=4)
-        self.RecommendModelFlag = Label(self, text=str(self.recommendFlag), foreground="red",
-                                        font=(self.textFontStyle, 14, "bold"))
-        self.RecommendModelFlag.grid(row=13, column=self.textColumn + 1, pady=4)
-
-        # recommend_value = StringVar()
-        # recommend_value.set("R")
-        # a = Radiobutton(self.parent,  text="Recommend",   width=12, variable=recommend_value, value="R")
-        # # a.grid(row =1 , column = 2)
-        # a.pack(side='left')
-        # b = Radiobutton(self.parent, text="NotRecommend",   width=12,  variable=recommend_value, value="N")
-        # # b.grid(row =1 , column = 3)
-        # b.pack(side='left')
+        recommend_label = Label(self, text="RecommendModel: ", foreground="Blue", font=(self.textFontStyle, 14, "bold"))
+        recommend_label.grid(row=12, column=self.textColumn + 1, pady=4)
+        recommend_check = Checkbutton(self, command=self.toggle_use_recommend, variable=self.use_recommend)
+        recommend_check.grid(row=12, column=self.textColumn + 3, pady=4)
 
         lbl_entry = Label(self, text="Command:")
         lbl_entry.grid(row=self.textRow + 1, sticky=E + W + S + N, pady=4, padx=4)
@@ -203,18 +187,13 @@ class Example(Frame):
         except TclError:
             pass
 
-    def setInRecommendModel(self):
-        self.recommendFlag = True
-        self.RecommendModelFlag.config(text=str(self.recommendFlag))
-        messagebox.showinfo("Recommend Model", "Recommend Model has been activated!")
-
-    def setInNotRecommendModel(self):
-        self.recommendFlag = False
-        self.RecommendModelFlag.config(text=str(self.recommendFlag))
-        content = self.getText()
-        content = removeRecommendContent(content, self.recommendRe)
-        self.writeFile(self.fileName, content, '1.0')
-        messagebox.showinfo("Recommend Model", "Recommend Model has been deactivated!")
+    def toggle_use_recommend(self):
+        if self.use_recommend.get() == True:
+            pass
+        else:
+            content = self.getText()
+            content = removeRecommendContent(content, self.recommendRe)
+            self.writeFile(self.fileName, content, '1.0')
 
     def onOpen(self):
         filename = filedialog.askopenfilename(
@@ -350,7 +329,7 @@ class Example(Frame):
                     entity_content, cursor_index = self.replaceString(selected_string, selected_string, command,
                                                                       cursor_index)
             aboveHalf_content += entity_content
-            content = self.addRecommendContent(aboveHalf_content, afterEntity_content, self.recommendFlag)
+            content = self.addRecommendContent(aboveHalf_content, afterEntity_content, self.use_recommend.get())
             content = content
             self.writeFile(self.fileName, content, cursor_index)
         except TclError:
@@ -413,7 +392,7 @@ class Example(Frame):
             else:
                 followHalf_content = line_after_entity
 
-            content = self.addRecommendContent(aboveHalf_content, followHalf_content, self.recommendFlag)
+            content = self.addRecommendContent(aboveHalf_content, followHalf_content, self.use_recommend.get())
             content = content
             self.writeFile(self.fileName, content, cursor_index)
 
@@ -447,7 +426,7 @@ class Example(Frame):
                                                                                      selected_string, command,
                                                                                      newcursor_index)
                             content = self.addRecommendContent(aboveHalf_content, followHalf_content,
-                                                               self.recommendFlag)
+                                                               self.use_recommend.get())
                             # content = aboveHalf_content + followHalf_content
                     self.writeFile(self.fileName, content, newcursor_index)
 
