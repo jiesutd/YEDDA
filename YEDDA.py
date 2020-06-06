@@ -57,7 +57,6 @@ class Application(Frame):
                              'g': "Sector",
                              'h': "Other"
                              }
-        self.allKey = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
         self.controlCommand = {'q': "unTag", 'ctrl+z': 'undo'}
         self.labelEntryList = []
         self.shortcutLabelList = []
@@ -98,13 +97,13 @@ class Application(Frame):
         self.master.title(self.Version)
         self.pack(fill=BOTH, expand=True)
 
-        for idx in range(0, self.textColumn):
-            self.columnconfigure(idx, weight=2)
+        for i in range(0, self.textColumn):
+            self.columnconfigure(i, weight=2)
         # self.columnconfigure(0, weight=2)
         self.columnconfigure(self.textColumn + 2, weight=1)
         self.columnconfigure(self.textColumn + 4, weight=1)
-        for idx in range(0, 16):
-            self.rowconfigure(idx, weight=1)
+        for i in range(0, 16):
+            self.rowconfigure(i, weight=1)
 
         self.lbl = Label(self, text="File: no file is opened")
         self.lbl.grid(sticky=W, pady=4, padx=5)
@@ -147,18 +146,16 @@ class Application(Frame):
                         padx=80)
         self.entry.bind('<Return>', self.returnEnter)
 
-        # for press_key in self.pressCommand.keys():
-        for idx in range(0, len(self.allKey)):
-            press_key = self.allKey[idx]
+        all_keys = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+        for press_key in all_keys:
             self.text.bind(press_key, self.textReturnEnter, add='')
             if self.OS != "windows":
-                controlPlusKey = "<Control-Key-" + press_key + ">"
-                self.text.bind(controlPlusKey, self.keepCurrent)
-                altPlusKey = "<Command-Key-" + press_key + ">"
-                self.text.bind(altPlusKey, self.keepCurrent)
+                self.text.bind(f'<Control-Key-"{press_key}">', self.keepCurrent)
+                self.text.bind(f'<Command-Key-"{press_key}">', self.keepCurrent)
 
         self.text.bind('<Control-Key-z>', self.backToHistory)
-        ## disable the default  copy behaivour when right click. For MacOS, right click is button 2, other systems are button3
+        # Disable the default  copy behaivour when right click.
+        # For MacOS, right click is button 2, other systems are button3
         self.text.bind('<Button-2>', self.rightClick)
         self.text.bind('<Button-3>', self.rightClick)
 
@@ -191,15 +188,7 @@ class Application(Frame):
 
     ## Disable right click default copy selection behaviour
     def rightClick(self, event):
-        if self.debug:
-            print("Action Track: rightClick")
-        try:
-            firstSelection_index = self.text.index(SEL_FIRST)
-            cursor_index = self.text.index(SEL_LAST)
-            content = self.text.get('1.0', "end-1c")
-            self.writeFile(self.fileName, content, cursor_index)
-        except TclError:
-            pass
+        return 'break'
 
     def toggle_use_recommend(self):
         if self.use_recommend.get() == True:
@@ -292,7 +281,6 @@ class Application(Frame):
             self.writeFile(self.fileName, historyContent, cursorIndex)
         else:
             print("History is empty!")
-        self.text.insert(INSERT, 'p')  # add a word as pad for key release delete
 
     def keepCurrent(self, event):
         if self.debug:
