@@ -36,6 +36,10 @@ class Editor(Text):
     def highlight_entity(self, start: str, count: int):
         self._highlight_entity(start, count, 'category')
 
+    def get_text(self) -> str:
+        """get text from 0 to end"""
+        return self.get("1.0", "end-1c")
+
 
 class Application(Frame):
     def __init__(self, parent):
@@ -189,7 +193,7 @@ class Application(Frame):
         if self.use_recommend.get() == True:
             pass
         else:
-            content = self.getText()
+            content = self.text.get_text()
             content = removeRecommendContent(content, self.recommendRe)
             self.writeFile(self.fileName, content, '1.0')
 
@@ -264,13 +268,8 @@ class Application(Frame):
         if self.debug:
             print("Action Track: backToHistory")
         if len(self.history) > 0:
-            historyCondition = self.history.pop()
-            # print "history condition: ", historyCondition
-            historyContent = historyCondition[0]
-            # print "history content: ", historyContent
-            cursorIndex = historyCondition[1]
-            # print "get history cursor: ", cursorIndex
-            self.writeFile(self.fileName, historyContent, cursorIndex)
+            content, cursor = self.history.pop()
+            self.writeFile(self.fileName, content, cursor)
         else:
             print("History is empty!")
 
@@ -287,15 +286,9 @@ class Application(Frame):
             print("Action Track: clearCommand")
         self.entry.delete(0, 'end')
 
-    def getText(self):
-        textContent = self.text.get("1.0", "end-1c")
-        textContent = textContent
-        return textContent
-
     def executeCursorCommand(self, command):
         if self.debug:
             print("Action Track: executeCursorCommand")
-        content = self.getText()
         print("Command:" + command)
         try:
             cursor_index = self.text.index(SEL_LAST)
@@ -348,16 +341,14 @@ class Application(Frame):
             if matched_span[1] > 0:
                 selected_string = line[matched_span[0]:matched_span[1]]
                 if detected_entity == 1:
-                    new_string_list = selected_string.strip('[@*]').rsplit('#', 1)
+                    new_string, old_entity_type = selected_string.strip('[@*]').rsplit('#', 1)
                 elif detected_entity == 2:
-                    new_string_list = selected_string.strip('[$*]').rsplit('#', 1)
-                new_string = new_string_list[0]
-                old_entity_type = new_string_list[1]
+                    new_string, old_entity_type = selected_string.strip('[$*]').rsplit('#', 1)
                 line_before_entity = line[:matched_span[0]]
                 line_after_entity = line[matched_span[1]:]
                 selected_string = new_string
                 entity_content = selected_string
-                cursor_index = line_id + '.' + str(int(matched_span[1]) - (len(new_string_list[1]) + 4))
+                cursor_index = line_id + '.' + str(int(matched_span[1]) - (len(old_entity_type) + 4))
                 if command == "q":
                     print('q: remove entity label')
                 elif command == 'y':
@@ -402,7 +393,7 @@ class Application(Frame):
                 if len(command) == 2:
                     select_num = int(command[0])
                     command = command[1]
-                    content = self.getText()
+                    content = self.text.get_text()
                     cursor_index = self.text.index(INSERT)
                     newcursor_index = cursor_index.split('.')[0] + "." + str(
                         int(cursor_index.split('.')[1]) + select_num)
@@ -424,8 +415,8 @@ class Application(Frame):
     def replaceString(self, content, string, replaceType, cursor_index):
         if replaceType in self.pressCommand:
             new_string = "[@" + string + "#" + self.pressCommand[replaceType] + "*]"
-            newcursor_index = cursor_index.split('.')[0] + "." + str(
-                int(cursor_index.split('.')[1]) + len(self.pressCommand[replaceType]) + 5)
+            row, col = cursor_index.split('.')
+            newcursor_index = f"{row}.{int(col) + len(self.pressCommand[replaceType]) + 5}"
         else:
             print("Invaild command!")
             print("cursor index: ", self.text.index(INSERT))
@@ -477,13 +468,10 @@ class Application(Frame):
             self.setColorDisplay()
 
     def setColorDisplay(self):
-        if self.debug:
-            print("Action Track: setColorDisplay")
-
         countVar = StringVar()
-        currentCursor = self.text.index(INSERT)
-        lineStart = currentCursor.split('.')[0] + '.0'
-        lineEnd = currentCursor.split('.')[0] + '.end'
+        cursor_row, _ = self.text.index(INSERT).split('.')
+        lineStart = cursor_row + '.0'
+        lineEnd = cursor_row + '.end'
 
         if self.colorAllChunk:
             self.text.mark_set("matchStart", "1.0")
@@ -537,26 +525,7 @@ class Application(Frame):
             self.text.tag_add("insideEntityColor", ledge_low, redge_high)
 
     def pushToHistory(self):
-        if self.debug:
-            print("Action Track: pushToHistory")
-        currentList = []
-        content = self.getText()
-        cursorPosition = self.text.index(INSERT)
-        # print "push to history cursor: ", cursorPosition
-        currentList.append(content)
-        currentList.append(cursorPosition)
-        self.history.append(currentList)
-
-    def pushToHistoryEvent(self, event):
-        if self.debug:
-            print("Action Track: pushToHistoryEvent")
-        currentList = []
-        content = self.getText()
-        cursorPosition = self.text.index(INSERT)
-        # print "push to history cursor: ", cursorPosition
-        currentList.append(content)
-        currentList.append(cursorPosition)
-        self.history.append(currentList)
+        self.history.append((self.text.get_text(), self.text.index(INSERT)))
 
     ## update shortcut map
     def renewPressCommand(self):
