@@ -11,6 +11,26 @@ from tkinter.ttk import *  # Frame, Button, Label, Style, Scrollbar
 from utils.recommend import *
 
 
+class Editor(Text):
+    def _highlight_entity(self, start: str, count: int, tagname: str):
+        self.tag_configure("edge", background="light grey", foreground='DimGrey')
+        end = f'{start}+{count}c'
+        star_pos = self.get(start, end).rfind('#')
+        word_start = f"{start}+2c"
+        word_end = f"{start}+{star_pos}c"
+        self.tag_add(tagname, word_start, word_end)
+        self.tag_add("edge", start, word_start)
+        self.tag_add("edge", word_end, end)
+
+    def highlight_recommend(self, start: str, count: int):
+        self.tag_configure("recommend", background='light green')
+        self._highlight_entity(start, count, 'recommend')
+
+    def highlight_entity(self, start: str, count: int):
+        self.tag_configure("category", background="SkyBlue1")
+        self._highlight_entity(start, count, 'category')
+
+
 class Example(Frame):
     def __init__(self, parent):
         Frame.__init__(self, parent)
@@ -64,9 +84,7 @@ class Example(Frame):
         if self.keepRecommend:
             self.goldAndrecomRe = r'\[[\@\$)].*?\#.*?\*\](?!\#)'
         ## configure color
-        self.entityColor = "SkyBlue1"
         self.insideNestEntityColor = "light slate blue"
-        self.recommendColor = 'lightgreen'
         self.selectColor = 'light salmon'
         self.textFontStyle = "Times"
         self.initUI()
@@ -86,7 +104,7 @@ class Example(Frame):
         self.lbl = Label(self, text="File: no file is opened")
         self.lbl.grid(sticky=W, pady=4, padx=5)
         self.fnt = font.Font(family=self.textFontStyle, size=self.textRow, weight="bold", underline=0)
-        self.text = Text(self, font=self.fnt, selectbackground=self.selectColor)
+        self.text = Editor(self, font=self.fnt, selectbackground=self.selectColor)
         self.text.grid(row=1, column=0, columnspan=self.textColumn, rowspan=self.textRow, padx=12, sticky=E + W + S + N)
 
         self.sb = Scrollbar(self)
@@ -525,28 +543,21 @@ class Example(Frame):
             self.text.mark_set("recommend_matchEnd", lineStart)
             self.text.mark_set("recommend_searchLimit", lineEnd)
         while True:
-            self.text.tag_configure("catagory", background=self.entityColor)
-            self.text.tag_configure("edge", background="light grey", foreground='DimGrey')
             pos = self.text.search(self.entity_regex, "matchEnd", "searchLimit", count=countVar, regexp=True)
             if pos == "":
                 break
             self.text.mark_set("matchStart", pos)
             self.text.mark_set("matchEnd", f"{pos}+{countVar.get()}c")
-            self.highlight_entity(self.text, pos, int(countVar.get()))
+            self.text.highlight_entity(pos, int(countVar.get()))
         ## color recommend type
         while True:
-            self.text.tag_configure("recommend", background=self.recommendColor)
             recommend_pos = self.text.search(self.recommendRe, "recommend_matchEnd", "recommend_searchLimit",
                                              count=countVar, regexp=True)
             if recommend_pos == "":
                 break
             self.text.mark_set("recommend_matchStart", recommend_pos)
             self.text.mark_set("recommend_matchEnd", f"{recommend_pos}+{countVar.get()}c")
-
-            ledge_low = recommend_pos
-            # second_pos = "%s+%sc" % (recommend_pos, str(1))
-            redge_low = f"{recommend_pos}+{countVar.get()}c"
-            self.text.tag_add("recommend", ledge_low, redge_low)
+            self.text.highlight_recommend(recommend_pos, int(countVar.get()))
 
         ## color the most inside span for nested span, scan from begin to end again
         if self.colorAllChunk:
@@ -742,15 +753,6 @@ class Example(Frame):
         showMessage += "Line Number: " + str(lineNum) + "\n\n"
         showMessage += "Saved to File: " + new_filename
         messagebox.showinfo("Export Message", showMessage)
-
-    def highlight_entity(self, text: Text, start: str, count: int):
-        end = f'{start}+{count}c'
-        star_pos = text.get(start, end).rfind('#')
-        word_start = f"{start}+2c"
-        word_end = f"{start}+{star_pos}c"
-        text.tag_add("catagory", word_start, word_end)
-        text.tag_add("edge", start, word_start)
-        text.tag_add("edge", word_end, end)
 
 
 def getConfigList():
