@@ -7,6 +7,8 @@ from tkinter import messagebox
 from collections import deque
 from tkinter import *
 from tkinter.ttk import Frame, Button, Label, Combobox, Scrollbar
+from dataclasses import dataclass
+from typing import List
 
 from utils.recommend import *
 
@@ -51,6 +53,48 @@ class Editor(Text):
         return self.get("1.0", "end-1c")
 
 
+@dataclass
+class KeyDef:
+    key: str
+    name: str
+    desc: str = ''
+    color: str = None
+
+
+class KeyMapFrame(Frame):
+    def __init__(self, parent, keymap: List[KeyDef]):
+        super().__init__(parent, relief='groove')
+        self.keymap = sorted(keymap, key=lambda x: x.key)
+        self.rows = len(keymap)
+        self.textFontStyle = 'Times'
+        self.key_labels = []
+        self.name_entries = []
+        self.create_widgets()
+
+    def create_widgets(self):
+        title = Label(self, text="Shortcuts map", foreground="blue", font=(self.textFontStyle, 14, "bold"))
+        title.grid(row=0, column=0, columnspan=2, sticky=W, padx=6, pady=8)
+        for row, item in enumerate(self.keymap, 1):
+            key_lbl = Label(self, text=item.key.upper() + ": ", font=(self.textFontStyle, 14, "bold"))
+            key_lbl.grid(row=row, column=0, sticky=NW, padx=4, pady=4)
+            self.key_labels.append(key_lbl)
+
+            name_entry = Entry(self, font=(self.textFontStyle, 14))
+            name_entry.insert(0, item.name)
+            name_entry.grid(row=row, column=1, columnspan=1, rowspan=1, sticky=NW, padx=4, pady=4)
+            self.name_entries.append(name_entry)
+
+    def update_keymap(self, keymap):
+        self.keymap = sorted(keymap, key=lambda x: x.key)
+        for lbl in self.key_labels:
+            lbl.destroy()
+        for ent in self.name_entries:
+            ent.destroy()
+        self.key_labels = []
+        self.name_entries = []
+        self.create_widgets()
+
+
 class Application(Frame):
     def __init__(self, parent):
         super().__init__(parent)
@@ -62,8 +106,14 @@ class Application(Frame):
         self.use_recommend = BooleanVar(self, True)
         self.history = deque(maxlen=20)
         self.currentContent = deque(maxlen=1)
-        self.pressCommand = {'a': "Artifical", 'b': "Event", 'c': "Fin-Concept", 'd': "Location",
-                             'e': "Organization", 'f': "Person", 'g': "Sector", 'h': "Other"}
+        self.pressCommand = [KeyDef('a', "Artifical"),
+                             KeyDef('b', "Event"),
+                             KeyDef('c', "Fin-Concept"),
+                             KeyDef('d', "Location"),
+                             KeyDef('e', "Organization"),
+                             KeyDef('f', "Person"),
+                             KeyDef('g', "Sector"),
+                             KeyDef('h', "Other")]
         self.labelEntryList = []
         self.shortcutLabelList = []
         self.configListLabel = None
@@ -111,8 +161,8 @@ class Application(Frame):
         for i in range(0, 16):
             self.rowconfigure(i, weight=1)
 
-        self.lbl = Label(self, text="File: no file is opened")
-        self.lbl.grid(sticky=W, pady=4, padx=5)
+        self.filename_lbl = Label(self, text="File: no file is opened")
+        self.filename_lbl.grid(sticky=W, pady=4, padx=5)
         self.text = Editor(self, selectbackground=self.selectColor)
         self.text.grid(row=1, column=0, columnspan=self.textColumn, rowspan=self.textRow, padx=12, sticky=E + W + S + N)
 
@@ -167,7 +217,18 @@ class Application(Frame):
         self.text.bind('<ButtonRelease-1>', self.show_cursor_pos)
         self.text.bind('<KeyRelease>', self.show_cursor_pos)
 
-        self.show_binding_widgets()
+        self.keymap_frame = KeyMapFrame(self, self.pressCommand)
+        self.keymap_frame.grid(row=1, column=self.textColumn + 2, rowspan=self.keymap_frame.rows,
+                               columnspan=2, padx=6, pady=6, sticky=NW)
+
+        Label(self, text="Map Templates", foreground="blue") \
+            .grid(row=self.keymap_frame.rows + 1, column=self.textColumn + 2, columnspan=2, rowspan=1, padx=10)
+        self.configListBox = Combobox(self, values=getConfigList(), state='readonly')
+        self.configListBox.grid(row=self.keymap_frame.rows + 2, column=self.textColumn + 2, columnspan=2, rowspan=1,
+                                padx=6)
+        # select current config file
+        self.configListBox.set(self.configFile.split(os.sep)[-1])
+        self.configListBox.bind('<<ComboboxSelected>>', self.on_select_configfile)
 
         self.enter = Button(self, text="Enter", command=self.returnButton)
         self.enter.grid(row=self.textRow + 1, column=self.textColumn + 1)
@@ -202,7 +263,7 @@ class Application(Frame):
             self.text.delete("1.0", END)
             text = self.readFile(filename)
             self.text.insert(END, text)
-            self.setNameLabel("File: " + filename)
+            self.filename_lbl.config(text="File: " + filename)
             self.autoLoadNewFile(self.fileName, "1.0")
             self.text.mark_set(INSERT, "1.0")
             self.setCursorLabel(self.text.index(INSERT))
@@ -225,9 +286,6 @@ class Application(Frame):
         _underline = 0
         fnt = font.Font(family=_family, size=_size, weight=_weight, underline=_underline)
         Text(self, font=fnt)
-
-    def setNameLabel(self, new_file):
-        self.lbl.config(text=new_file)
 
     def setCursorLabel(self, cursor_index):
         row, col = cursor_index.split('.')
@@ -351,12 +409,13 @@ class Application(Frame):
                     print('q: remove entity label')
                 elif command == 'y':
                     print("y: comfirm recommend label")
-                    old_key = next(key for key, etype in self.pressCommand.items() if etype == old_entity_type)
-                    entity_content, cursor_index = self.replaceString(selected_string, selected_string, old_key,
+                    keydef = self.get_cmd_by_name(old_entity_type)
+                    entity_content, cursor_index = self.replaceString(selected_string, selected_string, keydef.name,
                                                                       cursor_index)
                 else:
                     if len(selected_string) > 0:
-                        if command in self.pressCommand:
+                        keydef = self.get_cmd_by_key(command)
+                        if keydef is not None:
                             entity_content, cursor_index = self.replaceString(selected_string, selected_string, command,
                                                                               cursor_index)
                         else:
@@ -399,7 +458,8 @@ class Application(Frame):
                     selected_string = self.text.get(cursor_index, newcursor_index)
                     aboveHalf_content = self.text.get('1.0', cursor_index)
                     followHalf_content = self.text.get(cursor_index, "end-1c")
-                    if command in self.pressCommand:
+                    keydef = self.get_cmd_by_key(command)
+                    if keydef is not None:
                         if len(selected_string) > 0:
                             # print "insert index: ", self.text.index(INSERT) 
                             followHalf_content, newcursor_index = self.replaceString(followHalf_content,
@@ -411,10 +471,11 @@ class Application(Frame):
                     self.writeFile(self.fileName, content, newcursor_index)
 
     def replaceString(self, content, string, replaceType, cursor_index):
-        if replaceType in self.pressCommand:
-            new_string = "[@" + string + "#" + self.pressCommand[replaceType] + "*]"
+        cmd = self.get_cmd_by_key(replaceType)
+        if cmd is not None:
+            new_string = "[@" + string + "#" + cmd.name + "*]"
             row, col = cursor_index.split('.')
-            newcursor_index = f"{row}.{int(col) + len(self.pressCommand[replaceType]) + 5}"
+            newcursor_index = f"{row}.{int(col) + len(cmd.name) + 5}"
         else:
             print("Invaild command!")
             print("cursor index: ", self.text.index(INSERT))
@@ -457,7 +518,7 @@ class Application(Frame):
             self.text.delete("1.0", END)
             text = self.readFile(fileName)
             self.text.insert("end-1c", text)
-            self.setNameLabel("File: " + fileName)
+            self.filename_lbl.config(text="File: " + fileName)
             self.text.mark_set(INSERT, newcursor_index)
             self.text.see(newcursor_index)
             self.setCursorLabel(newcursor_index)
@@ -544,7 +605,7 @@ class Application(Frame):
             self.shortcutLabelList[listLength - idx].config(text="NON= ")
         with open(self.configFile, 'w') as fp:
             fp.write(str(self.pressCommand))
-        self.show_binding_widgets()
+        self.keymap_frame.update_keymap(self.pressCommand)
         messagebox.showinfo("Remap Notification",
                             "Shortcut map has been updated!\n\n" +
                             "Configure file has been saved in File:" + self.configFile)
@@ -580,60 +641,16 @@ class Application(Frame):
             self.configFile += ".config"
         with open(self.configFile, 'w') as fp:
             fp.write(str(self.pressCommand))
-        self.show_binding_widgets()
+        self.keymap_frame.update_keymap(self.pressCommand)
         messagebox.showinfo("Save New Map Notification",
                             "Shortcut map has been saved and updated!\n\n"
                             + "Configure file has been saved in File:" + self.configFile)
-
-    ## show shortcut map
-    def show_binding_widgets(self):
-        if os.path.isfile(self.configFile):
-            with open(self.configFile, 'r') as fp:
-                self.pressCommand = eval(fp.read())
-
-        mapLabel = Label(self, text="Shortcuts map Labels", foreground="blue", font=(self.textFontStyle, 14, "bold"))
-        mapLabel.grid(row=0, column=self.textColumn + 2, columnspan=2, sticky=W)
-
-        # destroy all previous widgets before switching shortcut maps
-        if self.labelEntryList is not None and isinstance(self.labelEntryList, list):
-            for x in self.labelEntryList:
-                x.destroy()
-        if self.shortcutLabelList is not None and isinstance(self.shortcutLabelList, list):
-            for x in self.shortcutLabelList:
-                x.destroy()
-        self.labelEntryList = []
-        self.shortcutLabelList = []
-
-        row = 0
-        for key in sorted(self.pressCommand):
-            row += 1
-            symbolLabel = Label(self, text=key.upper() + ": ", font=(self.textFontStyle, 14, "bold"), width=4)
-            symbolLabel.grid(row=row, column=self.textColumn + 2)
-            self.shortcutLabelList.append(symbolLabel)
-
-            labelEntry = Entry(self, font=(self.textFontStyle, 14))
-            labelEntry.insert(0, self.pressCommand[key])
-            labelEntry.grid(row=row, column=self.textColumn + 3, columnspan=1, rowspan=1)
-            self.labelEntryList.append(labelEntry)
-
-        if self.configListLabel is not None:
-            self.configListLabel.destroy()
-        if self.configListBox is not None:
-            self.configListBox.destroy()
-        self.configListLabel = Label(self, text="Map Templates", foreground="blue",
-                                     font=(self.textFontStyle, 14, "bold"))
-        self.configListLabel.grid(row=row + 1, column=self.textColumn + 2, columnspan=2, rowspan=1, padx=10)
-        self.configListBox = Combobox(self, values=getConfigList(), state='readonly')
-        self.configListBox.grid(row=row + 2, column=self.textColumn + 2, columnspan=2, rowspan=1, padx=6)
-        # select current config file
-        self.configListBox.set(self.configFile.split(os.sep)[-1])
-        self.configListBox.bind('<<ComboboxSelected>>', self.on_select_configfile)
 
     def on_select_configfile(self, event=None):
         if event and self.debug:
             print("Change shortcut map to: ", event.widget.get())
         self.configFile = os.path.join("configs", event.widget.get())
-        self.show_binding_widgets()
+        self.keymap_frame.update_keymap(self.pressCommand)
 
     def getCursorIndex(self):
         return self.text.index(INSERT)
@@ -671,6 +688,12 @@ class Application(Frame):
         showMessage += "Line Number: " + str(lineNum) + "\n\n"
         showMessage += "Saved to File: " + new_filename
         messagebox.showinfo("Export Message", showMessage)
+
+    def get_cmd_by_key(self, key):
+        return next((item for item in self.pressCommand if item.key == key), None)
+
+    def get_cmd_by_name(self, name):
+        return next((item for item in self.pressCommand if item.name == name), None)
 
 
 def getConfigList():
