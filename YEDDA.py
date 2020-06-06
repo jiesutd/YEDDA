@@ -12,8 +12,16 @@ from utils.recommend import *
 
 
 class Editor(Text):
+    def __init__(self, parent, **kwargs):
+        super().__init__(parent, kwargs)
+        fnt = font.Font(family='Times', size=20, weight="bold", underline=0)
+        self.config(insertbackground='red', insertwidth=4, font=fnt)
+        edge_fnt = font.Font(family='Times', size=12, underline=0)
+        self.tag_configure("edge", background="light grey", foreground='DimGrey', font=edge_fnt)
+        self.tag_configure("recommend", background='light green')
+        self.tag_configure("category", background="SkyBlue1")
+
     def _highlight_entity(self, start: str, count: int, tagname: str):
-        self.tag_configure("edge", background="light grey", foreground='DimGrey')
         end = f'{start}+{count}c'
         star_pos = self.get(start, end).rfind('#')
         word_start = f"{start}+2c"
@@ -23,20 +31,17 @@ class Editor(Text):
         self.tag_add("edge", word_end, end)
 
     def highlight_recommend(self, start: str, count: int):
-        self.tag_configure("recommend", background='light green')
         self._highlight_entity(start, count, 'recommend')
 
     def highlight_entity(self, start: str, count: int):
-        self.tag_configure("category", background="SkyBlue1")
         self._highlight_entity(start, count, 'category')
 
 
-class Example(Frame):
+class Application(Frame):
     def __init__(self, parent):
-        Frame.__init__(self, parent)
+        super().__init__(parent)
         self.Version = "YEDDA-V1.0 Annotator"
         self.OS = platform.system().lower()
-        self.parent = parent
         self.fileName = ""
         self.debug = False
         self.colorAllChunk = True
@@ -90,7 +95,7 @@ class Example(Frame):
         self.initUI()
 
     def initUI(self):
-        self.parent.title(self.Version)
+        self.master.title(self.Version)
         self.pack(fill=BOTH, expand=True)
 
         for idx in range(0, self.textColumn):
@@ -103,30 +108,27 @@ class Example(Frame):
 
         self.lbl = Label(self, text="File: no file is opened")
         self.lbl.grid(sticky=W, pady=4, padx=5)
-        self.fnt = font.Font(family=self.textFontStyle, size=self.textRow, weight="bold", underline=0)
-        self.text = Editor(self, font=self.fnt, selectbackground=self.selectColor)
+        self.text = Editor(self, selectbackground=self.selectColor)
         self.text.grid(row=1, column=0, columnspan=self.textColumn, rowspan=self.textRow, padx=12, sticky=E + W + S + N)
 
-        self.sb = Scrollbar(self)
-        self.sb.grid(row=1, column=self.textColumn, rowspan=self.textRow, padx=0, sticky=E + W + S + N)
-        self.text['yscrollcommand'] = self.sb.set
-        self.sb['command'] = self.text.yview
-        # self.sb.pack()
+        scroll = Scrollbar(self, command=self.text.yview)
+        scroll.grid(row=1, column=self.textColumn, rowspan=self.textRow, padx=0, sticky=E + W + S + N)
+        self.text['yscrollcommand'] = scroll.set
 
         abtn = Button(self, text="Open", command=self.onOpen)
         abtn.grid(row=1, column=self.textColumn + 1)
 
         ubtn = Button(self, text="ReMap", command=self.renewPressCommand)
-        ubtn.grid(row=4, column=self.textColumn + 1, pady=4)
+        ubtn.grid(row=2, column=self.textColumn + 1, pady=4)
 
         ubtn = Button(self, text="NewMap", command=self.savenewPressCommand)
-        ubtn.grid(row=5, column=self.textColumn + 1, pady=4)
+        ubtn.grid(row=3, column=self.textColumn + 1, pady=4)
 
         exportbtn = Button(self, text="Export", command=self.generateSequenceFile)
-        exportbtn.grid(row=6, column=self.textColumn + 1, pady=4)
+        exportbtn.grid(row=4, column=self.textColumn + 1, pady=4)
 
         cbtn = Button(self, text="Quit", command=self.quit)
-        cbtn.grid(row=7, column=self.textColumn + 1, pady=4)
+        cbtn.grid(row=5, column=self.textColumn + 1, pady=4)
 
         self.cursorName = Label(self, text="Cursor: ", foreground="Blue", font=(self.textFontStyle, 14, "bold"))
         self.cursorName.grid(row=9, column=self.textColumn + 1, pady=4)
@@ -134,7 +136,7 @@ class Example(Frame):
                                  font=(self.textFontStyle, 14, "bold"))
         self.cursorIndex.grid(row=10, column=self.textColumn + 1, pady=4)
 
-        recommend_label = Label(self, text="RecommendModel: ", foreground="Blue", font=(self.textFontStyle, 14, "bold"))
+        recommend_label = Label(self, text="Recommend: ", foreground="Blue", font=(self.textFontStyle, 14, "bold"))
         recommend_label.grid(row=12, column=self.textColumn + 1, pady=4)
         recommend_check = Checkbutton(self, command=self.toggle_use_recommend, variable=self.use_recommend)
         recommend_check.grid(row=12, column=self.textColumn + 3, pady=4)
@@ -521,7 +523,6 @@ class Example(Frame):
     def setColorDisplay(self):
         if self.debug:
             print("Action Track: setColorDisplay")
-        self.text.config(insertbackground='red', insertwidth=4, font=self.fnt)
 
         countVar = StringVar()
         currentCursor = self.text.index(INSERT)
@@ -905,7 +906,7 @@ def main():
     print("OS:", platform.system())
     root = Tk()
     root.geometry("1300x700+200+200")
-    app = Example(root)
+    app = Application(root)
     app.setFont(17)
     root.mainloop()
 
