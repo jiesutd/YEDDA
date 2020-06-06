@@ -6,7 +6,7 @@ from tkinter import font
 from tkinter import messagebox
 from collections import deque
 from tkinter import *
-from tkinter.ttk import *  # Frame, Button, Label, Style, Scrollbar
+from tkinter.ttk import Frame, Button, Label, Combobox, Scrollbar
 
 from utils.recommend import *
 
@@ -21,6 +21,13 @@ class Editor(Text):
         self.tag_configure("recommend", background='light green')
         self.tag_configure("category", background="SkyBlue1")
 
+        def _ignore(e): return 'break'
+
+        # Disable the default  copy behaivour when right click.
+        # For MacOS, right click is button 2, other systems are button3
+        self.bind('<Button-2>', _ignore)
+        self.bind('<Button-3>', _ignore)
+
     def _highlight_entity(self, start: str, count: int, tagname: str):
         end = f'{start}+{count}c'
         star_pos = self.get(start, end).rfind('#')
@@ -29,6 +36,9 @@ class Editor(Text):
         self.tag_add(tagname, word_start, word_end)
         self.tag_add("edge", start, word_start)
         self.tag_add("edge", word_end, end)
+
+    def show_annotation_tag(self, show: bool):
+        self.tag_configure('edge', elide=not show)
 
     def highlight_recommend(self, start: str, count: int):
         self._highlight_entity(start, count, 'recommend')
@@ -52,16 +62,8 @@ class Application(Frame):
         self.use_recommend = BooleanVar(self, True)
         self.history = deque(maxlen=20)
         self.currentContent = deque(maxlen=1)
-        self.pressCommand = {'a': "Artifical",
-                             'b': "Event",
-                             'c': "Fin-Concept",
-                             'd': "Location",
-                             'e': "Organization",
-                             'f': "Person",
-                             'g': "Sector",
-                             'h': "Other"
-                             }
-        self.controlCommand = {'q': "unTag", 'ctrl+z': 'undo'}
+        self.pressCommand = {'a': "Artifical", 'b': "Event", 'c': "Fin-Concept", 'd': "Location",
+                             'e': "Organization", 'f': "Person", 'g': "Sector", 'h': "Other"}
         self.labelEntryList = []
         self.shortcutLabelList = []
         self.configListLabel = None
@@ -141,6 +143,12 @@ class Application(Frame):
         recommend_check = Checkbutton(self, command=self.toggle_use_recommend, variable=self.use_recommend)
         recommend_check.grid(row=12, column=self.textColumn + 3, pady=4)
 
+        Label(self, text="Show Tags: ").grid(row=13, column=self.textColumn + 1)
+        should_show_tags = BooleanVar(self, True)
+        should_show_tags.trace_add('write', lambda _, _1, _2: self.text.show_annotation_tag(should_show_tags.get()))
+        show_tags_check = Checkbutton(self, variable=should_show_tags)
+        show_tags_check.grid(row=13, column=self.textColumn + 3)
+
         lbl_entry = Label(self, text="Command:")
         lbl_entry.grid(row=self.textRow + 1, sticky=E + W + S + N, pady=4, padx=4)
         self.entry = Entry(self)
@@ -156,10 +164,6 @@ class Application(Frame):
                 self.text.bind(f'<Command-Key-"{press_key}">', self.keepCurrent)
 
         self.text.bind('<Control-Key-z>', self.backToHistory)
-        # Disable the default  copy behaivour when right click.
-        # For MacOS, right click is button 2, other systems are button3
-        self.text.bind('<Button-2>', self.rightClick)
-        self.text.bind('<Button-3>', self.rightClick)
 
         self.text.bind('<Double-Button-1>', self.doubleLeftClick)
         self.text.bind('<ButtonRelease-1>', self.show_cursor_pos)
@@ -184,10 +188,6 @@ class Application(Frame):
         # start_index = ("%s - %sc" % (cursor_index, 5))
         # end_index = ("%s + %sc" % (cursor_index, 5))
         # self.text.tag_add('SEL', '1.0',"end-1c")
-
-    ## Disable right click default copy selection behaviour
-    def rightClick(self, event):
-        return 'break'
 
     def toggle_use_recommend(self):
         if self.use_recommend.get() == True:
