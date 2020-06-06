@@ -165,7 +165,7 @@ class Application(Frame):
         self.text.bind('<ButtonRelease-1>', self.show_cursor_pos)
         self.text.bind('<KeyRelease>', self.show_cursor_pos)
 
-        self.setMapShow()
+        self.show_binding_widgets()
 
         self.enter = Button(self, text="Enter", command=self.returnButton)
         self.enter.grid(row=self.textRow + 1, column=self.textColumn + 1)
@@ -353,7 +353,7 @@ class Application(Frame):
                     print('q: remove entity label')
                 elif command == 'y':
                     print("y: comfirm recommend label")
-                    old_key = self.pressCommand.keys()[self.pressCommand.values().index(old_entity_type)]
+                    old_key = next(key for key, etype in self.pressCommand.items() if etype == old_entity_type)
                     entity_content, cursor_index = self.replaceString(selected_string, selected_string, old_key,
                                                                       cursor_index)
                 else:
@@ -548,7 +548,7 @@ class Application(Frame):
             self.shortcutLabelList[listLength - idx].config(text="NON= ")
         with open(self.configFile, 'w') as fp:
             fp.write(str(self.pressCommand))
-        self.setMapShow()
+        self.show_binding_widgets()
         messagebox.showinfo("Remap Notification",
                             "Shortcut map has been updated!\n\n" +
                             "Configure file has been saved in File:" + self.configFile)
@@ -584,45 +584,41 @@ class Application(Frame):
             self.configFile += ".config"
         with open(self.configFile, 'w') as fp:
             fp.write(str(self.pressCommand))
-        self.setMapShow()
+        self.show_binding_widgets()
         messagebox.showinfo("Save New Map Notification",
                             "Shortcut map has been saved and updated!\n\n"
                             + "Configure file has been saved in File:" + self.configFile)
 
     ## show shortcut map
-    def setMapShow(self):
+    def show_binding_widgets(self):
         if os.path.isfile(self.configFile):
             with open(self.configFile, 'r') as fp:
                 self.pressCommand = eval(fp.read())
-        hight = len(self.pressCommand)
-        width = 2
-        row = 0
 
         mapLabel = Label(self, text="Shortcuts map Labels", foreground="blue", font=(self.textFontStyle, 14, "bold"))
-        mapLabel.grid(row=0, column=self.textColumn + 2, columnspan=2, rowspan=1, padx=10)
+        mapLabel.grid(row=0, column=self.textColumn + 2, columnspan=2, sticky=W)
 
         # destroy all previous widgets before switching shortcut maps
-        if self.labelEntryList is not None and type(self.labelEntryList) is type([]):
+        if self.labelEntryList is not None and isinstance(self.labelEntryList, list):
             for x in self.labelEntryList:
                 x.destroy()
-        if self.shortcutLabelList is not None and type(self.shortcutLabelList) is type([]):
+        if self.shortcutLabelList is not None and isinstance(self.shortcutLabelList, list):
             for x in self.shortcutLabelList:
                 x.destroy()
         self.labelEntryList = []
         self.shortcutLabelList = []
 
+        row = 0
         for key in sorted(self.pressCommand):
             row += 1
-            # print "key: ", key, "  command: ", self.pressCommand[key]
-            symbolLabel = Label(self, text=key.upper() + ": ", foreground="blue", font=(self.textFontStyle, 14, "bold"))
-            symbolLabel.grid(row=row, column=self.textColumn + 2, columnspan=1, rowspan=1, padx=3)
+            symbolLabel = Label(self, text=key.upper() + ": ", font=(self.textFontStyle, 14, "bold"), width=4)
+            symbolLabel.grid(row=row, column=self.textColumn + 2)
             self.shortcutLabelList.append(symbolLabel)
 
-            labelEntry = Entry(self, foreground="blue", font=(self.textFontStyle, 14, "bold"))
+            labelEntry = Entry(self, font=(self.textFontStyle, 14))
             labelEntry.insert(0, self.pressCommand[key])
             labelEntry.grid(row=row, column=self.textColumn + 3, columnspan=1, rowspan=1)
             self.labelEntryList.append(labelEntry)
-            # print "row: ", row
 
         if self.configListLabel is not None:
             self.configListLabel.destroy()
@@ -635,13 +631,13 @@ class Application(Frame):
         self.configListBox.grid(row=row + 2, column=self.textColumn + 2, columnspan=2, rowspan=1, padx=6)
         # select current config file
         self.configListBox.set(self.configFile.split(os.sep)[-1])
-        self.configListBox.bind('<<ComboboxSelected>>', self.on_select)
+        self.configListBox.bind('<<ComboboxSelected>>', self.on_select_configfile)
 
-    def on_select(self, event=None):
+    def on_select_configfile(self, event=None):
         if event and self.debug:
             print("Change shortcut map to: ", event.widget.get())
         self.configFile = os.path.join("configs", event.widget.get())
-        self.setMapShow()
+        self.show_binding_widgets()
 
     def getCursorIndex(self):
         return self.text.index(INSERT)
