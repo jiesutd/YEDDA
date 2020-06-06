@@ -94,6 +94,17 @@ class KeyMapFrame(Frame):
         self.name_entries = []
         self.create_widgets()
 
+    def read_keymap(self) -> List[KeyDef]:
+        """read current keymap in GUI, might be changed by user"""
+        new_map = []
+        for i, cmd in enumerate(self.keymap):
+            new_name = self.name_entries[i].get()
+            if new_name.strip() != '':
+                new_map.append(KeyDef(cmd.key, new_name, cmd.desc, cmd.color))
+            else:
+                print(f'{cmd.key} key deleted')
+        return new_map
+
 
 class Application(Frame):
     def __init__(self, parent):
@@ -410,7 +421,7 @@ class Application(Frame):
                 elif command == 'y':
                     print("y: comfirm recommend label")
                     keydef = self.get_cmd_by_name(old_entity_type)
-                    entity_content, cursor_index = self.replaceString(selected_string, selected_string, keydef.name,
+                    entity_content, cursor_index = self.replaceString(selected_string, selected_string, keydef.key,
                                                                       cursor_index)
                 else:
                     if len(selected_string) > 0:
@@ -584,25 +595,11 @@ class Application(Frame):
     def pushToHistory(self):
         self.history.append((self.text.get_text(), self.text.index(INSERT)))
 
-    ## update shortcut map
+    ## update shortcut map, directly in current configfile
     def renewPressCommand(self):
         if self.debug:
             print("Action Track: renewPressCommand")
-        seq = 0
-        new_dict = {}
-        listLength = len(self.labelEntryList)
-        delete_num = 0
-        for key in sorted(self.pressCommand):
-            label = self.labelEntryList[seq].get()
-            if len(label) > 0:
-                new_dict[key] = label
-            else:
-                delete_num += 1
-            seq += 1
-        self.pressCommand = new_dict
-        for idx in range(1, delete_num + 1):
-            self.labelEntryList[listLength - idx].delete(0, END)
-            self.shortcutLabelList[listLength - idx].config(text="NON= ")
+        self.pressCommand = self.keymap_frame.read_keymap()
         with open(self.configFile, 'w') as fp:
             fp.write(str(self.pressCommand))
         self.keymap_frame.update_keymap(self.pressCommand)
@@ -614,21 +611,7 @@ class Application(Frame):
     def savenewPressCommand(self):
         if self.debug:
             print("Action Track: savenewPressCommand")
-        seq = 0
-        new_dict = {}
-        listLength = len(self.labelEntryList)
-        delete_num = 0
-        for key in sorted(self.pressCommand):
-            label = self.labelEntryList[seq].get()
-            if len(label) > 0:
-                new_dict[key] = label
-            else:
-                delete_num += 1
-            seq += 1
-        self.pressCommand = new_dict
-        for idx in range(1, delete_num + 1):
-            self.labelEntryList[listLength - idx].delete(0, END)
-            self.shortcutLabelList[listLength - idx].config(text="NON= ")
+        self.pressCommand = self.keymap_frame.read_keymap()
         # prompt to ask configFile name
         self.configFile = filedialog.asksaveasfilename(
             initialdir="./configs/",
