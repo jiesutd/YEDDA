@@ -130,10 +130,9 @@ class Application(Frame):
         cbtn = Button(self, text="Quit", command=self.quit)
         cbtn.grid(row=5, column=self.textColumn + 1, pady=4)
 
-        self.cursorName = Label(self, text="Cursor: ", foreground="Blue", font=(self.textFontStyle, 14, "bold"))
-        self.cursorName.grid(row=9, column=self.textColumn + 1, pady=4)
-        self.cursorIndex = Label(self, text=("row: %s\ncol: %s" % (0, 0)), foreground="red",
-                                 font=(self.textFontStyle, 14, "bold"))
+        cursorName = Label(self, text="Cursor: ", foreground="Blue", font=(self.textFontStyle, 14, "bold"))
+        cursorName.grid(row=9, column=self.textColumn + 1, pady=4)
+        self.cursorIndex = Label(self, text="row: 0\ncol: 0", foreground="red", font=(self.textFontStyle, 14, "bold"))
         self.cursorIndex.grid(row=10, column=self.textColumn + 1, pady=4)
 
         recommend_label = Label(self, text="Recommend: ", foreground="Blue", font=(self.textFontStyle, 14, "bold"))
@@ -151,11 +150,7 @@ class Application(Frame):
         # for press_key in self.pressCommand.keys():
         for idx in range(0, len(self.allKey)):
             press_key = self.allKey[idx]
-
-            # self.text.bind(press_key, lambda event, arg=press_key:self.textReturnEnter(event,arg))
-            self.text.bind(press_key, self.textReturnEnter)
-            simplePressKey = "<KeyRelease-" + press_key + ">"
-            self.text.bind(simplePressKey, self.deleteTextInput)
+            self.text.bind(press_key, self.textReturnEnter, add='')
             if self.OS != "windows":
                 controlPlusKey = "<Control-Key-" + press_key + ">"
                 self.text.bind(controlPlusKey, self.keepCurrent)
@@ -280,11 +275,9 @@ class Application(Frame):
             print("Action Track: textReturnEnter")
         self.pushToHistory()
         print("event: ", press_key)
-        # content = self.text.get()
         self.clearCommand()
         self.executeCursorCommand(press_key.lower())
-        # self.deleteTextInput()
-        return press_key
+        return 'break'
 
     def backToHistory(self, event):
         if self.debug:
@@ -447,23 +440,6 @@ class Application(Frame):
                                                                self.use_recommend.get())
                             # content = aboveHalf_content + followHalf_content
                     self.writeFile(self.fileName, content, newcursor_index)
-
-    def deleteTextInput(self, event):
-        if self.debug:
-            print("Action Track: deleteTextInput")
-        get_insert = self.text.index(INSERT)
-        print("delete insert:", get_insert)
-        insert_list = get_insert.split('.')
-        last_insert = insert_list[0] + "." + str(int(insert_list[1]) - 1)
-        get_input = self.text.get(last_insert, get_insert)
-        # print "get_input: ", get_input
-        aboveHalf_content = self.text.get('1.0', last_insert)
-        followHalf_content = self.text.get(last_insert, "end-1c")
-        if len(get_input) > 0:
-            print(get_input)
-            followHalf_content = followHalf_content.replace(get_input, '', 1)
-        content = aboveHalf_content + followHalf_content
-        self.writeFile(self.fileName, content, last_insert)
 
     def replaceString(self, content, string, replaceType, cursor_index):
         if replaceType in self.pressCommand:
