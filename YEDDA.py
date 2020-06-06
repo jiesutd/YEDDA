@@ -135,19 +135,17 @@ class Application(Frame):
         cbtn = Button(self, text="Quit", command=self.quit)
         cbtn.grid(row=5, column=self.textColumn + 1, pady=4)
 
-        self.cursor_index_label = Label(self, text="1:0", foreground="red", font=(self.textFontStyle, 14, "bold"))
-        self.cursor_index_label.grid(row=10, column=self.textColumn + 1, pady=4)
+        recommend_check = Checkbutton(self, text='Recommend', command=self.toggle_use_recommend,
+                                      variable=self.use_recommend)
+        recommend_check.grid(row=6, column=self.textColumn + 1, sticky=W, pady=4)
 
-        recommend_label = Label(self, text="Recommend: ", foreground="Blue", font=(self.textFontStyle, 14, "bold"))
-        recommend_label.grid(row=12, column=self.textColumn + 1, pady=4)
-        recommend_check = Checkbutton(self, command=self.toggle_use_recommend, variable=self.use_recommend)
-        recommend_check.grid(row=12, column=self.textColumn + 3, pady=4)
-
-        Label(self, text="Show Tags: ").grid(row=13, column=self.textColumn + 1)
         should_show_tags = BooleanVar(self, True)
         should_show_tags.trace_add('write', lambda _, _1, _2: self.text.show_annotation_tag(should_show_tags.get()))
-        show_tags_check = Checkbutton(self, variable=should_show_tags)
-        show_tags_check.grid(row=13, column=self.textColumn + 3)
+        show_tags_check = Checkbutton(self, text='Show Tags', variable=should_show_tags)
+        show_tags_check.grid(row=7, column=self.textColumn + 1, sticky=W)
+
+        self.cursor_index_label = Label(self, text="1:0", foreground="red", font=(self.textFontStyle, 14, "bold"))
+        self.cursor_index_label.grid(row=10, column=self.textColumn + 1, pady=4)
 
         lbl_entry = Label(self, text="Command:")
         lbl_entry.grid(row=self.textRow + 1, sticky=E + W + S + N, pady=4, padx=4)
@@ -439,9 +437,7 @@ class Application(Frame):
                 ann_file = open(new_name, 'w', encoding=self.file_encoding)
                 ann_file.write(content)
                 ann_file.close()
-            # print "Writed to new file: ", new_name
             self.autoLoadNewFile(new_name, newcursor_index)
-            # self.generateSequenceFile()
         else:
             print("Don't write to empty file!")
 
@@ -826,7 +822,10 @@ def main():
     print("SUTDAnnotator launched!")
     print("OS:", platform.system())
     root = Tk()
-    root.geometry("1300x700+200+200")
+    width, height = 1300, 700
+    x = max((root.winfo_screenwidth() - width) // 2, 0)
+    y = max((root.winfo_screenheight() - height) // 2, 0)
+    root.geometry(f'{width}x{height}+{x}+{y}')
     app = Application(root)
     app.setFont(17)
     root.mainloop()
