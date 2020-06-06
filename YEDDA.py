@@ -51,13 +51,13 @@ class Example(Frame):
         self.keepRecommend = True
 
         '''
-        self.seged: for exporting sequence, if True then split words with space, else split character without space
-        for example, if your data is segmentated Chinese (or English) with words seperated by a space, you need to set this flag as true
+        self.segmented: for exporting sequence, if True then split words with space, else split character without space
+        for example, if your data is segmented Chinese (or English) with words separated by a space, you need to set this flag as true
         if your data is Chinese without segmentation, you need to set this flag as False
         '''
         self.segmented = True  ## False for non-segmentated Chinese, True for English or Segmented Chinese
         self.configFile = "configs/default.config"
-        self.entityRe = r'\[\@.*?\#.*?\*\](?!\#)'
+        self.entity_regex = r'\[\@.*?\#.*?\*\](?!\#)'
         self.insideNestEntityRe = r'\[\@\[\@(?!\[\@).*?\#.*?\*\]\#'
         self.recommendRe = r'\[\$.*?\#.*?\*\](?!\#)'
         self.goldAndrecomRe = r'\[\@.*?\#.*?\*\](?!\#)'
@@ -305,12 +305,11 @@ class Example(Frame):
         content = self.getText()
         print("Command:" + command)
         try:
-            firstSelection_index = self.text.index(SEL_FIRST)
             cursor_index = self.text.index(SEL_LAST)
-            aboveHalf_content = self.text.get('1.0', firstSelection_index)
-            followHalf_content = self.text.get(firstSelection_index, "end-1c")
+            aboveHalf_content = self.text.get('1.0', SEL_FIRST)
+            followHalf_content = self.text.get(SEL_FIRST, "end-1c")
             selected_string = self.text.selection_get()
-            if re.match(self.entityRe, selected_string) != None:
+            if re.match(self.entity_regex, selected_string) != None:
                 ## if have selected entity
                 new_string_list = selected_string.strip('[@]').rsplit('#', 1)
                 new_string = new_string_list[0]
@@ -340,7 +339,7 @@ class Example(Frame):
             line = self.text.get(line_id + '.0', line_id + '.end')
             matched_span = (-1, -1)
             detected_entity = -1  ## detected entity type:－1 not detected, 1 detected gold, 2 detected recommend
-            for match in re.finditer(self.entityRe, line):
+            for match in re.finditer(self.entity_regex, line):
                 if match.span()[0] <= int(column_id) & int(column_id) <= match.span()[1]:
                     matched_span = match.span()
                     detected_entity = 1
@@ -527,21 +526,13 @@ class Example(Frame):
             self.text.mark_set("recommend_searchLimit", lineEnd)
         while True:
             self.text.tag_configure("catagory", background=self.entityColor)
-            self.text.tag_configure("edge", background=self.entityColor)
-            pos = self.text.search(self.entityRe, "matchEnd", "searchLimit", count=countVar, regexp=True)
+            self.text.tag_configure("edge", background="light grey", foreground='DimGrey')
+            pos = self.text.search(self.entity_regex, "matchEnd", "searchLimit", count=countVar, regexp=True)
             if pos == "":
                 break
             self.text.mark_set("matchStart", pos)
             self.text.mark_set("matchEnd", f"{pos}+{countVar.get()}c")
-
-            first_pos = pos
-            second_pos = f"{pos}+1c"
-            lastsecond_pos = f"{pos}+{int(countVar.get()) - 1}c"
-            last_pos = f"{pos} + {countVar.get()}c"
-
-            self.text.tag_add("catagory", second_pos, lastsecond_pos)
-            self.text.tag_add("edge", first_pos, second_pos)
-            self.text.tag_add("edge", lastsecond_pos, last_pos)
+            self.highlight_entity(self.text, pos, int(countVar.get()))
         ## color recommend type
         while True:
             self.text.tag_configure("recommend", background=self.recommendColor)
@@ -552,10 +543,10 @@ class Example(Frame):
             self.text.mark_set("recommend_matchStart", recommend_pos)
             self.text.mark_set("recommend_matchEnd", f"{recommend_pos}+{countVar.get()}c")
 
-            first_pos = recommend_pos
+            ledge_low = recommend_pos
             # second_pos = "%s+%sc" % (recommend_pos, str(1))
-            lastsecond_pos = f"{recommend_pos}+{countVar.get()}c"
-            self.text.tag_add("recommend", first_pos, lastsecond_pos)
+            redge_low = f"{recommend_pos}+{countVar.get()}c"
+            self.text.tag_add("recommend", ledge_low, redge_low)
 
         ## color the most inside span for nested span, scan from begin to end again
         if self.colorAllChunk:
@@ -573,9 +564,9 @@ class Example(Frame):
                 break
             self.text.mark_set("matchStart", pos)
             self.text.mark_set("matchEnd", "%s+%sc" % (pos, countVar.get()))
-            first_pos = f"{pos} + 2c"
-            last_pos = f"{pos} + {int(countVar.get()) - 1}c"
-            self.text.tag_add("insideEntityColor", first_pos, last_pos)
+            ledge_low = f"{pos} + 2c"
+            redge_high = f"{pos} + {int(countVar.get()) - 1}c"
+            self.text.tag_add("insideEntityColor", ledge_low, redge_high)
 
     def pushToHistory(self):
         if self.debug:
@@ -751,6 +742,15 @@ class Example(Frame):
         showMessage += "Line Number: " + str(lineNum) + "\n\n"
         showMessage += "Saved to File: " + new_filename
         messagebox.showinfo("Export Message", showMessage)
+
+    def highlight_entity(self, text: Text, start: str, count: int):
+        end = f'{start}+{count}c'
+        star_pos = text.get(start, end).rfind('#')
+        word_start = f"{start}+2c"
+        word_end = f"{start}+{star_pos}c"
+        text.tag_add("catagory", word_start, word_end)
+        text.tag_add("edge", start, word_start)
+        text.tag_add("edge", word_end, end)
 
 
 def getConfigList():
