@@ -129,10 +129,8 @@ class Application(Frame):
         cbtn = Button(self, text="Quit", command=self.quit)
         cbtn.grid(row=5, column=self.textColumn + 1, pady=4)
 
-        cursorName = Label(self, text="Cursor: ", foreground="Blue", font=(self.textFontStyle, 14, "bold"))
-        cursorName.grid(row=9, column=self.textColumn + 1, pady=4)
-        self.cursorIndex = Label(self, text="row: 0\ncol: 0", foreground="red", font=(self.textFontStyle, 14, "bold"))
-        self.cursorIndex.grid(row=10, column=self.textColumn + 1, pady=4)
+        self.cursor_index_label = Label(self, text="1:0", foreground="red", font=(self.textFontStyle, 14, "bold"))
+        self.cursor_index_label.grid(row=10, column=self.textColumn + 1, pady=4)
 
         recommend_label = Label(self, text="Recommend: ", foreground="Blue", font=(self.textFontStyle, 14, "bold"))
         recommend_label.grid(row=12, column=self.textColumn + 1, pady=4)
@@ -160,21 +158,18 @@ class Application(Frame):
         self.text.bind('<Button-3>', self.rightClick)
 
         self.text.bind('<Double-Button-1>', self.doubleLeftClick)
-        self.text.bind('<ButtonRelease-1>', self.singleLeftClick)
+        self.text.bind('<ButtonRelease-1>', self.show_cursor_pos)
+        self.text.bind('<KeyRelease>', self.show_cursor_pos)
 
         self.setMapShow()
 
         self.enter = Button(self, text="Enter", command=self.returnButton)
         self.enter.grid(row=self.textRow + 1, column=self.textColumn + 1)
 
-    ## cursor index show with the left click
-    def singleLeftClick(self, event):
-        if self.debug:
-            print("Action Track: singleLeftClick")
+    def show_cursor_pos(self, event):
         cursor_index = self.text.index(INSERT)
-        row_column = cursor_index.split('.')
-        cursor_text = f"row: {row_column[0]}\ncol: {row_column[-1]}"
-        self.cursorIndex.config(text=cursor_text)
+        row, col = cursor_index.split('.')
+        self.cursor_index_label.config(text=f"{row}:{col}")
 
     ## TODO: select entity by double left click
     def doubleLeftClick(self, event):
@@ -233,11 +228,8 @@ class Application(Frame):
         self.lbl.config(text=new_file)
 
     def setCursorLabel(self, cursor_index):
-        if self.debug:
-            print("Action Track: setCursorLabel")
-        row_column = cursor_index.split('.')
-        cursor_text = f"row: {row_column[0]}\ncol: {row_column[-1]}"
-        self.cursorIndex.config(text=cursor_text)
+        row, col = cursor_index.split('.')
+        self.cursor_index_label.config(text=f"{row}:{col}")
 
     def returnButton(self):
         if self.debug:
