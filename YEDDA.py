@@ -141,6 +141,8 @@ class QueryExport(Dialog):
         Checkbutton(master, text="Segmented", variable=self.segmented_var).pack()
         self.only_NP_var = BooleanVar(master, False)
         Checkbutton(master, text="Only NP label", variable=self.only_NP_var).pack()
+        self.export_recommended_var = BooleanVar(master, True)
+        Checkbutton(master, text="Export Recommended", variable=self.export_recommended_var).pack()
 
     def apply(self):
         """override, called after press ok, not called on cancel"""
@@ -151,6 +153,9 @@ class QueryExport(Dialog):
 
     def only_NP(self) -> bool:
         return self.only_NP_var.get()
+
+    def keep_recommended(self) -> bool:
+        return self.export_recommended_var.get()
 
     def tag_scheme(self) -> str:
         return self.scheme_var.get()
@@ -173,7 +178,6 @@ class Application(Frame):
         self.OS = platform.system().lower()
         self.fileName = ""
         self.debug = False
-        self.use_recommend = BooleanVar(self, True)
         self.history = deque(maxlen=20)
         self.currentContent = deque(maxlen=1)
         self.pressCommand = [KeyDef('a', "Artifical"),
@@ -184,26 +188,17 @@ class Application(Frame):
                              KeyDef('f', "Person"),
                              KeyDef('g', "Sector"),
                              KeyDef('h', "Other")]
-        self.labelEntryList = []
-        self.shortcutLabelList = []
-        self.configListLabel = None
         self.configListBox = None
         self.file_encoding = 'utf-8'
 
         # default GUI display parameter
-        if len(self.pressCommand) > 20:
-            self.textRow = len(self.pressCommand)
-        else:
-            self.textRow = 20
+        self.textRow = max(len(self.pressCommand), 20)
         self.textColumn = 5
-        self.keepRecommend = True
 
         self.configFile = "configs/default.config"
         self.entity_regex = r'\[\@.*?\#.*?\*\](?!\#)'
         self.recommendRe = r'\[\$.*?\#.*?\*\](?!\#)'
-        self.goldAndrecomRe = r'\[\@.*?\#.*?\*\](?!\#)'
-        if self.keepRecommend:
-            self.goldAndrecomRe = r'\[[\@\$)].*?\#.*?\*\](?!\#)'
+        self.goldAndrecomRe = r'\[[\@\$)].*?\#.*?\*\](?!\#)'
         ## configure color
         self.selectColor = 'light salmon'
         self.textFontStyle = "Times"
@@ -241,6 +236,7 @@ class Application(Frame):
         cbtn = Button(self, text="Quit", command=self.quit)
         cbtn.grid(row=5, column=self.textColumn + 1, pady=4)
 
+        self.use_recommend = BooleanVar(self, True)
         recommend_check = Checkbutton(self, text='Recommend', command=self.toggle_use_recommend,
                                       variable=self.use_recommend)
         recommend_check.grid(row=6, column=self.textColumn + 1, sticky=W, pady=4)
@@ -641,10 +637,12 @@ class Application(Frame):
                 seqFile.write('\n')
                 continue
             else:
-                if not self.keepRecommend:
+                if not dlg.keep_recommended():
                     line = removeRecommendContent(line, self.recommendRe)
-                wordTagPairs = getWordTagPairs(line, dlg.segmented(), dlg.tag_scheme(), dlg.only_NP(),
-                                               self.goldAndrecomRe)
+                    pattern = self.entity_regex
+                else:
+                    pattern = self.goldAndrecomRe
+                wordTagPairs = getWordTagPairs(line, dlg.segmented(), dlg.tag_scheme(), dlg.only_NP(), pattern)
                 for wordTag in wordTagPairs:
                     seqFile.write(wordTag)
                 ## use null line to seperate sentences
@@ -654,7 +652,7 @@ class Application(Frame):
         print("Line number:", lineNum)
         showMessage = "Exported file successfully!\n\n"
         showMessage += "Tag scheme: " + dlg.tag_scheme() + "\n\n"
-        showMessage += "Keep Recom: " + str(self.keepRecommend) + "\n\n"
+        showMessage += "Keep Recom: " + str(dlg.keep_recommended()) + "\n\n"
         showMessage += "Text Segmented: " + str(dlg.segmented()) + "\n\n"
         showMessage += "Line Number: " + str(lineNum) + "\n\n"
         showMessage += "Saved to File: " + new_filename
