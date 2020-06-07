@@ -265,7 +265,7 @@ class Application(Frame):
 
         all_keys = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
         for press_key in all_keys:
-            self.text.bind(press_key, self.textReturnEnter, add='')
+            self.text.bind(press_key, self.alphanum_key_pressed, add='')
             if self.OS != "windows":
                 self.text.bind(f'<Control-Key-"{press_key}">', self.keepCurrent)
                 self.text.bind(f'<Command-Key-"{press_key}">', self.keepCurrent)
@@ -364,10 +364,8 @@ class Application(Frame):
         self.executeEntryCommand(content)
         return content
 
-    def textReturnEnter(self, event):
+    def alphanum_key_pressed(self, event):
         press_key = event.char
-        if self.debug:
-            print("Action Track: textReturnEnter")
         self.pushToHistory()
         print("event: ", press_key)
         self.clearCommand()
@@ -683,7 +681,7 @@ def getWordTagPairs(tagedSentence, segmented=True, tagScheme="BMES", onlyNP=Fals
         tagged_chunks.append(chunk)
 
     if len(tagged_chunks) == 0:
-        return [(sentence, 0, len(sentence), False)]
+        tagged_chunks = [(sentence, 0, len(sentence), False)]  # TODO semantically wrong
 
     chunks = []
     for idx in range(0, len(tagged_chunks)):
