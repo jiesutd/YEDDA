@@ -16,8 +16,8 @@ from utils.recommend import *
 
 
 class Editor(ScrolledText):
-    def __init__(self, parent, **kwargs):
-        super().__init__(parent, **kwargs)
+    def __init__(self, parent):
+        super().__init__(parent, selectbackground='light salmon')
         self.entity_pattern = r'\[\@.*?\#.*?\*\](?!\#)'  # TODO dup
         self.recommend_pattern = r'\[\$.*?\#.*?\*\](?!\#)'  # TODO dup
         fnt = font.Font(family='Times', size=20, weight="bold", underline=0)
@@ -177,9 +177,9 @@ class Application(Frame):
         self.Version = "YEDDA-V1.0 Annotator"
         self.OS = platform.system().lower()
         self.fileName = ""
+        self.file_encoding = 'utf-8'
         self.debug = False
         self.history = deque(maxlen=20)
-        self.currentContent = deque(maxlen=1)
         self.pressCommand = [KeyDef('a', "Artifical"),
                              KeyDef('b', "Event"),
                              KeyDef('c', "Fin-Concept"),
@@ -188,8 +188,6 @@ class Application(Frame):
                              KeyDef('f', "Person"),
                              KeyDef('g', "Sector"),
                              KeyDef('h', "Other")]
-        self.configListBox = None
-        self.file_encoding = 'utf-8'
 
         # default GUI display parameter
         self.textRow = max(len(self.pressCommand), 20)
@@ -199,8 +197,6 @@ class Application(Frame):
         self.entity_regex = r'\[\@.*?\#.*?\*\](?!\#)'
         self.recommendRe = r'\[\$.*?\#.*?\*\](?!\#)'
         self.goldAndrecomRe = r'\[[\@\$)].*?\#.*?\*\](?!\#)'
-        ## configure color
-        self.selectColor = 'light salmon'
         self.textFontStyle = "Times"
         self.initUI()
 
@@ -218,8 +214,8 @@ class Application(Frame):
 
         self.filename_lbl = Label(self, text="File: no file is opened")
         self.filename_lbl.grid(sticky=W, pady=4, padx=5)
-        self.text = Editor(self, selectbackground=self.selectColor)
-        self.text.grid(row=1, column=0, columnspan=self.textColumn, rowspan=self.textRow, padx=12, sticky=E + W + S + N)
+        self.text = Editor(self)
+        self.text.grid(row=1, column=0, columnspan=self.textColumn, rowspan=self.textRow, padx=12, sticky=NSEW)
 
         abtn = Button(self, text="Open", command=self.onOpen)
         abtn.grid(row=1, column=self.textColumn + 1)
@@ -246,18 +242,15 @@ class Application(Frame):
                                       command=lambda: self.text.show_annotation_tag(show_tags_var.get()))
         show_tags_check.grid(row=7, column=self.textColumn + 1, sticky=W)
 
-        self.cursor_index_label = Label(self, text="1:0", foreground="red", font=(self.textFontStyle, 14, "bold"))
-        self.cursor_index_label.grid(row=10, column=self.textColumn + 1, pady=4)
-
-        lbl_entry = Label(self, text="Command:")
-        lbl_entry.grid(row=self.textRow + 1, sticky=E + W + S + N, pady=4, padx=4)
+        self.cursor_index_label = Label(self, text="Ln 1, Col 0")
+        self.cursor_index_label.grid(row=self.textRow + 1, sticky=NSEW, pady=4, padx=4)
         self.entry = Entry(self)
-        self.entry.grid(row=self.textRow + 1, columnspan=self.textColumn + 1, rowspan=1, sticky=E + W + S + N, pady=4,
-                        padx=80)
+        self.entry.grid(row=self.textRow + 1, column=1, columnspan=self.textColumn - 2, sticky=NSEW, pady=4,
+                        padx=8)
         self.entry.bind('<Return>', self.returnEnter)
 
         self.enter = Button(self, text="Enter", command=self.returnButton)
-        self.enter.grid(row=self.textRow + 1, column=self.textColumn + 1)
+        self.enter.grid(row=self.textRow + 1, column=self.textColumn - 1)
 
         all_keys = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
         for press_key in all_keys:
@@ -288,7 +281,7 @@ class Application(Frame):
     def show_cursor_pos(self, event):
         cursor_index = self.text.index(INSERT)
         row, col = cursor_index.split('.')
-        self.cursor_index_label.config(text=f"{row}:{col}")
+        self.cursor_index_label.config(text=f"Ln {row}, Col {col}")
 
     ## TODO: select entity by double left click
     def doubleLeftClick(self, event):
@@ -316,7 +309,7 @@ class Application(Frame):
             self.filename_lbl.config(text="File: " + filename)
             self.autoLoadNewFile(self.fileName, "1.0")
             self.text.mark_set(INSERT, "1.0")
-            self.setCursorLabel(self.text.index(INSERT))
+            self.show_cursor_pos(None)
 
     def readFile(self, filename):
         f = open(filename)
@@ -339,7 +332,7 @@ class Application(Frame):
 
     def setCursorLabel(self, cursor_index):
         row, col = cursor_index.split('.')
-        self.cursor_index_label.config(text=f"{row}:{col}")
+        self.cursor_index_label.config(text=f"Ln {row}, Col {col}")
 
     def returnButton(self):
         if self.debug:
@@ -490,7 +483,7 @@ class Application(Frame):
             currentCursor = self.text.index(INSERT)
             newCurrentCursor = str(int(currentCursor.split('.')[0]) + 1) + ".0"
             self.text.mark_set(INSERT, newCurrentCursor)
-            self.setCursorLabel(newCurrentCursor)
+            self.show_cursor_pos(None)
         else:
             command_list = decompositCommand(command)
             for idx in range(0, len(command_list)):
@@ -569,7 +562,7 @@ class Application(Frame):
             self.filename_lbl.config(text="File: " + fileName)
             self.text.mark_set(INSERT, newcursor_index)
             self.text.see(newcursor_index)
-            self.setCursorLabel(newcursor_index)
+            self.show_cursor_pos(None)
             self.text.update_view()
 
     def pushToHistory(self):
