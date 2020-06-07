@@ -6,7 +6,8 @@ from tkinter import font
 from tkinter import messagebox
 from collections import deque
 from tkinter import *
-from tkinter.ttk import Frame, Button, Label, Combobox, Scrollbar
+from tkinter.ttk import Frame, Button, Radiobutton, Label, Combobox, Scrollbar
+from tkinter.simpledialog import Dialog
 from dataclasses import dataclass
 from typing import List
 
@@ -106,6 +107,48 @@ class KeyMapFrame(Frame):
         return new_map
 
 
+class QueryExport(Dialog):
+    def __init__(self, parent, filename, sample):
+        self.confirmed = False
+        self.sample = sample
+        super().__init__(parent, 'Exporting to ' + filename)  # here dialog shows
+
+    def body(self, master):
+        """override"""
+        box = Frame(master, relief='groove')
+        self.scheme_var = StringVar(master, "BMES")
+        Radiobutton(box, text="BMES", variable=self.scheme_var, value="BMES").pack(side=LEFT, padx=5, pady=5)
+        Radiobutton(box, text="BIO", variable=self.scheme_var, value="BIO").pack(side=LEFT, padx=5, pady=5)
+        box.pack()
+        self.segmented_var = BooleanVar(master, self._guess_segmented())
+        Checkbutton(master, text="Segmented", variable=self.segmented_var).pack()
+        self.only_NP_var = BooleanVar(master, False)
+        Checkbutton(master, text="Only NP label", variable=self.only_NP_var).pack()
+
+    def apply(self):
+        """override, called after press ok, not called on cancel"""
+        self.confirmed = True
+
+    def segmented(self) -> bool:
+        return self.segmented_var.get()
+
+    def only_NP(self) -> bool:
+        return self.only_NP_var.get()
+
+    def tag_scheme(self) -> str:
+        return self.scheme_var.get()
+
+    def _guess_segmented(self):
+        """False for non-segmented Chinese, True for English or Segmented Chinese.
+        Make naive guess, user should check whether the guess is right
+        """
+        ascii_percent = sum(1 for c in self.sample if c.isascii()) / len(self.sample)
+        is_english = (ascii_percent > 0.8)
+        space_percent = self.sample.count(' ') / len(self.sample)
+        many_space = (space_percent > 0.2)
+        return is_english or many_space or False
+
+
 class Application(Frame):
     def __init__(self, parent):
         super().__init__(parent)
@@ -137,16 +180,8 @@ class Application(Frame):
         else:
             self.textRow = 20
         self.textColumn = 5
-        self.tagScheme = "BMES"
-        self.onlyNP = False  ## for exporting sequence 
         self.keepRecommend = True
 
-        '''
-        self.segmented: for exporting sequence, if True then split words with space, else split character without space
-        for example, if your data is segmented Chinese (or English) with words separated by a space, you need to set this flag as true
-        if your data is Chinese without segmentation, you need to set this flag as False
-        '''
-        self.segmented = True  ## False for non-segmentated Chinese, True for English or Segmented Chinese
         self.configFile = "configs/default.config"
         self.entity_regex = r'\[\@.*?\#.*?\*\](?!\#)'
         self.insideNestEntityRe = r'\[\@\[\@(?!\[\@).*?\#.*?\*\]\#'
@@ -644,7 +679,10 @@ class Application(Frame):
             print(out_error)
             messagebox.showerror("Export error!", out_error)
             return -1
-
+        dlg = QueryExport(self, self.fileName, self.text.get_text()[:100])
+        if not dlg.confirmed:
+            print("Operation canceled")
+            return
         fileLines = open(self.fileName, 'r').readlines()
         lineNum = len(fileLines)
         new_filename = self.fileName.split('.ann')[0] + '.anns'
@@ -656,7 +694,8 @@ class Application(Frame):
             else:
                 if not self.keepRecommend:
                     line = removeRecommendContent(line, self.recommendRe)
-                wordTagPairs = getWordTagPairs(line, self.segmented, self.tagScheme, self.onlyNP, self.goldAndrecomRe)
+                wordTagPairs = getWordTagPairs(line, dlg.segmented(), dlg.tag_scheme(), dlg.only_NP(),
+                                               self.goldAndrecomRe)
                 for wordTag in wordTagPairs:
                     seqFile.write(wordTag)
                 ## use null line to seperate sentences
@@ -665,9 +704,9 @@ class Application(Frame):
         print("Exported file into sequence style in file: ", new_filename)
         print("Line number:", lineNum)
         showMessage = "Exported file successfully!\n\n"
-        showMessage += "Tag scheme: " + self.tagScheme + "\n\n"
+        showMessage += "Tag scheme: " + dlg.tag_scheme() + "\n\n"
         showMessage += "Keep Recom: " + str(self.keepRecommend) + "\n\n"
-        showMessage += "Text Seged: " + str(self.segmented) + "\n\n"
+        showMessage += "Text Segmented: " + str(dlg.segmented()) + "\n\n"
         showMessage += "Line Number: " + str(lineNum) + "\n\n"
         showMessage += "Saved to File: " + new_filename
         messagebox.showinfo("Export Message", showMessage)
