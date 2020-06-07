@@ -229,18 +229,15 @@ class Application(Frame):
         exportbtn = Button(self, text="Export", command=self.generateSequenceFile)
         exportbtn.grid(row=4, column=self.textColumn + 1, pady=4)
 
-        cbtn = Button(self, text="Quit", command=self.quit)
-        cbtn.grid(row=5, column=self.textColumn + 1, pady=4)
-
         self.use_recommend = BooleanVar(self, True)
         recommend_check = Checkbutton(self, text='Recommend', command=self.toggle_use_recommend,
                                       variable=self.use_recommend)
-        recommend_check.grid(row=6, column=self.textColumn + 1, sticky=W, pady=4)
+        recommend_check.grid(row=5, column=self.textColumn + 1, sticky=W, pady=4)
 
         show_tags_var = BooleanVar(self, True)
         show_tags_check = Checkbutton(self, text='Show Tags', variable=show_tags_var,
                                       command=lambda: self.text.show_annotation_tag(show_tags_var.get()))
-        show_tags_check.grid(row=7, column=self.textColumn + 1, sticky=W)
+        show_tags_check.grid(row=6, column=self.textColumn + 1, sticky=W)
 
         self.cursor_index_label = Label(self, text="Ln 1, Col 0")
         self.cursor_index_label.grid(row=self.textRow + 1, sticky=NSEW, pady=4, padx=4)
@@ -269,11 +266,9 @@ class Application(Frame):
         self.keymap_frame.grid(row=1, column=self.textColumn + 2, rowspan=self.keymap_frame.rows,
                                columnspan=2, padx=6, pady=6, sticky=NW)
 
-        Label(self, text="Map Templates", foreground="blue") \
-            .grid(row=self.keymap_frame.rows + 1, column=self.textColumn + 2, columnspan=2, rowspan=1, padx=10)
+        Label(self, text="KeyMap Templates:").grid(row=7, column=self.textColumn + 1)
         self.configListBox = Combobox(self, values=getConfigList(), state='readonly')
-        self.configListBox.grid(row=self.keymap_frame.rows + 2, column=self.textColumn + 2, columnspan=2, rowspan=1,
-                                padx=6)
+        self.configListBox.grid(row=7, column=self.textColumn + 2, columnspan=2)
         # select current config file
         self.configListBox.set(self.configFile.split(os.sep)[-1])
         self.configListBox.bind('<<ComboboxSelected>>', self.on_select_configfile)
