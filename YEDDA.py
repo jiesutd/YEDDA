@@ -241,12 +241,14 @@ class Application(Frame):
 
         self.cursor_index_label = Label(self, text="Ln 1, Col 0")
         self.cursor_index_label.grid(row=self.textRow + 1, sticky=NSEW, pady=4, padx=4)
-        self.entry = Entry(self)
+        self.cmd_var = StringVar()
+        self.cmd_var.trace_add('write', lambda _, _1, _2: self.preview_cmd_range())
+        self.entry = Entry(self, validate='focus', vcmd=self.preview_cmd_range, textvariable=self.cmd_var)
         self.entry.grid(row=self.textRow + 1, column=1, columnspan=self.textColumn - 2, sticky=NSEW, pady=4,
                         padx=8)
-        self.entry.bind('<Return>', self.returnEnter)
+        self.entry.bind('<Return>', self.execute_command)
 
-        self.enter = Button(self, text="Enter", command=self.returnButton)
+        self.enter = Button(self, text="Enter", command=lambda: self.execute_command(None))
         self.enter.grid(row=self.textRow + 1, column=self.textColumn - 1)
 
         all_keys = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
@@ -329,19 +331,22 @@ class Application(Frame):
         row, col = cursor_index.split('.')
         self.cursor_index_label.config(text=f"Ln {row}, Col {col}")
 
-    def returnButton(self):
-        if self.debug:
-            print("Action Track: returnButton")
-        self.pushToHistory()
-        # self.returnEnter(event)
-        content = self.entry.get()
-        self.clearCommand()
-        self.executeEntryCommand(content)
-        return content
+    def preview_cmd_range(self):
+        cmd = self.entry.get().strip()
+        self.text.tag_delete('cmd-preview')
+        self.text.tag_configure("cmd-preview", background='light salmon')
+        match = re.match(r'^(-?[0-9]+).*', cmd)
+        if match:
+            count = int(match.group(1))
+        else:
+            count = 1
+        if count > 0:
+            self.text.tag_add('cmd-preview', INSERT, f'{INSERT}+{count}c')
+        else:
+            self.text.tag_add('cmd-preview', f'{INSERT}-{abs(count)}c', INSERT)
+        return True
 
-    def returnEnter(self, event):
-        if self.debug:
-            print("Action Track: returnEnter")
+    def execute_command(self, event):
         self.pushToHistory()
         content = self.entry.get()
         self.clearCommand()
