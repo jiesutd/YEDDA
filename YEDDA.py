@@ -8,15 +8,16 @@ from collections import deque
 from tkinter import *
 from tkinter.ttk import Frame, Button, Radiobutton, Label, Combobox, Scrollbar
 from tkinter.simpledialog import Dialog
+from tkinter.scrolledtext import ScrolledText
 from dataclasses import dataclass
 from typing import List
 
 from utils.recommend import *
 
 
-class Editor(Text):
+class Editor(ScrolledText):
     def __init__(self, parent, **kwargs):
-        super().__init__(parent, kwargs)
+        super().__init__(parent, **kwargs)
         fnt = font.Font(family='Times', size=20, weight="bold", underline=0)
         self.config(insertbackground='red', insertwidth=4, font=fnt)
         edge_fnt = font.Font(family='Times', size=12, underline=0)
@@ -212,10 +213,6 @@ class Application(Frame):
         self.text = Editor(self, selectbackground=self.selectColor)
         self.text.grid(row=1, column=0, columnspan=self.textColumn, rowspan=self.textRow, padx=12, sticky=E + W + S + N)
 
-        scroll = Scrollbar(self, command=self.text.yview)
-        scroll.grid(row=1, column=self.textColumn, rowspan=self.textRow, padx=0, sticky=E + W + S + N)
-        self.text['yscrollcommand'] = scroll.set
-
         abtn = Button(self, text="Open", command=self.onOpen)
         abtn.grid(row=1, column=self.textColumn + 1)
 
@@ -235,9 +232,9 @@ class Application(Frame):
                                       variable=self.use_recommend)
         recommend_check.grid(row=6, column=self.textColumn + 1, sticky=W, pady=4)
 
-        should_show_tags = BooleanVar(self, True)
-        should_show_tags.trace_add('write', lambda _, _1, _2: self.text.show_annotation_tag(should_show_tags.get()))
-        show_tags_check = Checkbutton(self, text='Show Tags', variable=should_show_tags)
+        show_tags_var = BooleanVar(self, True)
+        show_tags_check = Checkbutton(self, text='Show Tags', variable=show_tags_var,
+                                      command=lambda: self.text.show_annotation_tag(show_tags_var.get()))
         show_tags_check.grid(row=7, column=self.textColumn + 1, sticky=W)
 
         self.cursor_index_label = Label(self, text="1:0", foreground="red", font=(self.textFontStyle, 14, "bold"))
@@ -249,6 +246,9 @@ class Application(Frame):
         self.entry.grid(row=self.textRow + 1, columnspan=self.textColumn + 1, rowspan=1, sticky=E + W + S + N, pady=4,
                         padx=80)
         self.entry.bind('<Return>', self.returnEnter)
+
+        self.enter = Button(self, text="Enter", command=self.returnButton)
+        self.enter.grid(row=self.textRow + 1, column=self.textColumn + 1)
 
         all_keys = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
         for press_key in all_keys:
@@ -276,9 +276,6 @@ class Application(Frame):
         self.configListBox.set(self.configFile.split(os.sep)[-1])
         self.configListBox.bind('<<ComboboxSelected>>', self.on_select_configfile)
 
-        self.enter = Button(self, text="Enter", command=self.returnButton)
-        self.enter.grid(row=self.textRow + 1, column=self.textColumn + 1)
-
     def show_cursor_pos(self, event):
         cursor_index = self.text.index(INSERT)
         row, col = cursor_index.split('.')
@@ -295,9 +292,7 @@ class Application(Frame):
         # self.text.tag_add('SEL', '1.0',"end-1c")
 
     def toggle_use_recommend(self):
-        if self.use_recommend.get() == True:
-            pass
-        else:
+        if not self.use_recommend.get():
             content = self.text.get_text()
             content = removeRecommendContent(content, self.recommendRe)
             self.writeFile(self.fileName, content, '1.0')
