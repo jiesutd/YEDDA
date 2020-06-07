@@ -643,8 +643,8 @@ class Application(Frame):
             out_error = "Export only works on filename ended in .ann or .txt!\nPlease rename file."
             print(out_error)
             messagebox.showerror("Export error!", out_error)
-
             return -1
+
         fileLines = open(self.fileName, 'r').readlines()
         lineNum = len(fileLines)
         new_filename = self.fileName.split('.ann')[0] + '.anns'
@@ -685,89 +685,70 @@ def getConfigList():
     return list(filteredFileNames)
 
 
-def getWordTagPairs(tagedSentence, seged=True, tagScheme="BMES", onlyNP=False, entityRe=r'\[\@.*?\#.*?\*\]'):
-    newSent = tagedSentence.strip('\n')
-    filterList = re.findall(entityRe, newSent)
-    newSentLength = len(newSent)
-    chunk_list = []
-    start_pos = 0
-    end_pos = 0
-    if len(filterList) == 0:
-        singleChunkList = []
-        singleChunkList.append(newSent)
-        singleChunkList.append(0)
-        singleChunkList.append(len(newSent))
-        singleChunkList.append(False)
-        chunk_list.append(singleChunkList)
-        # print singleChunkList
-        singleChunkList = []
-    else:
-        for pattern in filterList:
-            # print pattern
-            singleChunkList = []
-            start_pos = end_pos + newSent[end_pos:].find(pattern)
-            end_pos = start_pos + len(pattern)
-            singleChunkList.append(pattern)
-            singleChunkList.append(start_pos)
-            singleChunkList.append(end_pos)
-            singleChunkList.append(True)
-            chunk_list.append(singleChunkList)
-            singleChunkList = []
-    ## chunk_list format:
-    full_list = []
-    for idx in range(0, len(chunk_list)):
-        if idx == 0:
-            if chunk_list[idx][1] > 0:
-                full_list.append([newSent[0:chunk_list[idx][1]], 0, chunk_list[idx][1], False])
-                full_list.append(chunk_list[idx])
-            else:
-                full_list.append(chunk_list[idx])
-        else:
-            if chunk_list[idx][1] == chunk_list[idx - 1][2]:
-                full_list.append(chunk_list[idx])
-            elif chunk_list[idx][1] < chunk_list[idx - 1][2]:
-                print("ERROR: found pattern has overlap!", chunk_list[idx][1], ' with ', chunk_list[idx - 1][2])
-            else:
-                full_list.append(
-                    [newSent[chunk_list[idx - 1][2]:chunk_list[idx][1]], chunk_list[idx - 1][2], chunk_list[idx][1],
-                     False])
-                full_list.append(chunk_list[idx])
+def getWordTagPairs(tagedSentence, segmented=True, tagScheme="BMES", onlyNP=False, entityRe=r'\[\@.*?\#.*?\*\]'):
+    sentence = tagedSentence.strip('\n')
+    tagged_chunks = []
+    for match in re.finditer(entityRe, sentence):
+        chunk = (match.group(), match.start(), match.end(), True)  # (chunk_of_words, start, end, is_tagged)
+        tagged_chunks.append(chunk)
 
-        if idx == len(chunk_list) - 1:
-            if chunk_list[idx][2] > newSentLength:
+    if len(tagged_chunks) == 0:
+        return [(sentence, 0, len(sentence), False)]
+
+    chunks = []
+    for idx in range(0, len(tagged_chunks)):
+        if idx == 0:
+            if tagged_chunks[idx][1] > 0:  # first character is not tagged
+                chunks.append((sentence[0:tagged_chunks[idx][1]], 0, tagged_chunks[idx][1], False))
+                chunks.append(tagged_chunks[idx])
+            else:
+                chunks.append(tagged_chunks[idx])
+        else:
+            if tagged_chunks[idx][1] == tagged_chunks[idx - 1][2]:
+                chunks.append(tagged_chunks[idx])
+            elif tagged_chunks[idx][1] < tagged_chunks[idx - 1][2]:
+                print("ERROR: found pattern has overlap!", tagged_chunks[idx][1], ' with ', tagged_chunks[idx - 1][2])
+            else:
+                chunks.append(
+                    (sentence[tagged_chunks[idx - 1][2]:tagged_chunks[idx][1]], tagged_chunks[idx - 1][2],
+                     tagged_chunks[idx][1],
+                     False))
+                chunks.append(tagged_chunks[idx])
+
+        sent_len = len(sentence)
+        if idx == len(tagged_chunks) - 1:
+            if tagged_chunks[idx][2] > sent_len:
                 print("ERROR: found pattern position larger than sentence length!")
-            elif chunk_list[idx][2] < newSentLength:
-                full_list.append([newSent[chunk_list[idx][2]:newSentLength], chunk_list[idx][2], newSentLength, False])
+            elif tagged_chunks[idx][2] < sent_len:
+                chunks.append([sentence[tagged_chunks[idx][2]:sent_len], tagged_chunks[idx][2], sent_len, False])
             else:
                 continue
-    return turnFullListToOutputPair(full_list, seged, tagScheme, onlyNP)
+    return turnFullListToOutputPair(chunks, segmented, tagScheme, onlyNP)
 
 
 def turnFullListToOutputPair(fullList, segmented=True, tagScheme="BMES", onlyNP=False):
-    pairList = []
-    for eachList in fullList:
-        if eachList[3]:
-            contLabelList = eachList[0].strip('[@$]').rsplit('#', 1)
-            if len(contLabelList) != 2:
-                print("Error: sentence format error!")
-            label = contLabelList[1].strip('*')
+    pair_list = []
+    for chunk_words, start, end, is_tagged in fullList:
+        if is_tagged:
+            plain_words, label = chunk_words.strip('[@$]').rsplit('#', 1)
+            label = label.strip('*')
             if segmented:
-                contLabelList[0] = contLabelList[0].split()
+                plain_words = plain_words.split()
             if onlyNP:
                 label = "NP"
-            outList = outputWithTagScheme(contLabelList[0], label, tagScheme)
-            for eachItem in outList:
-                pairList.append(eachItem)
+            outList = outputWithTagScheme(plain_words, label, tagScheme)
+            pair_list.extend(outList)
         else:
             if segmented:
-                eachList[0] = eachList[0].split()
-            for idx in range(0, len(eachList[0])):
-                basicContent = eachList[0][idx]
-                if basicContent == ' ':
+                words = chunk_words.split()
+            else:
+                words = chunk_words  # actually chars
+            for word_or_char in words:
+                if word_or_char == ' ':
                     continue
-                pair = basicContent + ' ' + 'O\n'
-                pairList.append(pair)
-    return pairList
+                pair = word_or_char + ' ' + 'O\n'
+                pair_list.append(pair)
+    return pair_list
 
 
 def outputWithTagScheme(input_list, label, tagScheme="BMES"):
