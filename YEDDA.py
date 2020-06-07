@@ -70,6 +70,32 @@ class Editor(ScrolledText):
         self._highlight_entities(self.entity_pattern, self.highlight_entity)
         self._highlight_entities(self.recommend_pattern, self.highlight_recommend)
 
+    def current_entity(self) -> (str, (str, int)):
+        def find_pattern_span_in_line(pattern):
+            row, col = self.index(INSERT).split('.')
+            cursor_col = int(col)
+            count_var = StringVar()
+            from_index = f'{row}.0'
+            while True:
+                pos = self.search(pattern, from_index, f'{row}.end', count=count_var, regexp=True)
+                if pos == '':
+                    break
+                row, col = pos.split('.')
+                match_end = f'{row}.{int(col) + int(count_var.get())}'  # here don't use offset form
+                if int(col) <= cursor_col <= (int(col) + int(count_var.get())):
+                    return pos, match_end
+                from_index = match_end
+            return None
+
+        span = find_pattern_span_in_line(self.entity_pattern)
+        if span is not None:
+            return 'gold', span
+        span = find_pattern_span_in_line(self.recommend_pattern)
+        if span is not None:
+            return 'recommend', span
+        else:
+            return None, (None, None)
+
 
 @dataclass
 class KeyDef:
@@ -356,7 +382,6 @@ class Application(Frame):
     def alphanum_key_pressed(self, event):
         press_key = event.char
         self.pushToHistory()
-        print("event: ", press_key)
         self.clearCommand()
         self.executeCursorCommand(press_key.lower())
         return 'break'
@@ -413,67 +438,48 @@ class Application(Frame):
             content = self.addRecommendContent(aboveHalf_content, afterEntity_content, self.use_recommend.get())
             content = content
             self.writeFile(self.fileName, content, cursor_index)
-        except TclError:
-            ## not select text
+        except TclError:  # no selected text
             cursor_index = self.text.index(INSERT)
-            [line_id, column_id] = cursor_index.split('.')
+            line_id, column_id = cursor_index.split('.')
             aboveLine_content = self.text.get('1.0', str(int(line_id) - 1) + '.end')
             belowLine_content = self.text.get(str(int(line_id) + 1) + '.0', "end-1c")
             line = self.text.get(line_id + '.0', line_id + '.end')
-            matched_span = (-1, -1)
-            detected_entity = -1  ## detected entity type:－1 not detected, 1 detected gold, 2 detected recommend
-            for match in re.finditer(self.entity_regex, line):
-                if match.span()[0] <= int(column_id) & int(column_id) <= match.span()[1]:
-                    matched_span = match.span()
-                    detected_entity = 1
-                    break
-            if detected_entity == -1:
-                for match in re.finditer(self.recommendRe, line):
-                    if match.span()[0] <= int(column_id) & int(column_id) <= match.span()[1]:
-                        matched_span = match.span()
-                        detected_entity = 2
-                        break
-            line_before_entity = line
-            line_after_entity = ""
-            if matched_span[1] > 0:
-                selected_string = line[matched_span[0]:matched_span[1]]
-                if detected_entity == 1:
-                    new_string, old_entity_type = selected_string.strip('[@*]').rsplit('#', 1)
-                elif detected_entity == 2:
-                    new_string, old_entity_type = selected_string.strip('[$*]').rsplit('#', 1)
-                line_before_entity = line[:matched_span[0]]
-                line_after_entity = line[matched_span[1]:]
-                selected_string = new_string
-                entity_content = selected_string
-                cursor_index = line_id + '.' + str(int(matched_span[1]) - (len(old_entity_type) + 4))
-                if command == "q":
-                    print('q: remove entity label')
-                elif command == 'y':
-                    print("y: comfirm recommend label")
-                    keydef = self.get_cmd_by_name(old_entity_type)
-                    entity_content, cursor_index = self.replaceString(selected_string, selected_string, keydef.key,
-                                                                      cursor_index)
-                else:
-                    if len(selected_string) > 0:
-                        keydef = self.get_cmd_by_key(command)
-                        if keydef is not None:
-                            entity_content, cursor_index = self.replaceString(selected_string, selected_string, command,
-                                                                              cursor_index)
-                        else:
-                            return
-                line_before_entity += entity_content
+            found, (start, end) = self.text.current_entity()
+            if not found:
+                print(f'{command}: outside entity, do nothing')
+                return
+            selected_string = self.text.get(start, end)
+            if found == 'gold':
+                entity_content, old_entity_type = selected_string.strip('[@*]').rsplit('#', 1)
+            elif found == 'recommend':
+                entity_content, old_entity_type = selected_string.strip('[$*]').rsplit('#', 1)
+            cursor_index = line_id + '.' + str(int(end.split('.')[1]) - (len(old_entity_type) + 4))
+
+            if command == "q":
+                print('q: remove entity label')
+            elif command == 'y':
+                print("y: comfirm recommend label")
+                cmd = self.get_cmd_by_name(old_entity_type)
+                entity_content, cursor_index = self.replaceString(entity_content, entity_content, cmd.key, cursor_index)
+            elif len(entity_content) > 0 and self.get_cmd_by_key(command) is not None:
+                print(f'{command}: change entity type')
+                entity_content, cursor_index = self.replaceString(entity_content, entity_content, command, cursor_index)
+            else:
+                print(f'{command}: inside entity, do nothing')
+                return
+            line_before_entity = self.text.get(f'{line_id}.0', start)
+            line_after_entity = self.text.get(end, f'{line_id}.end')
+            line_before_entity += entity_content
             if aboveLine_content != '':
                 aboveHalf_content = aboveLine_content + '\n' + line_before_entity
             else:
                 aboveHalf_content = line_before_entity
-
             if belowLine_content != '':
                 followHalf_content = line_after_entity + '\n' + belowLine_content
             else:
                 followHalf_content = line_after_entity
 
             content = self.addRecommendContent(aboveHalf_content, followHalf_content, self.use_recommend.get())
-            content = content
             self.writeFile(self.fileName, content, cursor_index)
 
     def executeEntryCommand(self, command):
@@ -512,22 +518,20 @@ class Application(Frame):
                     self.writeFile(self.fileName, content, newcursor_index)
 
     def replaceString(self, content, string, replaceType, cursor_index):
-        cmd = self.get_cmd_by_key(replaceType)
-        if cmd is not None:
-            new_string = "[@" + string + "#" + cmd.name + "*]"
+        keydef = self.get_cmd_by_key(replaceType)
+        if keydef is not None:
+            new_string = "[@" + string + "#" + keydef.name + "*]"
             row, col = cursor_index.split('.')
-            newcursor_index = f"{row}.{int(col) + len(cmd.name) + 5}"
+            newcursor_index = f"{row}.{int(col) + len(keydef.name) + 5}"
+            content = content.replace(string, new_string, 1)
+            return content, newcursor_index
         else:
             print("Invaild command!")
             print("cursor index: ", self.text.index(INSERT))
             return content, cursor_index
-        content = content.replace(string, new_string, 1)
-        return content, newcursor_index
 
     def writeFile(self, fileName, content, newcursor_index):
-        if self.debug:
-            print("Action track: writeFile")
-
+        print("Action track: writeFile")
         if len(fileName) > 0:
             if ".ann" in fileName:
                 new_name = fileName
