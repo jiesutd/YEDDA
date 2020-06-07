@@ -18,8 +18,8 @@ from utils.recommend import *
 class Editor(ScrolledText):
     def __init__(self, parent, **kwargs):
         super().__init__(parent, **kwargs)
-        self.entity_regex = r'\[\@.*?\#.*?\*\](?!\#)'  # TODO dup
-        self.recommendRe = r'\[\$.*?\#.*?\*\](?!\#)'  # TODO dup
+        self.entity_pattern = r'\[\@.*?\#.*?\*\](?!\#)'  # TODO dup
+        self.recommend_pattern = r'\[\$.*?\#.*?\*\](?!\#)'  # TODO dup
         fnt = font.Font(family='Times', size=20, weight="bold", underline=0)
         self.config(insertbackground='red', insertwidth=4, font=fnt)
         edge_fnt = font.Font(family='Times', size=12, underline=0)
@@ -56,43 +56,19 @@ class Editor(ScrolledText):
         """get text from 0 to end"""
         return self.get("1.0", "end-1c")
 
-    def update_view(self):
-        cursor_row, _ = self.index(INSERT).split('.')
-        lineStart = cursor_row + '.0'
-        lineEnd = cursor_row + '.end'
-        colorAllChunk = True
-
-        if colorAllChunk:
-            self.mark_set("matchStart", "1.0")
-            self.mark_set("matchEnd", "1.0")
-            self.mark_set("searchLimit", 'end-1c')
-            self.mark_set("recommend_matchStart", "1.0")
-            self.mark_set("recommend_matchEnd", "1.0")
-            self.mark_set("recommend_searchLimit", 'end-1c')
-        else:
-            self.mark_set("matchStart", lineStart)
-            self.mark_set("matchEnd", lineStart)
-            self.mark_set("searchLimit", lineEnd)
-            self.mark_set("recommend_matchStart", lineStart)
-            self.mark_set("recommend_matchEnd", lineStart)
-            self.mark_set("recommend_searchLimit", lineEnd)
-        countVar = StringVar()
+    def _highlight_entities(self, pattern, highlight_func):
+        count_var = StringVar()
+        from_index = '1.0'
         while True:
-            pos = self.search(self.entity_regex, "matchEnd", "searchLimit", count=countVar, regexp=True)
+            pos = self.search(pattern, from_index, END, count=count_var, regexp=True)
             if pos == "":
                 break
-            self.mark_set("matchStart", pos)
-            self.mark_set("matchEnd", f"{pos}+{countVar.get()}c")
-            self.highlight_entity(pos, int(countVar.get()))
-        ## color recommend type
-        while True:
-            recommend_pos = self.search(self.recommendRe, "recommend_matchEnd", "recommend_searchLimit",
-                                        count=countVar, regexp=True)
-            if recommend_pos == "":
-                break
-            self.mark_set("recommend_matchStart", recommend_pos)
-            self.mark_set("recommend_matchEnd", f"{recommend_pos}+{countVar.get()}c")
-            self.highlight_recommend(recommend_pos, int(countVar.get()))
+            from_index = f"{pos}+{count_var.get()}c"
+            highlight_func(pos, int(count_var.get()))
+
+    def update_view(self):
+        self._highlight_entities(self.entity_pattern, self.highlight_entity)
+        self._highlight_entities(self.recommend_pattern, self.highlight_recommend)
 
 
 @dataclass
