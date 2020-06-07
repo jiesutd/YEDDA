@@ -20,8 +20,6 @@ class Editor(ScrolledText):
         super().__init__(parent, **kwargs)
         self.entity_regex = r'\[\@.*?\#.*?\*\](?!\#)'  # TODO dup
         self.recommendRe = r'\[\$.*?\#.*?\*\](?!\#)'  # TODO dup
-        self.insideNestEntityColor = "light slate blue"  # TODO dup
-        self.insideNestEntityRe = r'\[\@\[\@(?!\[\@).*?\#.*?\*\]\#'  # TODO dup
         fnt = font.Font(family='Times', size=20, weight="bold", underline=0)
         self.config(insertbackground='red', insertwidth=4, font=fnt)
         edge_fnt = font.Font(family='Times', size=12, underline=0)
@@ -95,26 +93,6 @@ class Editor(ScrolledText):
             self.mark_set("recommend_matchStart", recommend_pos)
             self.mark_set("recommend_matchEnd", f"{recommend_pos}+{countVar.get()}c")
             self.highlight_recommend(recommend_pos, int(countVar.get()))
-
-        ## color the most inside span for nested span, scan from begin to end again
-        if colorAllChunk:
-            self.mark_set("matchStart", "1.0")
-            self.mark_set("matchEnd", "1.0")
-            self.mark_set("searchLimit", 'end-1c')
-        else:
-            self.mark_set("matchStart", lineStart)
-            self.mark_set("matchEnd", lineStart)
-            self.mark_set("searchLimit", lineEnd)
-        while True:
-            self.tag_configure("insideEntityColor", background=self.insideNestEntityColor)
-            pos = self.search(self.insideNestEntityRe, "matchEnd", "searchLimit", count=countVar, regexp=True)
-            if pos == "":
-                break
-            self.mark_set("matchStart", pos)
-            self.mark_set("matchEnd", "%s+%sc" % (pos, countVar.get()))
-            ledge_low = f"{pos} + 2c"
-            redge_high = f"{pos} + {int(countVar.get()) - 1}c"
-            self.tag_add("insideEntityColor", ledge_low, redge_high)
 
 
 @dataclass
@@ -246,13 +224,11 @@ class Application(Frame):
 
         self.configFile = "configs/default.config"
         self.entity_regex = r'\[\@.*?\#.*?\*\](?!\#)'
-        self.insideNestEntityRe = r'\[\@\[\@(?!\[\@).*?\#.*?\*\]\#'
         self.recommendRe = r'\[\$.*?\#.*?\*\](?!\#)'
         self.goldAndrecomRe = r'\[\@.*?\#.*?\*\](?!\#)'
         if self.keepRecommend:
             self.goldAndrecomRe = r'\[[\@\$)].*?\#.*?\*\](?!\#)'
         ## configure color
-        self.insideNestEntityColor = "light slate blue"
         self.selectColor = 'light salmon'
         self.textFontStyle = "Times"
         self.initUI()
