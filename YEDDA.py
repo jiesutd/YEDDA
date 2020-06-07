@@ -18,6 +18,10 @@ from utils.recommend import *
 class Editor(ScrolledText):
     def __init__(self, parent, **kwargs):
         super().__init__(parent, **kwargs)
+        self.entity_regex = r'\[\@.*?\#.*?\*\](?!\#)'  # TODO dup
+        self.recommendRe = r'\[\$.*?\#.*?\*\](?!\#)'  # TODO dup
+        self.insideNestEntityColor = "light slate blue"  # TODO dup
+        self.insideNestEntityRe = r'\[\@\[\@(?!\[\@).*?\#.*?\*\]\#'  # TODO dup
         fnt = font.Font(family='Times', size=20, weight="bold", underline=0)
         self.config(insertbackground='red', insertwidth=4, font=fnt)
         edge_fnt = font.Font(family='Times', size=12, underline=0)
@@ -53,6 +57,64 @@ class Editor(ScrolledText):
     def get_text(self) -> str:
         """get text from 0 to end"""
         return self.get("1.0", "end-1c")
+
+    def update_view(self):
+        cursor_row, _ = self.index(INSERT).split('.')
+        lineStart = cursor_row + '.0'
+        lineEnd = cursor_row + '.end'
+        colorAllChunk = True
+
+        if colorAllChunk:
+            self.mark_set("matchStart", "1.0")
+            self.mark_set("matchEnd", "1.0")
+            self.mark_set("searchLimit", 'end-1c')
+            self.mark_set("recommend_matchStart", "1.0")
+            self.mark_set("recommend_matchEnd", "1.0")
+            self.mark_set("recommend_searchLimit", 'end-1c')
+        else:
+            self.mark_set("matchStart", lineStart)
+            self.mark_set("matchEnd", lineStart)
+            self.mark_set("searchLimit", lineEnd)
+            self.mark_set("recommend_matchStart", lineStart)
+            self.mark_set("recommend_matchEnd", lineStart)
+            self.mark_set("recommend_searchLimit", lineEnd)
+        countVar = StringVar()
+        while True:
+            pos = self.search(self.entity_regex, "matchEnd", "searchLimit", count=countVar, regexp=True)
+            if pos == "":
+                break
+            self.mark_set("matchStart", pos)
+            self.mark_set("matchEnd", f"{pos}+{countVar.get()}c")
+            self.highlight_entity(pos, int(countVar.get()))
+        ## color recommend type
+        while True:
+            recommend_pos = self.search(self.recommendRe, "recommend_matchEnd", "recommend_searchLimit",
+                                        count=countVar, regexp=True)
+            if recommend_pos == "":
+                break
+            self.mark_set("recommend_matchStart", recommend_pos)
+            self.mark_set("recommend_matchEnd", f"{recommend_pos}+{countVar.get()}c")
+            self.highlight_recommend(recommend_pos, int(countVar.get()))
+
+        ## color the most inside span for nested span, scan from begin to end again
+        if colorAllChunk:
+            self.mark_set("matchStart", "1.0")
+            self.mark_set("matchEnd", "1.0")
+            self.mark_set("searchLimit", 'end-1c')
+        else:
+            self.mark_set("matchStart", lineStart)
+            self.mark_set("matchEnd", lineStart)
+            self.mark_set("searchLimit", lineEnd)
+        while True:
+            self.tag_configure("insideEntityColor", background=self.insideNestEntityColor)
+            pos = self.search(self.insideNestEntityRe, "matchEnd", "searchLimit", count=countVar, regexp=True)
+            if pos == "":
+                break
+            self.mark_set("matchStart", pos)
+            self.mark_set("matchEnd", "%s+%sc" % (pos, countVar.get()))
+            ledge_low = f"{pos} + 2c"
+            redge_high = f"{pos} + {int(countVar.get()) - 1}c"
+            self.tag_add("insideEntityColor", ledge_low, redge_high)
 
 
 @dataclass
@@ -112,7 +174,7 @@ class QueryExport(Dialog):
     def __init__(self, parent, filename, sample):
         self.confirmed = False
         self.sample = sample
-        super().__init__(parent, 'Exporting to ' + filename)  # here dialog shows
+        super().__init__(parent, 'Exporting ' + filename)  # here dialog shows
 
     def body(self, master):
         """override"""
@@ -157,7 +219,6 @@ class Application(Frame):
         self.OS = platform.system().lower()
         self.fileName = ""
         self.debug = False
-        self.colorAllChunk = True
         self.use_recommend = BooleanVar(self, True)
         self.history = deque(maxlen=20)
         self.currentContent = deque(maxlen=1)
@@ -563,64 +624,7 @@ class Application(Frame):
             self.text.mark_set(INSERT, newcursor_index)
             self.text.see(newcursor_index)
             self.setCursorLabel(newcursor_index)
-            self.setColorDisplay()
-
-    def setColorDisplay(self):
-        countVar = StringVar()
-        cursor_row, _ = self.text.index(INSERT).split('.')
-        lineStart = cursor_row + '.0'
-        lineEnd = cursor_row + '.end'
-
-        if self.colorAllChunk:
-            self.text.mark_set("matchStart", "1.0")
-            self.text.mark_set("matchEnd", "1.0")
-            self.text.mark_set("searchLimit", 'end-1c')
-            self.text.mark_set("recommend_matchStart", "1.0")
-            self.text.mark_set("recommend_matchEnd", "1.0")
-            self.text.mark_set("recommend_searchLimit", 'end-1c')
-        else:
-            self.text.mark_set("matchStart", lineStart)
-            self.text.mark_set("matchEnd", lineStart)
-            self.text.mark_set("searchLimit", lineEnd)
-            self.text.mark_set("recommend_matchStart", lineStart)
-            self.text.mark_set("recommend_matchEnd", lineStart)
-            self.text.mark_set("recommend_searchLimit", lineEnd)
-        while True:
-            pos = self.text.search(self.entity_regex, "matchEnd", "searchLimit", count=countVar, regexp=True)
-            if pos == "":
-                break
-            self.text.mark_set("matchStart", pos)
-            self.text.mark_set("matchEnd", f"{pos}+{countVar.get()}c")
-            self.text.highlight_entity(pos, int(countVar.get()))
-        ## color recommend type
-        while True:
-            recommend_pos = self.text.search(self.recommendRe, "recommend_matchEnd", "recommend_searchLimit",
-                                             count=countVar, regexp=True)
-            if recommend_pos == "":
-                break
-            self.text.mark_set("recommend_matchStart", recommend_pos)
-            self.text.mark_set("recommend_matchEnd", f"{recommend_pos}+{countVar.get()}c")
-            self.text.highlight_recommend(recommend_pos, int(countVar.get()))
-
-        ## color the most inside span for nested span, scan from begin to end again
-        if self.colorAllChunk:
-            self.text.mark_set("matchStart", "1.0")
-            self.text.mark_set("matchEnd", "1.0")
-            self.text.mark_set("searchLimit", 'end-1c')
-        else:
-            self.text.mark_set("matchStart", lineStart)
-            self.text.mark_set("matchEnd", lineStart)
-            self.text.mark_set("searchLimit", lineEnd)
-        while True:
-            self.text.tag_configure("insideEntityColor", background=self.insideNestEntityColor)
-            pos = self.text.search(self.insideNestEntityRe, "matchEnd", "searchLimit", count=countVar, regexp=True)
-            if pos == "":
-                break
-            self.text.mark_set("matchStart", pos)
-            self.text.mark_set("matchEnd", "%s+%sc" % (pos, countVar.get()))
-            ledge_low = f"{pos} + 2c"
-            redge_high = f"{pos} + {int(countVar.get()) - 1}c"
-            self.text.tag_add("insideEntityColor", ledge_low, redge_high)
+            self.text.update_view()
 
     def pushToHistory(self):
         self.history.append((self.text.get_text(), self.text.index(INSERT)))
@@ -680,7 +684,7 @@ class Application(Frame):
             return
         fileLines = open(self.fileName, 'r').readlines()
         lineNum = len(fileLines)
-        new_filename = self.fileName.split('.ann')[0] + '.anns'
+        new_filename = self.fileName.split('.ann')[0] + '.' + dlg.tag_scheme().lower()
         seqFile = open(new_filename, 'w')
         for line in fileLines:
             if len(line) <= 2:
