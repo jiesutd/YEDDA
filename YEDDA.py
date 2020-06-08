@@ -10,7 +10,7 @@ from tkinter.ttk import Frame, Button, Radiobutton, Label, Combobox, Scrollbar
 from tkinter.simpledialog import Dialog
 from tkinter.scrolledtext import ScrolledText
 from dataclasses import dataclass
-from typing import List
+from typing import List, Optional
 
 from utils.recommend import *
 
@@ -82,7 +82,7 @@ class Editor(ScrolledText):
                     break
                 row, col = pos.split('.')
                 match_end = f'{row}.{int(col) + int(count_var.get())}'  # here don't use offset form
-                if int(col) <= cursor_col <= (int(col) + int(count_var.get())):
+                if int(col) < cursor_col < (int(col) + int(count_var.get())):
                     return pos, match_end
                 from_index = match_end
             return None
@@ -95,6 +95,12 @@ class Editor(ScrolledText):
             return 'recommend', span
         else:
             return None, (None, None)
+
+    def get_selection(self) -> Optional[str]:
+        try:
+            return self.selection_get()
+        except TclError:
+            return None
 
 
 @dataclass
@@ -383,7 +389,7 @@ class Application(Frame):
         press_key = event.char
         self.pushToHistory()
         self.clearCommand()
-        self.executeCursorCommand(press_key.lower())
+        self.execute_cursor_command(press_key.lower())
         return 'break'
 
     def backToHistory(self, event):
@@ -408,49 +414,37 @@ class Application(Frame):
             print("Action Track: clearCommand")
         self.entry.delete(0, 'end')
 
-    def executeCursorCommand(self, command):
-        if self.debug:
-            print("Action Track: executeCursorCommand")
+    def execute_cursor_command(self, command):
         print("Command:" + command)
-        try:
-            cursor_index = self.text.index(SEL_LAST)
-            above_half = self.text.get('1.0', SEL_FIRST)
-            below_half = self.text.get(SEL_FIRST, "end-1c")
-            selected_string = self.text.selection_get()
-            if re.match(self.entity_regex, selected_string):
-                # if have selected entity
-                new_string_list = selected_string.strip('[@]').rsplit('#', 1)
-                new_string = new_string_list[0]
-                below_half = below_half.replace(selected_string, new_string, 1)
-                selected_string = new_string
-                # cursor_index = "%s - %sc" % (cursor_index, str(len(new_string_list[1])+4))
-                cursor_index = cursor_index.split('.')[0] + "." + str(
-                    int(cursor_index.split('.')[1]) - len(new_string_list[1]) + 4)
-            afterEntity_content = below_half[len(selected_string):]
-
-            if command == "q":
-                print('q: remove entity label')
-            else:
-                if len(selected_string) > 0:
-                    entity_content, cursor_index = self.replaceString(selected_string, selected_string, command,
-                                                                      cursor_index)
-            above_half += entity_content
-            content = self.addRecommendContent(above_half, afterEntity_content, self.use_recommend.get())
-            self.writeFile(self.fileName, content, cursor_index)
-        except TclError:  # no selected text
-            found, (start, end) = self.text.current_entity()
-            if not found:
-                print(f'{command}: outside entity, do nothing')
+        found, (start, end) = self.text.current_entity()
+        selected = self.text.get_selection()
+        # selected whole entity, cursor just outside it
+        selected_whole = selected is not None and \
+                         (re.match(self.entity_regex, selected) or re.match(self.recommendRe, selected))
+        if not found and selected is not None and not selected_whole:  # cursor outside existing entity & has selection
+            if self.get_cmd_by_key(command) is None:
+                print(f'{command} key not bound, outside entity, do nothing')
                 return
-            selected_string = self.text.get(start, end)
-            if found == 'gold':
-                old_entity, old_label = selected_string.strip('[@*]').rsplit('#', 1)
-            else:  # found == 'recommend':
-                old_entity, old_label = selected_string.strip('[$*]').rsplit('#', 1)
+            cursor_index = self.text.index(SEL_LAST)
+            entity_content, cursor_index = self.replaceString(selected, selected, command, cursor_index)
+            above_half = self.text.get('1.0', SEL_FIRST) + entity_content
+            below_half = self.text.get(SEL_LAST, "end-1c")
+            content = self.addRecommendContent(above_half, below_half, self.use_recommend.get())
+            self.writeFile(self.fileName, content, cursor_index)
+        elif not found and not selected:
+            print(f'{command} outside entity, no selection, do nothing')
+            return
+        # Cursor inside existing entity, no matter has or not has selection.
+        # Or Cursor outside existing entity (just on the edge), with the whole entity selected
+        else:
+            if selected_whole:
+                start, end = self.text.index(SEL_FIRST), self.text.index(SEL_LAST)
+            covered_string = self.text.get(start, end)
+            old_entity, old_label = covered_string.strip('[@$*]').rsplit('#', 1)
 
             if command == "q":
                 print('q: remove entity label')
-                new_cursor = f'{end}-{5+len(old_label)}c'
+                new_cursor = f'{end}-{5 + len(old_label)}c'
                 entity_content = old_entity
             elif command == 'y':
                 print("y: comfirm recommend label")
@@ -463,7 +457,7 @@ class Application(Frame):
                 delta = len(cmd.name) - len(old_label)
                 new_cursor = end + (f'+{delta}c' if delta >= 0 else f'{delta}c')
             else:
-                print(f'{command}: inside entity, do nothing')
+                print(f'{command}: key not bound, do nothing')
                 return
             above_half = self.text.get('1.0', start) + entity_content
             below_half = self.text.get(end, 'end-1c')
