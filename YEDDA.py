@@ -414,19 +414,19 @@ class Application(Frame):
         print("Command:" + command)
         try:
             cursor_index = self.text.index(SEL_LAST)
-            aboveHalf_content = self.text.get('1.0', SEL_FIRST)
-            followHalf_content = self.text.get(SEL_FIRST, "end-1c")
+            above_half = self.text.get('1.0', SEL_FIRST)
+            below_half = self.text.get(SEL_FIRST, "end-1c")
             selected_string = self.text.selection_get()
             if re.match(self.entity_regex, selected_string) != None:
                 ## if have selected entity
                 new_string_list = selected_string.strip('[@]').rsplit('#', 1)
                 new_string = new_string_list[0]
-                followHalf_content = followHalf_content.replace(selected_string, new_string, 1)
+                below_half = below_half.replace(selected_string, new_string, 1)
                 selected_string = new_string
                 # cursor_index = "%s - %sc" % (cursor_index, str(len(new_string_list[1])+4))
                 cursor_index = cursor_index.split('.')[0] + "." + str(
                     int(cursor_index.split('.')[1]) - len(new_string_list[1]) + 4)
-            afterEntity_content = followHalf_content[len(selected_string):]
+            afterEntity_content = below_half[len(selected_string):]
 
             if command == "q":
                 print('q: remove entity label')
@@ -434,53 +434,41 @@ class Application(Frame):
                 if len(selected_string) > 0:
                     entity_content, cursor_index = self.replaceString(selected_string, selected_string, command,
                                                                       cursor_index)
-            aboveHalf_content += entity_content
-            content = self.addRecommendContent(aboveHalf_content, afterEntity_content, self.use_recommend.get())
+            above_half += entity_content
+            content = self.addRecommendContent(above_half, afterEntity_content, self.use_recommend.get())
             content = content
             self.writeFile(self.fileName, content, cursor_index)
         except TclError:  # no selected text
-            cursor_index = self.text.index(INSERT)
-            line_id, column_id = cursor_index.split('.')
-            aboveLine_content = self.text.get('1.0', str(int(line_id) - 1) + '.end')
-            belowLine_content = self.text.get(str(int(line_id) + 1) + '.0', "end-1c")
-            line = self.text.get(line_id + '.0', line_id + '.end')
             found, (start, end) = self.text.current_entity()
             if not found:
                 print(f'{command}: outside entity, do nothing')
                 return
             selected_string = self.text.get(start, end)
             if found == 'gold':
-                entity_content, old_entity_type = selected_string.strip('[@*]').rsplit('#', 1)
-            elif found == 'recommend':
-                entity_content, old_entity_type = selected_string.strip('[$*]').rsplit('#', 1)
-            cursor_index = line_id + '.' + str(int(end.split('.')[1]) - (len(old_entity_type) + 4))
+                entity_content, old_label = selected_string.strip('[@*]').rsplit('#', 1)
+            else:  # found == 'recommend':
+                entity_content, old_label = selected_string.strip('[$*]').rsplit('#', 1)
 
             if command == "q":
+                new_cursor = f'{end}-{5+len(old_label)}c'
                 print('q: remove entity label')
             elif command == 'y':
                 print("y: comfirm recommend label")
-                cmd = self.get_cmd_by_name(old_entity_type)
-                entity_content, cursor_index = self.replaceString(entity_content, entity_content, cmd.key, cursor_index)
+                entity_content = f'[@{entity_content}#{old_label}*]'
+                new_cursor = end
             elif len(entity_content) > 0 and self.get_cmd_by_key(command) is not None:
                 print(f'{command}: change entity type')
-                entity_content, cursor_index = self.replaceString(entity_content, entity_content, command, cursor_index)
+                cmd = self.get_cmd_by_key(command)
+                entity_content = f'[@{entity_content}#{cmd.name}*]'
+                delta = len(cmd.name) - len(old_label)
+                new_cursor = end + (f'+{delta}c' if delta >= 0 else f'{delta}c')
             else:
                 print(f'{command}: inside entity, do nothing')
                 return
-            line_before_entity = self.text.get(f'{line_id}.0', start)
-            line_after_entity = self.text.get(end, f'{line_id}.end')
-            line_before_entity += entity_content
-            if aboveLine_content != '':
-                aboveHalf_content = aboveLine_content + '\n' + line_before_entity
-            else:
-                aboveHalf_content = line_before_entity
-            if belowLine_content != '':
-                followHalf_content = line_after_entity + '\n' + belowLine_content
-            else:
-                followHalf_content = line_after_entity
-
-            content = self.addRecommendContent(aboveHalf_content, followHalf_content, self.use_recommend.get())
-            self.writeFile(self.fileName, content, cursor_index)
+            above_half = self.text.get('1.0', start) + entity_content
+            below_half = self.text.get(end, END)
+            content = self.addRecommendContent(above_half, below_half, self.use_recommend.get())
+            self.writeFile(self.fileName, content, new_cursor)
 
     def executeEntryCommand(self, command):
         if self.debug:
