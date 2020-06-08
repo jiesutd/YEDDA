@@ -417,8 +417,8 @@ class Application(Frame):
             above_half = self.text.get('1.0', SEL_FIRST)
             below_half = self.text.get(SEL_FIRST, "end-1c")
             selected_string = self.text.selection_get()
-            if re.match(self.entity_regex, selected_string) != None:
-                ## if have selected entity
+            if re.match(self.entity_regex, selected_string):
+                # if have selected entity
                 new_string_list = selected_string.strip('[@]').rsplit('#', 1)
                 new_string = new_string_list[0]
                 below_half = below_half.replace(selected_string, new_string, 1)
@@ -436,7 +436,6 @@ class Application(Frame):
                                                                       cursor_index)
             above_half += entity_content
             content = self.addRecommendContent(above_half, afterEntity_content, self.use_recommend.get())
-            content = content
             self.writeFile(self.fileName, content, cursor_index)
         except TclError:  # no selected text
             found, (start, end) = self.text.current_entity()
@@ -445,28 +444,29 @@ class Application(Frame):
                 return
             selected_string = self.text.get(start, end)
             if found == 'gold':
-                entity_content, old_label = selected_string.strip('[@*]').rsplit('#', 1)
+                old_entity, old_label = selected_string.strip('[@*]').rsplit('#', 1)
             else:  # found == 'recommend':
-                entity_content, old_label = selected_string.strip('[$*]').rsplit('#', 1)
+                old_entity, old_label = selected_string.strip('[$*]').rsplit('#', 1)
 
             if command == "q":
-                new_cursor = f'{end}-{5+len(old_label)}c'
                 print('q: remove entity label')
+                new_cursor = f'{end}-{5+len(old_label)}c'
+                entity_content = old_entity
             elif command == 'y':
                 print("y: comfirm recommend label")
-                entity_content = f'[@{entity_content}#{old_label}*]'
+                entity_content = f'[@{old_entity}#{old_label}*]'
                 new_cursor = end
-            elif len(entity_content) > 0 and self.get_cmd_by_key(command) is not None:
+            elif len(old_entity) > 0 and self.get_cmd_by_key(command) is not None:
                 print(f'{command}: change entity type')
                 cmd = self.get_cmd_by_key(command)
-                entity_content = f'[@{entity_content}#{cmd.name}*]'
+                entity_content = f'[@{old_entity}#{cmd.name}*]'
                 delta = len(cmd.name) - len(old_label)
                 new_cursor = end + (f'+{delta}c' if delta >= 0 else f'{delta}c')
             else:
                 print(f'{command}: inside entity, do nothing')
                 return
             above_half = self.text.get('1.0', start) + entity_content
-            below_half = self.text.get(end, END)
+            below_half = self.text.get(end, 'end-1c')
             content = self.addRecommendContent(above_half, below_half, self.use_recommend.get())
             self.writeFile(self.fileName, content, new_cursor)
 
@@ -560,7 +560,7 @@ class Application(Frame):
     def pushToHistory(self):
         self.history.append((self.text.get_text(), self.text.index(INSERT)))
 
-    ## update shortcut map, directly in current configfile
+    # update shortcut map, directly in current configfile
     def renewPressCommand(self):
         if self.debug:
             print("Action Track: renewPressCommand")
@@ -572,7 +572,7 @@ class Application(Frame):
                             "Shortcut map has been updated!\n\n" +
                             "Configure file has been saved in File:" + self.configFile)
 
-    ## save as new shortcut map
+    # save as new shortcut map
     def savenewPressCommand(self):
         if self.debug:
             print("Action Track: savenewPressCommand")
@@ -599,9 +599,6 @@ class Application(Frame):
             print("Change shortcut map to: ", event.widget.get())
         self.configFile = os.path.join("configs", event.widget.get())
         self.keymap_frame.update_keymap(self.pressCommand)
-
-    def getCursorIndex(self):
-        return self.text.index(INSERT)
 
     def generateSequenceFile(self):
         if (".ann" not in self.fileName) and (".txt" not in self.fileName):
