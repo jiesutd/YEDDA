@@ -117,16 +117,15 @@ class Example(Frame):
         if len(filez) != 2:
             tkMessageBox.showinfo("Compare Error", "Please select exactly two files!")
         else:
-            f = tkFileDialog.asksaveasfile(mode='w', defaultextension=".tex")
-            write_result = compareBoundary(filez[0], filez[1], f)
+            outfile = tkFileDialog.asksaveasfilename(defaultextension=".tex")
+            write_result = compareBoundary(filez[0], filez[1], outfile)
             if write_result:
-                tkMessageBox.showinfo("Latex Generate", "Latex file generated successfully!\n\nSaved to " + f.name)
+                tkMessageBox.showinfo("Latex Generate", "Latex file generated successfully!\n\nSaved to " + outfile)
                 # import os
                 # os.system("pdflatex "+ f.name)
             else:
                 tkMessageBox.showinfo("Latex Error",
                                       "Latex generated Error, two files don't have same sentence number!")
-            f.close()
 
 
 def main():

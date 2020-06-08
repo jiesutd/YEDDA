@@ -15,7 +15,7 @@ def lines_to_label_list(input_lines):
     return label_list
 
 
-def compareBoundary(gold_file, pred_file, out_file):
+def compareBoundary(gold_file, pred_file, out_file_name):
     # print "Compare files..."
     # print "Gold file:", gold_file
     # print "Pred file:", pred_file
@@ -30,6 +30,7 @@ def compareBoundary(gold_file, pred_file, out_file):
     match_entity = []
     start_line = 0
     end_line = sentence_num
+    out_file = open(out_file_name, 'w', encoding='utf-8')
     write_head(out_file)
     out_file.write("\\section{Overall Statistics}\n")
     out_file.write("File1 color: " + "\colorbox{blue!30}{Blue}; Dir: \colorbox{blue!30}{" + gold_file.replace("_",
@@ -56,9 +57,9 @@ def compareBoundary(gold_file, pred_file, out_file):
     out_file.write("\\end{tabular}\n")
     out_file.write("\\end{table}\n")
     out_file.write("\\section{Detail Content Comparison}\n")
-    out_file.write("\colorbox{blue!30}{Blue}: only annotated in File1.\\\\\n")
-    out_file.write("\colorbox{red!30}{Red}: only annotated in File2.\\\\\n")
-    out_file.write("\colorbox{green!30}{Green}: annotated in both files.\\\\\n")
+    out_file.write("\\colorbox{blue!30}{Blue}: only annotated in File1.\\\\\n")
+    out_file.write("\\colorbox{red!30}{Red}: only annotated in File2.\\\\\n")
+    out_file.write("\\colorbox{green!30}{Green}: annotated in both files.\\\\\n")
     out_file.write("\\rule{5cm}{0.1em}\\\\\n")
     out_file.write("\\vspace{0.3cm}\\\\\n")
     remove_seg = False
@@ -115,7 +116,7 @@ def generate_segment_latex(sentence, segment):
 
 
 def generate_overlap(sentence, match_segment):
-    output_string = "\colorbox{yellow!70}{$"
+    output_string = "\\colorbox{yellow!70}{$"
     gold = match_segment.split('_')[1]
     pred = match_segment.split('_')[2]
 
@@ -158,16 +159,16 @@ def generate_overlap(sentence, match_segment):
     overlap_words = "".join(sentence[overlap_start:overlap_end])
     if front_words:
         if front_flag == "P":
-            output_string += r"\underline{\\text{" + front_words + "}}"
+            output_string += "\\underline{\\text{" + front_words + "}}"
         else:
-            output_string += r"\overline{\\text{" + front_words + "}}"
-    output_string += r"\overline{\underline{\\text{" + overlap_words + "}}}"
+            output_string += "\\overline{\\text{" + front_words + "}}"
+    output_string += "\\overline{\\underline{\\text{" + overlap_words + "}}}"
     if back_words:
         if back_flag == "P":
-            output_string += r"\underline{\\text{" + back_words + "}}"
+            output_string += "\\underline{\\text{" + back_words + "}}"
         else:
-            output_string += r"\overline{\\text{" + back_words + "}}"
-    output_string += r"$}$^{{\color{blue}{" + gold_type + r"}}}_{{\color{red}{" + pred_type + "}}}$"
+            output_string += "\\overline{\\text{" + back_words + "}}"
+    output_string += "$}$^{{\color{blue}{" + gold_type + "}}}_{{\\color{red}{" + pred_type + "}}}$"
     return output_string
 
 
@@ -178,8 +179,8 @@ def generate_match(sentence, match_segment):
     start = int(pos[0])
     end = int(pos[1])
     words = sentence[start:end + 1]
-    output_string = r"\colorbox{green!30}{$\underline{\overline{\\text{" + ''.join(
-        words) + r"}}}$}$^{{\color{blue}{" + entity_type + r"}}}_{{\color{red}{" + entity_type + "}}}$"
+    output_string = "\\colorbox{green!30}{$\\underline{\\overline{\\text{" + ''.join(
+        words) + "}}}$}$^{{\\color{blue}{" + entity_type + "}}}_{{\\color{red}{" + entity_type + "}}}$"
     return output_string
 
 
@@ -200,8 +201,8 @@ def generate_gold_left(sentence, match_segment):
     start = int(pos[0])
     end = int(pos[1])
     words = sentence[start:end + 1]
-    output_string = "\colorbox{blue!30}{$\overline{\\text{" + ''.join(
-        words) + "}}$}$^{{\color{blue}{" + entity_type + "}}}"
+    output_string = "\\colorbox{blue!30}{$\\overline{\\text{" + ''.join(
+        words) + "}}$}$^{{\\color{blue}{" + entity_type + "}}}"
     return output_string
 
 
@@ -212,8 +213,8 @@ def generate_pred_left(sentence, match_segment):
     start = int(pos[0])
     end = int(pos[1])
     words = sentence[start:end + 1]
-    output_string = r"\colorbox{red!30}{$\underline{\\text{" + ''.join(
-        words) + r"}}$}$_{{\color{red}{" + entity_type + "}}}$"
+    output_string = "\\colorbox{red!30}{$\\underline{\\text{" + ''.join(
+        words) + "}}$}$_{{\\color{red}{" + entity_type + "}}}$"
     return output_string
 
 
@@ -472,29 +473,27 @@ def calculate_average(input_array):
 
 def write_head(out_file):
     out_file.write("%%%%%%%%%%%%%%%%%%%%%%% file typeinst.tex %%%%%%%%%%%%%%%%%%%%%%%%%\n")
-    out_file.write(r"\documentclass[runningheads,a4paper]{llncs}\n")
-    out_file.write(r"\usepackage{amssymb}\n")
-    out_file.write(r"\setcounter{tocdepth}{3}\n")
-    out_file.write(r"\usepackage{graphicx}\n")
-    out_file.write(r"\usepackage{multirow}\n")
-    out_file.write(r"\usepackage{subfigure}\n")
-    out_file.write(r"\usepackage{amsmath}\n")
-    out_file.write(r"\usepackage{CJK}\n")
-    out_file.write(r"\usepackage{color}\n")
-    out_file.write(r"\usepackage{xcolor}\n")
-    out_file.write(r"\usepackage{url}\n")
+    out_file.write("\\documentclass[a4paper]{article}\n")
+    out_file.write("\\usepackage{amssymb}\n")
+    out_file.write("\\setcounter{tocdepth}{3}\n")
+    out_file.write("\\usepackage{graphicx}\n")
+    out_file.write("\\usepackage{multirow}\n")
+    out_file.write("\\usepackage{subfigure}\n")
+    out_file.write("\\usepackage{amsmath}\n")
+    out_file.write("\\usepackage{CJK}\n")
+    out_file.write("\\usepackage{color}\n")
+    out_file.write("\\usepackage{xcolor}\n")
+    out_file.write("\\usepackage{url}\n")
     out_file.write("\\begin{document}\n")
     out_file.write("\\begin{CJK*}{UTF8}{gbsn}\n")
-    out_file.write(r"\mainmatter  % start of an individual contribution\n")
     out_file.write("\\title{Annotation Comparison Report}\n")
     out_file.write("\\author{SUTDNLP Group}\n")
-    out_file.write("\\institute{Singapore University of Technology and Design}\n")
     out_file.write("\\maketitle\n\n")
 
 
 def write_end(out_file):
-    out_file.write(r"\end{CJK*}\n")
-    out_file.write(r"\end{document}\n")
+    out_file.write("\\end{CJK*}\n")
+    out_file.write("\\end{document}\n")
 
 
 def simplified_name(file_name):
