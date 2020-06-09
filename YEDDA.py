@@ -386,7 +386,7 @@ class Application(Frame):
         self.pushToHistory()
         content = self.entry.get()
         self.clearCommand()
-        self.executeEntryCommand(content.strip())
+        self.execute_entry_command(content.strip())
         return content
 
     def alphanum_key_pressed(self, event):
@@ -422,10 +422,15 @@ class Application(Frame):
         print("Command:" + command)
         found, (start, end) = self.text.current_entity()
         selected = self.text.get_selection()
+        if not found and not selected:
+            print(f'{command} outside entity, no selection, do nothing')
+            return
         # selected whole entity, cursor just outside it
         selected_whole = selected is not None and \
-                         (re.match(self.entity_regex, selected) or re.match(self.recommendRe, selected))
-        if not found and selected is not None and not selected_whole:  # cursor outside existing entity & has selection
+            (re.match(self.entity_regex, selected) or re.match(self.recommendRe, selected))
+
+        # cursor outside existing entity & has selection
+        if not found and selected is not None and not selected_whole:
             if self.get_cmd_by_key(command) is None:
                 print(f'{command} key not bound, outside entity, do nothing')
                 return
@@ -435,9 +440,6 @@ class Application(Frame):
             below_half = self.text.get(SEL_LAST, "end-1c")
             content = self.addRecommendContent(above_half, below_half, self.use_recommend.get())
             self.writeFile(self.fileName, content, cursor_index)
-        elif not found and not selected:
-            print(f'{command} outside entity, no selection, do nothing')
-            return
         # Cursor inside existing entity, no matter has or not has selection.
         # Or Cursor outside existing entity (just on the edge), with the whole entity selected
         else:
@@ -468,7 +470,7 @@ class Application(Frame):
             content = self.addRecommendContent(above_half, below_half, self.use_recommend.get())
             self.writeFile(self.fileName, content, new_cursor)
 
-    def executeEntryCommand(self, command):
+    def execute_entry_command(self, command):
         print(f"EntryCommand: {command}")
         if command == '':  # move to next line
             row, _ = self.text.index(INSERT).split('.')
@@ -483,31 +485,28 @@ class Application(Frame):
             self.show_cursor_pos(None)
             self.preview_cmd_range()
         else:
-            command_list = decompositCommand(command)
-            for idx in range(0, len(command_list)):
-                command = command_list[idx]
-                if len(command) == 2:
-                    select_num = int(command[0])
-                    command = command[1]
-                    content = self.text.get_text()
-                    cursor_index = self.text.index(INSERT)
-                    newcursor_index = cursor_index.split('.')[0] + "." + str(
-                        int(cursor_index.split('.')[1]) + select_num)
-                    # print "new cursor position: ", select_num, " with ", newcursor_index, "with ", newcursor_index
-                    selected_string = self.text.get(cursor_index, newcursor_index)
-                    aboveHalf_content = self.text.get('1.0', cursor_index)
-                    followHalf_content = self.text.get(cursor_index, "end-1c")
-                    keydef = self.get_cmd_by_key(command)
-                    if keydef is not None:
-                        if len(selected_string) > 0:
-                            # print "insert index: ", self.text.index(INSERT) 
-                            followHalf_content, newcursor_index = self.replaceString(followHalf_content,
-                                                                                     selected_string, command,
-                                                                                     newcursor_index)
-                            content = self.addRecommendContent(aboveHalf_content, followHalf_content,
-                                                               self.use_recommend.get())
-                            # content = aboveHalf_content + followHalf_content
-                    self.writeFile(self.fileName, content, newcursor_index)
+            def split_commands(string):
+                commands = []
+                num = ''
+                for c in string:
+                    if c.isdigit():
+                        num += c
+                    else:
+                        commands.append((int(num), c))
+                        num = ''
+                return commands
+
+            for select_num, cmd in split_commands(command):
+                assert select_num > 0
+                sel_start = self.text.index(INSERT)
+                sel_end = self.text.index(f'{INSERT}+{select_num}c')
+                selected = self.text.get(sel_start, sel_end)
+                if self.get_cmd_by_key(cmd) is not None:
+                    above_half = self.text.get('1.0', sel_start)
+                    below_half = self.text.get(sel_start, "end-1c")
+                    below_half, new_cursor = self.replaceString(below_half, selected, cmd, sel_end)
+                    content = self.addRecommendContent(above_half, below_half, self.use_recommend.get())
+                    self.writeFile(self.fileName, content, new_cursor)
 
     def replaceString(self, content, string, replaceType, cursor_index):
         keydef = self.get_cmd_by_key(replaceType)
@@ -523,7 +522,7 @@ class Application(Frame):
             return content, cursor_index
 
     def writeFile(self, fileName, content, newcursor_index):
-        print("Action track: writeFile")
+        print("writeFile")
         if len(fileName) > 0:
             if ".ann" in fileName:
                 new_name = fileName
@@ -759,22 +758,6 @@ def removeRecommendContent(content, recommendRe=r'\[\$.*?\#.*?\*\](?!\#)'):
         last_match_end = match.span()[1]
     output_content += content[last_match_end:]
     return output_content
-
-
-def decompositCommand(command_string):
-    command_list = []
-    each_command = []
-    num_select = ''
-    for idx in range(0, len(command_string)):
-        if command_string[idx].isdigit():
-            num_select += command_string[idx]
-        else:
-            each_command.append(num_select)
-            each_command.append(command_string[idx])
-            command_list.append(each_command)
-            each_command = []
-            num_select = ''
-    return command_list
 
 
 def main():
