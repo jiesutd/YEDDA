@@ -6,7 +6,7 @@ from tkinter import font
 from tkinter import messagebox
 from collections import deque
 from tkinter import *
-from tkinter.ttk import Frame, Button, Radiobutton, Label, Combobox, Scrollbar
+from tkinter.ttk import Frame, Button, Radiobutton, Label, Combobox
 from tkinter.simpledialog import Dialog
 from tkinter.scrolledtext import ScrolledText
 from dataclasses import dataclass
@@ -27,19 +27,19 @@ class Editor(ScrolledText):
         self.tag_configure("recommend", background='light green')
         self.tag_configure("category", background="SkyBlue1")
 
-        def _ignore(e): return 'break'
+        def _ignore(_): return 'break'
 
-        # Disable the default  copy behaivour when right click.
+        # Disable the default copy behaviour when right click.
         # For MacOS, right click is button 2, other systems are button3
         self.bind('<Button-2>', _ignore)
         self.bind('<Button-3>', _ignore)
 
-    def _highlight_entity(self, start: str, count: int, tagname: str):
+    def _highlight_entity(self, start: str, count: int, tag_name: str):
         end = f'{start}+{count}c'
         star_pos = self.get(start, end).rfind('#')
         word_start = f"{start}+2c"
         word_end = f"{start}+{star_pos}c"
-        self.tag_add(tagname, word_start, word_end)
+        self.tag_add(tag_name, word_start, word_end)
         self.tag_add("edge", start, word_start)
         self.tag_add("edge", word_end, end)
 
@@ -212,7 +212,7 @@ class Application(Frame):
         self.file_encoding = 'utf-8'
         self.debug = False
         self.history = deque(maxlen=20)
-        self.pressCommand = [KeyDef('a', "Artifical"),
+        self.pressCommand = [KeyDef('a', "Artificial"),
                              KeyDef('b', "Event"),
                              KeyDef('c', "Fin-Concept"),
                              KeyDef('d', "Location"),
@@ -249,39 +249,35 @@ class Application(Frame):
         self.text = Editor(self)
         self.text.grid(row=1, column=0, columnspan=self.textColumn, rowspan=self.textRow, padx=12, sticky=NSEW)
 
-        abtn = Button(self, text="Open", command=self.onOpen)
-        abtn.grid(row=1, column=self.textColumn + 1)
-
-        ubtn = Button(self, text="ReMap", command=self.renewPressCommand)
-        ubtn.grid(row=2, column=self.textColumn + 1, pady=4)
-
-        ubtn = Button(self, text="NewMap", command=self.savenewPressCommand)
-        ubtn.grid(row=3, column=self.textColumn + 1, pady=4)
-
-        exportbtn = Button(self, text="Export", command=self.generateSequenceFile)
-        exportbtn.grid(row=4, column=self.textColumn + 1, pady=4)
+        btn = Button(self, text="Open", command=self.onOpen)
+        btn.grid(row=1, column=self.textColumn + 1)
+        btn = Button(self, text="ReMap", command=self.renewPressCommand)
+        btn.grid(row=2, column=self.textColumn + 1, pady=4)
+        btn = Button(self, text="NewMap", command=self.savenewPressCommand)
+        btn.grid(row=3, column=self.textColumn + 1, pady=4)
+        btn = Button(self, text="Export", command=self.generateSequenceFile)
+        btn.grid(row=4, column=self.textColumn + 1, pady=4)
 
         self.use_recommend = BooleanVar(self, True)
-        recommend_check = Checkbutton(self, text='Recommend', command=self.toggle_use_recommend,
-                                      variable=self.use_recommend)
-        recommend_check.grid(row=5, column=self.textColumn + 1, sticky=W, pady=4)
+        check = Checkbutton(self, text='Recommend', command=self.toggle_use_recommend, variable=self.use_recommend)
+        check.grid(row=5, column=self.textColumn + 1, sticky=W, pady=4)
 
         show_tags_var = BooleanVar(self, True)
-        show_tags_check = Checkbutton(self, text='Show Tags', variable=show_tags_var,
-                                      command=lambda: self.text.show_annotation_tag(show_tags_var.get()))
-        show_tags_check.grid(row=6, column=self.textColumn + 1, sticky=W)
+        check = Checkbutton(self, text='Show Tags', variable=show_tags_var,
+                            command=lambda: self.text.show_annotation_tag(show_tags_var.get()))
+        check.grid(row=6, column=self.textColumn + 1, sticky=W)
 
         self.cursor_index_label = Label(self, text="Ln 1, Col 0")
         self.cursor_index_label.grid(row=self.textRow + 1, sticky=NSEW, pady=4, padx=4)
-        self.cmd_var = StringVar()
-        self.cmd_var.trace_add('write', lambda _, _1, _2: self.preview_cmd_range())
-        self.entry = Entry(self, validate='focus', vcmd=self.preview_cmd_range, textvariable=self.cmd_var)
+        cmd_var = StringVar()
+        cmd_var.trace_add('write', lambda _, _1, _2: self.preview_cmd_range())
+        self.entry = Entry(self, validate='focus', vcmd=self.preview_cmd_range, textvariable=cmd_var)
         self.entry.grid(row=self.textRow + 1, column=1, columnspan=self.textColumn - 2, sticky=NSEW, pady=4, padx=8)
         self.entry.bind('<FocusOut>', self.clear_preview_mark)
         self.entry.bind('<Return>', self.execute_command)
 
-        self.enter = Button(self, text="Enter", command=lambda: self.execute_command(None))
-        self.enter.grid(row=self.textRow + 1, column=self.textColumn - 1)
+        btn = Button(self, text="Enter", command=lambda: self.execute_command(None))
+        btn.grid(row=self.textRow + 1, column=self.textColumn - 1)
 
         all_keys = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
         for press_key in all_keys:
@@ -307,13 +303,13 @@ class Application(Frame):
         self.configListBox.set(self.configFile.split(os.sep)[-1])
         self.configListBox.bind('<<ComboboxSelected>>', self.on_select_configfile)
 
-    def show_cursor_pos(self, event):
+    def show_cursor_pos(self, _):
         cursor_index = self.text.index(INSERT)
         row, col = cursor_index.split('.')
         self.cursor_index_label.config(text=f"Ln {row}, Col {col}")
 
-    ## TODO: select entity by double left click
-    def doubleLeftClick(self, event):
+    # TODO: select entity by double left click
+    def doubleLeftClick(self, _):
         if self.debug:
             print("Action Track: doubleLeftClick")
         pass
@@ -363,7 +359,7 @@ class Application(Frame):
         row, col = cursor_index.split('.')
         self.cursor_index_label.config(text=f"Ln {row}, Col {col}")
 
-    def clear_preview_mark(self, event):
+    def clear_preview_mark(self, _):
         self.text.tag_delete('cmd-preview')
 
     def preview_cmd_range(self):
@@ -382,7 +378,7 @@ class Application(Frame):
             self.text.tag_add(preview_tag, f'{INSERT}-{abs(count)}c', INSERT)
         return True
 
-    def execute_command(self, event):
+    def execute_command(self, _):
         self.pushToHistory()
         content = self.entry.get()
         self.clearCommand()
@@ -396,7 +392,7 @@ class Application(Frame):
         self.execute_cursor_command(press_key.lower())
         return 'break'
 
-    def backToHistory(self, event):
+    def backToHistory(self, _):
         if self.debug:
             print("Action Track: backToHistory")
         if len(self.history) > 0:
@@ -405,7 +401,7 @@ class Application(Frame):
         else:
             print("History is empty!")
 
-    def keepCurrent(self, event):
+    def keepCurrent(self, _):
         if self.debug:
             print("Action Track: keepCurrent")
         print("keep current, insert:", INSERT)
@@ -427,7 +423,7 @@ class Application(Frame):
             return
         # selected whole entity, cursor just outside it
         selected_whole = selected is not None and \
-            (re.match(self.entity_regex, selected) or re.match(self.recommendRe, selected))
+                         (re.match(self.entity_regex, selected) or re.match(self.recommendRe, selected))
 
         # cursor outside existing entity & has selection
         if not found and selected is not None and not selected_whole:
@@ -453,7 +449,7 @@ class Application(Frame):
                 new_cursor = f'{end}-{5 + len(old_label)}c'
                 entity_content = old_entity
             elif command == 'y':
-                print("y: comfirm recommend label")
+                print("y: confirm recommend label")
                 entity_content = f'[@{old_entity}#{old_label}*]'
                 new_cursor = end
             elif len(old_entity) > 0 and self.get_cmd_by_key(command) is not None:
@@ -517,7 +513,7 @@ class Application(Frame):
             content = content.replace(string, new_string, 1)
             return content, newcursor_index
         else:
-            print("Invaild command!")
+            print("Invalid command!")
             print("cursor index: ", self.text.index(INSERT))
             return content, cursor_index
 
@@ -630,7 +626,7 @@ class Application(Frame):
                 wordTagPairs = getWordTagPairs(line, dlg.segmented(), dlg.tag_scheme(), dlg.only_NP(), pattern)
                 for wordTag in wordTagPairs:
                     seqFile.write(wordTag)
-                ## use null line to seperate sentences
+                # use null line to separate sentences
                 seqFile.write('\n')
         seqFile.close()
         print("Exported file into sequence style in file: ", new_filename)
