@@ -276,8 +276,8 @@ class Application(Frame):
         self.cmd_var = StringVar()
         self.cmd_var.trace_add('write', lambda _, _1, _2: self.preview_cmd_range())
         self.entry = Entry(self, validate='focus', vcmd=self.preview_cmd_range, textvariable=self.cmd_var)
-        self.entry.grid(row=self.textRow + 1, column=1, columnspan=self.textColumn - 2, sticky=NSEW, pady=4,
-                        padx=8)
+        self.entry.grid(row=self.textRow + 1, column=1, columnspan=self.textColumn - 2, sticky=NSEW, pady=4, padx=8)
+        self.entry.bind('<FocusOut>', self.clear_preview_mark)
         self.entry.bind('<Return>', self.execute_command)
 
         self.enter = Button(self, text="Enter", command=lambda: self.execute_command(None))
@@ -363,26 +363,30 @@ class Application(Frame):
         row, col = cursor_index.split('.')
         self.cursor_index_label.config(text=f"Ln {row}, Col {col}")
 
-    def preview_cmd_range(self):
-        cmd = self.entry.get().strip()
+    def clear_preview_mark(self, event):
         self.text.tag_delete('cmd-preview')
-        self.text.tag_configure("cmd-preview", background='light salmon')
+
+    def preview_cmd_range(self):
+        preview_tag = 'cmd-preview'
+        cmd = self.entry.get().strip()
+        self.text.tag_delete(preview_tag)
+        self.text.tag_configure(preview_tag, background='light salmon')
         match = re.match(r'^(-?[0-9]+).*', cmd)
         if match:
             count = int(match.group(1))
         else:
             count = 1
         if count > 0:
-            self.text.tag_add('cmd-preview', INSERT, f'{INSERT}+{count}c')
+            self.text.tag_add(preview_tag, INSERT, f'{INSERT}+{count}c')
         else:
-            self.text.tag_add('cmd-preview', f'{INSERT}-{abs(count)}c', INSERT)
+            self.text.tag_add(preview_tag, f'{INSERT}-{abs(count)}c', INSERT)
         return True
 
     def execute_command(self, event):
         self.pushToHistory()
         content = self.entry.get()
         self.clearCommand()
-        self.executeEntryCommand(content)
+        self.executeEntryCommand(content.strip())
         return content
 
     def alphanum_key_pressed(self, event):
@@ -465,13 +469,19 @@ class Application(Frame):
             self.writeFile(self.fileName, content, new_cursor)
 
     def executeEntryCommand(self, command):
-        if self.debug:
-            print("Action Track: executeEntryCommand")
-        if len(command) == 0:
-            currentCursor = self.text.index(INSERT)
-            newCurrentCursor = str(int(currentCursor.split('.')[0]) + 1) + ".0"
-            self.text.mark_set(INSERT, newCurrentCursor)
+        print(f"EntryCommand: {command}")
+        if command == '':  # move to next line
+            row, _ = self.text.index(INSERT).split('.')
+            self.text.mark_set(INSERT, f'{int(row) + 1}.0')
             self.show_cursor_pos(None)
+        elif command.isdigit():
+            self.text.mark_set(INSERT, f'{INSERT}+{command}c')
+            self.show_cursor_pos(None)
+            self.preview_cmd_range()
+        elif len(command) >= 2 and command[0] == '-' and command[1:].isdigit():
+            self.text.mark_set(INSERT, f'{INSERT}{command}c')
+            self.show_cursor_pos(None)
+            self.preview_cmd_range()
         else:
             command_list = decompositCommand(command)
             for idx in range(0, len(command_list)):
