@@ -10,22 +10,18 @@ from tkinter.ttk import Frame, Button, Radiobutton, Label, Combobox
 from tkinter.simpledialog import Dialog
 from tkinter.scrolledtext import ScrolledText
 from dataclasses import dataclass
-from typing import List, Optional
+from typing import List, Optional, Tuple
 
 from utils.recommend import *
 
 
 class Editor(ScrolledText):
-    def __init__(self, parent):
+    def __init__(self, parent, entity_pattern, recommend_pattern):
         super().__init__(parent, selectbackground='light salmon')
-        self.entity_pattern = r'\[\@.*?\#.*?\*\](?!\#)'  # TODO dup
-        self.recommend_pattern = r'\[\$.*?\#.*?\*\](?!\#)'  # TODO dup
+        self.entity_pattern = entity_pattern
+        self.recommend_pattern = recommend_pattern
         fnt = font.Font(family='Times', size=20, weight="bold", underline=0)
         self.config(insertbackground='red', insertwidth=4, font=fnt)
-        edge_fnt = font.Font(family='Times', size=12, underline=0)
-        self.tag_configure("edge", background="light grey", foreground='DimGrey', font=edge_fnt)
-        self.tag_configure("recommend", background='light green')
-        self.tag_configure("category", background="SkyBlue1")
 
         def _ignore(_): return 'break'
 
@@ -33,12 +29,37 @@ class Editor(ScrolledText):
         # For MacOS, right click is button 2, other systems are button3
         self.bind('<Button-2>', _ignore)
         self.bind('<Button-3>', _ignore)
+        self.set_colors(None)
+
+    def set_colors(self, colors: Optional[List[Tuple[str, str]]]):
+        """
+        Set colors for different entity type
+        :param colors: list of (entity, color), or None to disable colorful annotation
+        """
+        self.colors = colors
+        for t in self.tag_names():
+            if t.startswith('entity') or t.startswith('recommend'):
+                self.tag_delete(t)
+        # TODO color edge to discriminate recommend
+        self.tag_configure("edge", background="light grey", foreground='DimGrey', font=('Times', 12))
+        if colors is None:
+            self.tag_configure("recommend", background='light green')
+            self.tag_configure("entity", background="SkyBlue1")
+        else:
+            for label, color in self.colors:
+                self.tag_configure('entity_' + label, background=color)
+                self.tag_configure('recommend_' + label, background=color)
 
     def _highlight_entity(self, start: str, count: int, tag_name: str):
         end = f'{start}+{count}c'
-        star_pos = self.get(start, end).rfind('#')
+        sharp_pos = self.get(start, end).rfind('#')
         word_start = f"{start}+2c"
-        word_end = f"{start}+{star_pos}c"
+        word_end = f"{start}+{sharp_pos}c"
+        if self.colors:
+            label_start = f'{start}+{sharp_pos + 1}c'
+            label_end = f'{start}+{count - 2}c'
+            label = self.get(label_start, label_end)
+            tag_name = f'{tag_name}_{label}'
         self.tag_add(tag_name, word_start, word_end)
         self.tag_add("edge", start, word_start)
         self.tag_add("edge", word_end, end)
@@ -50,7 +71,7 @@ class Editor(ScrolledText):
         self._highlight_entity(start, count, 'recommend')
 
     def highlight_entity(self, start: str, count: int):
-        self._highlight_entity(start, count, 'category')
+        self._highlight_entity(start, count, 'entity')
 
     def get_text(self) -> str:
         """get text from 0 to end"""
@@ -129,7 +150,7 @@ class KeyMapFrame(Frame):
             key_lbl.grid(row=row, column=0, sticky=NW, padx=4, pady=4)
             self.key_labels.append(key_lbl)
 
-            name_entry = Entry(self, font=(self.textFontStyle, 14))
+            name_entry = Entry(self, font=(self.textFontStyle, 14), bg=item.color)
             name_entry.insert(0, item.name)
             name_entry.grid(row=row, column=1, columnspan=1, rowspan=1, sticky=NW, padx=4, pady=4)
             self.name_entries.append(name_entry)
@@ -203,6 +224,14 @@ class QueryExport(Dialog):
         return is_english or many_space or False
 
 
+def all_colors():
+    colors = []
+    for color in ('LightBlue', 'LightCyan', 'LightGoldenrod', 'LightPink',
+                  'LightSalmon', 'LightSkyBlue', 'LightSteelBlue', 'LightYellow'):
+        colors += [c + n for c, n in zip([color] * 5, ['', '1', '2', '3', '4'])]
+    return sorted(colors, key=lambda c: list(reversed(c)))
+
+
 class Application(Frame):
     def __init__(self, parent):
         super().__init__(parent)
@@ -220,6 +249,8 @@ class Application(Frame):
                              KeyDef('f', "Person"),
                              KeyDef('g', "Sector"),
                              KeyDef('h', "Other")]
+        for key, color in zip(self.pressCommand, all_colors()):
+            key.color = color
 
         # default GUI display parameter
         self.textRow = max(len(self.pressCommand), 20)
@@ -246,7 +277,7 @@ class Application(Frame):
 
         self.filename_lbl = Label(self, text="File: no file is opened")
         self.filename_lbl.grid(sticky=W, pady=4, padx=5)
-        self.text = Editor(self)
+        self.text = Editor(self, self.entity_regex, self.recommendRe)
         self.text.grid(row=1, column=0, columnspan=self.textColumn, rowspan=self.textRow, padx=12, sticky=NSEW)
 
         btn = Button(self, text="Open", command=self.onOpen)
@@ -266,6 +297,10 @@ class Application(Frame):
         check = Checkbutton(self, text='Show Tags', variable=show_tags_var,
                             command=lambda: self.text.show_annotation_tag(show_tags_var.get()))
         check.grid(row=6, column=self.textColumn + 1, sticky=W)
+
+        self.use_colorful_var = BooleanVar(self, False)
+        check = Checkbutton(self, text='Colorful', variable=self.use_colorful_var, command=self.toggle_use_colorful)
+        check.grid(row=7, column=self.textColumn + 1, sticky=W)
 
         self.cursor_index_label = Label(self, text="Ln 1, Col 0")
         self.cursor_index_label.grid(row=self.textRow + 1, sticky=NSEW, pady=4, padx=4)
@@ -296,9 +331,9 @@ class Application(Frame):
         self.keymap_frame.grid(row=1, column=self.textColumn + 2, rowspan=self.keymap_frame.rows,
                                columnspan=2, padx=6, pady=6, sticky=NW)
 
-        Label(self, text="KeyMap Templates:").grid(row=7, column=self.textColumn + 1)
+        Label(self, text="KeyMap Templates:").grid(row=8, column=self.textColumn + 1)
         self.configListBox = Combobox(self, values=getConfigList(), state='readonly')
-        self.configListBox.grid(row=7, column=self.textColumn + 2, columnspan=2)
+        self.configListBox.grid(row=8, column=self.textColumn + 2, columnspan=2)
         # select current config file
         self.configListBox.set(self.configFile.split(os.sep)[-1])
         self.configListBox.bind('<<ComboboxSelected>>', self.on_select_configfile)
@@ -323,6 +358,13 @@ class Application(Frame):
             content = self.text.get_text()
             content = removeRecommendContent(content, self.recommendRe)
             self.writeFile(self.fileName, content, '1.0')
+
+    def toggle_use_colorful(self):
+        if self.use_colorful_var.get():
+            self.text.set_colors([(d.name, d.color) for d in self.pressCommand])
+        else:
+            self.text.set_colors(None)
+        self.text.update_view()
 
     def onOpen(self):
         filename = filedialog.askopenfilename(
