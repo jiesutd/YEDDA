@@ -651,10 +651,10 @@ class Application(Frame):
         if not dlg.confirmed:
             print("Operation canceled")
             return
-        fileLines = open(self.fileName, 'r').readlines()
+        fileLines = open(self.fileName, 'r', encoding=self.file_encoding).readlines()
         lineNum = len(fileLines)
         new_filename = self.fileName.split('.ann')[0] + '.' + dlg.tag_scheme().lower()
-        seqFile = open(new_filename, 'w')
+        seqFile = open(new_filename, 'w', encoding=self.file_encoding)
         for line in fileLines:
             if len(line) <= 2:
                 seqFile.write('\n')
