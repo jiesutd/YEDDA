@@ -502,8 +502,8 @@ def write_head(out_file):
     out_file.write("\\begin{CJK*}{UTF8}{gbsn}\n")
     out_file.write("\mainmatter  % start of an individual contribution\n")
     out_file.write("\\title{Annotation Comparison Report}\n")
-    out_file.write("\\author{SUTDNLP Group}\n")
-    out_file.write("\\institute{Singapore University of Technology and Design}\n")
+    out_file.write("\\author{YLab}\n")
+    out_file.write("\\institute{Zhejiang University}\n")
     
     out_file.write("\\maketitle\n\n")
 
