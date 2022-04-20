@@ -270,6 +270,7 @@ class Application(Frame):
         for i in range(0, self.textColumn):
             self.columnconfigure(i, weight=2)
         # self.columnconfigure(0, weight=2)
+        
         self.columnconfigure(self.textColumn + 2, weight=1)
         self.columnconfigure(self.textColumn + 4, weight=1)
         for i in range(0, 16):
@@ -546,6 +547,7 @@ class Application(Frame):
                     content = self.addRecommendContent(above_half, below_half, self.use_recommend.get())
                     self.writeFile(self.fileName, content, new_cursor)
 
+
     def replaceString(self, content, string, replaceType, cursor_index):
         keydef = self.get_cmd_by_key(replaceType)
         if keydef is not None:
@@ -576,6 +578,7 @@ class Application(Frame):
         else:
             print("Don't write to empty file!")
 
+
     def addRecommendContent(self, train_data, decode_data, recommendMode):
         if not recommendMode:
             content = train_data + decode_data
@@ -584,6 +587,7 @@ class Application(Frame):
                 print("Action Track: addRecommendContent, start Recommend entity")
             content = maximum_matching(train_data, decode_data)
         return content
+
 
     def autoLoadNewFile(self, fileName, newcursor_index):
         if self.debug:
@@ -597,6 +601,7 @@ class Application(Frame):
             self.text.see(newcursor_index)
             self.show_cursor_pos(None)
             self.text.update_view()
+
 
     def pushToHistory(self):
         self.history.append((self.text.get_text(), self.text.index(INSERT)))
@@ -640,6 +645,7 @@ class Application(Frame):
             print("Change shortcut map to: ", event.widget.get())
         self.configFile = os.path.join("configs", event.widget.get())
         self.keymap_frame.update_keymap(self.pressCommand)
+
 
     def generateSequenceFile(self):
         if (".ann" not in self.fileName) and (".txt" not in self.fileName):

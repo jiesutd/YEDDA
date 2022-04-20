@@ -15,7 +15,7 @@ This GUI annotation tool is developed with tkinter package in Python.
 
 System required: Python 3.6
 
-Author: [Jie Yang](https://jiesutd.github.io), Phd Candidate of SUTD.
+Author: [Jie Yang](https://jiesutd.github.io), Assistant Professor at Zhejiang University, China.
 
 Interface:
 ====
@@ -71,7 +71,7 @@ Important features:
 
 Cite: 
 ========
-If you use YEDDA for research, please cite our [ACL paper](https://arxiv.org/pdf/1711.03759.pdf) as follows:
+If you use YEDDA for research, please cite our [ACL paper](https://aclanthology.org/P18-4006.pdf) as follows:
 
     @article{yang2017yedda,  
      title={YEDDA: A Lightweight Collaborative Text Span Annotation Tool},  
@@ -88,7 +88,7 @@ Updating...
 * 2018-Oct-20, YEDDA has a slight update in which shortcut maps can be edited, stored and switched seamlessly.
 * 2018-May-07, Repository is renamed as YEDDA now!
 * 2018-May-01, Our paper has been accepted as a demonstration at ACL 2018.
-* 2017-Sep-27, (YEDDA V 1.0): project was officially named as YEDDA ! See our paper [here](https://arxiv.org/pdf/1711.03759.pdf).
+* 2017-Sep-27, (YEDDA V 1.0): project was officially named as YEDDA ! See our paper [here](https://aclanthology.org/P18-4006.pdf).
 * 2017-June-24, (V 0.6): support nested coloring; add event annotation beta version [Event_beta.py](Event_beta.py)
 * 2017-May-31, (V 0.6): optimize for Windows OS.
 * 2017-Apr-26, (V 0.5.3): fix bug with line merge when change entity type.
