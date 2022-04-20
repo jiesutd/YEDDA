@@ -1,3 +1,10 @@
+'''
+ # @ Author: Jie Yang
+ # @ Create Time: 2018
+ # @ Last Modified by: Jie Yang  Contact: jieynlp@gmail.com
+ # @ Last Modified time: 2022-04-20 12:51:14
+ '''
+
 # -*- coding: utf-8 -*-
 import platform
 import tkinter.filedialog as tkFileDialog

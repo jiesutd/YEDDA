@@ -13,7 +13,7 @@ For more details, please refer to [our paper (ACL2018:demo, best demo nomination
 
 This GUI annotation tool is developed with tkinter package in Python. 
 
-System required: Python 3.6
+System required: Python 3.6 or above
 
 Author: [Jie Yang](https://jiesutd.github.io), Assistant Professor at Zhejiang University, China.
 
@@ -84,6 +84,7 @@ If you use YEDDA for research, please cite our [ACL paper](https://aclanthology.
 
 Updating...
 ====
+* 2022-Apr-20, Move to Python 3 with colorful entity background. Thanks [@etern](https://github.com/etern)
 * 2019-Jul-31, Convert the config file into JSON format.
 * 2018-Oct-20, YEDDA has a slight update in which shortcut maps can be edited, stored and switched seamlessly.
 * 2018-May-07, Repository is renamed as YEDDA now!

@@ -1,3 +1,9 @@
+'''
+ # @ Author: Jie Yang
+ # @ Create Time: 2018
+ # @ Last Modified by: Jie Yang  Contact: jieynlp@gmail.com
+ # @ Last Modified time: 2022-04-20 12:38:31
+ '''
 # -*- coding: utf-8 -*-
 import os.path
 import platform
@@ -319,8 +325,8 @@ class Application(Frame):
         for press_key in all_keys:
             self.text.bind(press_key, self.alphanum_key_pressed, add='')
             if self.OS != "windows":
-                self.text.bind(f'<Control-Key-"{press_key}">', self.keepCurrent)
-                self.text.bind(f'<Command-Key-"{press_key}">', self.keepCurrent)
+                self.text.bind("<Control-Key-" + press_key + ">", self.keepCurrent)
+                self.text.bind("<Control-Key-" + press_key + ">", self.keepCurrent)
 
         self.text.bind('<Control-Key-z>', self.backToHistory)
 
