@@ -811,7 +811,7 @@ def removeRecommendContent(content, recommendRe=r'\[\$.*?\#.*?\*\](?!\#)'):
 
 
 def main():
-    print("SUTDAnnotator launched!")
+    print("YEDDA launched!")
     print("OS:", platform.system())
     root = Tk()
     width, height = 1300, 700
