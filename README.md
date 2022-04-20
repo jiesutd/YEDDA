@@ -13,7 +13,7 @@ For more details, please refer to [our paper (ACL2018:demo, best demo nomination
 
 This GUI annotation tool is developed with tkinter package in Python. 
 
-System required: Python 2.7
+System required: Python 3.6
 
 Author: [Jie Yang](https://jiesutd.github.io), Assistant Professor at Zhejiang University, China.
 
