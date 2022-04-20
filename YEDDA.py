@@ -147,15 +147,11 @@ class Example(Frame):
         # # b.grid(row =1 , column = 3)
         # b.pack(side='left')
 
-
         lbl_entry = Label(self, text="Command:")
         lbl_entry.grid(row = self.textRow +1,  sticky = E+W+S+N, pady=4,padx=4)
         self.entry = Entry(self)
         self.entry.grid(row = self.textRow +1, columnspan=self.textColumn + 1, rowspan = 1, sticky = E+W+S+N, pady=4, padx=80)
         self.entry.bind('<Return>', self.returnEnter)
-
-
-
 
         # for press_key in self.pressCommand.keys():
         for idx in range(0, len(self.allKey)):
@@ -486,7 +482,6 @@ class Example(Frame):
         self.writeFile(self.fileName, content, last_insert)
 
 
-
     def replaceString(self, content, string, replaceType, cursor_index):
         if replaceType in self.pressCommand:
             new_string = "[@" + string + "#" + self.pressCommand[replaceType] + "*]"
@@ -520,6 +515,7 @@ class Example(Frame):
         else:
             print("Don't write to empty file!")
 
+
     def addRecommendContent(self, train_data, decode_data, recommendMode):
         if not recommendMode:
             content = train_data + decode_data
@@ -528,6 +524,7 @@ class Example(Frame):
                 print("Action Track: addRecommendContent, start Recommend entity")
             content = maximum_matching(train_data, decode_data)
         return content
+
 
     def autoLoadNewFile(self, fileName, newcursor_index):
         if self.debug:
@@ -597,7 +594,6 @@ class Example(Frame):
             # second_pos = "%s+%sc" % (recommend_pos, str(1))
             lastsecond_pos = "%s+%sc" % (recommend_pos, str(int(countVar.get())))
             self.text.tag_add("recommend", first_pos, lastsecond_pos)
-
 
         ## color the most inside span for nested span, scan from begin to end again
         if self.colorAllChunk:
@@ -753,7 +749,6 @@ class Example(Frame):
 
     def getCursorIndex(self):
         return self.text.index(INSERT)
-
 
     def generateSequenceFile(self):
         if (".ann" not in self.fileName) and (".txt" not in self.fileName):
@@ -916,10 +911,6 @@ def removeRecommendContent(content, recommendRe = r'\[\$.*?\#.*?\*\](?!\#)'):
     return output_content
 
 
-
-
-
-
 def decompositCommand(command_string):
     command_list = []
     each_command = []
@@ -935,7 +926,6 @@ def decompositCommand(command_string):
             num_select =''
     # print command_list
     return command_list
-
 
 
 def main():
