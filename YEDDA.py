@@ -243,7 +243,7 @@ class Application(Frame):
     def __init__(self, parent):
         super().__init__(parent)
         self.Version = "YEDDA-V1.0 Annotator"
-        self.configFile = "configs/default.config"
+        self.configFile = os.sep.join(['configs', 'default.config'])
         self.OS = platform.system().lower()
         self.fileName = ""
         self.file_encoding = 'utf-8'
