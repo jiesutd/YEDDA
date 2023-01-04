@@ -243,7 +243,7 @@ class Application(Frame):
     def __init__(self, parent):
         super().__init__(parent)
         self.Version = "YEDDA-V1.0 Annotator"
-        self.configFile = "configs/default.config"
+        self.configFile = "./configs/default.config"
         self.OS = platform.system().lower()
         self.fileName = ""
         self.file_encoding = 'utf-8'
@@ -261,16 +261,13 @@ class Application(Frame):
         self.textFontStyle = "Times"
         self.initUI()
 
-    def KeyDef2Dic(self):
-        config_dic = {}
-        for item in self.pressCommand:
-            config_dic[item.key] = item.name
-        return config_dic
 
     def readConfig(self):
         self.pressCommand = []
         with open(self.configFile, 'r') as fp:
-            config_dict = json.loads(json.load(fp))
+            config_dict = json.load(fp)
+            if type(config_dict) is str:
+                config_dict = json.loads(config_dict)
         for index,entity in config_dict.items():
             self.pressCommand.append(KeyDef(index,entity))
         for key, color in zip(self.pressCommand, all_colors()):
@@ -279,6 +276,11 @@ class Application(Frame):
         # default GUI display parameter
         self.textRow = max(len(self.pressCommand), 20)
 
+    def KeyDef2Dic(self):
+        config_dic = {}
+        for item in self.pressCommand:
+            config_dic[item.key] = item.name
+        return config_dic
 
     def initUI(self):
         self.master.title(self.Version)
@@ -628,8 +630,8 @@ class Application(Frame):
         if self.debug:
             print("Action Track: renewPressCommand")
         self.pressCommand = self.keymap_frame.read_keymap()
-        with open(self.configFile, 'wb') as fp:
-            json.dump(json.dumps(self.KeyDef2Dic(), fp)
+        with open(self.configFile, 'w') as fp:
+            json.dump(json.dumps(self.KeyDef2Dic()), fp)
         self.keymap_frame.update_keymap(self.pressCommand)
         messagebox.showinfo("Remap Notification",
                             "Shortcut map has been updated!\n\n" +
@@ -650,8 +652,8 @@ class Application(Frame):
         # make sure ending with ".config"
         if not self.configFile.endswith(".config"):
             self.configFile += ".config"
-        with open(self.configFile, 'wb') as fp:
-            json.dump(json.dumps(self.KeyDef2Dic(), fp)
+        with open(self.configFile, 'w') as fp:
+            json.dump(json.dumps(self.KeyDef2Dic()), fp)
         self.keymap_frame.update_keymap(self.pressCommand)
         messagebox.showinfo("Save New Map Notification",
                             "Shortcut map has been saved and updated!\n\n"
