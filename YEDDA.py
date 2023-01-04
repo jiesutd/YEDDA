@@ -271,6 +271,8 @@ class Application(Frame):
         self.pressCommand = []
         with open(self.configFile, 'r') as fp:
             config_dict = json.load(fp)
+            if type(config_dict) is str:
+                config_dcit = json.loads(config_dict)
         for index,entity in config_dict.items():
             self.pressCommand.append(KeyDef(index,entity))
         for key, color in zip(self.pressCommand, all_colors()):
@@ -629,7 +631,7 @@ class Application(Frame):
             print("Action Track: renewPressCommand")
         self.pressCommand = self.keymap_frame.read_keymap()
         with open(self.configFile, 'wb') as fp:
-            json.dump(self.KeyDef2Dic(self.pressCommand), fp)
+            json.dump(json.dumps(self.KeyDef2Dic()), fp)
         self.keymap_frame.update_keymap(self.pressCommand)
         messagebox.showinfo("Remap Notification",
                             "Shortcut map has been updated!\n\n" +
@@ -651,7 +653,7 @@ class Application(Frame):
         if not self.configFile.endswith(".config"):
             self.configFile += ".config"
         with open(self.configFile, 'wb') as fp:
-            json.dump(self.KeyDef2Dic(self.pressCommand), fp)
+            json.dump(json.dumps(self.KeyDef2Dic()), fp)
         self.keymap_frame.update_keymap(self.pressCommand)
         messagebox.showinfo("Save New Map Notification",
                             "Shortcut map has been saved and updated!\n\n"
